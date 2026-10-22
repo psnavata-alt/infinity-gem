@@ -1,0 +1,54 @@
+# Files produced by the code in this repository
+
+Validation results and test inputs outside `data/`. Each was written by the script in the same folder (or the folder named in its README) and can be rebuilt from the data in `data/`; the GAMS results come from IFPRI's model, run by `validation/ifpri*/` (see their README files).
+
+- `LICENSES/GPL-2.0-only.txt`
+- `checks/reference_live.json`
+- `docs/verification/SAM2023_condensed_9sectors.csv`
+- `docs/verification/SAM2023_condensed_9sectors_IFPRI_netted.csv`
+- `docs/verification/stata/data/parameters.csv`
+- `docs/verification/stata/data/sam_T2_long.csv`
+- `docs/verification/stata/data/sam_base_long.csv`
+- `docs/verification/stata/data/sets.csv`
+- `docs/verification/stata/data/solution.csv`
+- `docs/verification/stata/results/python_mirror_calibration_results.csv`
+- `docs/verification/stata/results/python_mirror_equation_results.csv`
+- `requirements.txt`
+- `research/dsge/draws/dsge_ph_draws_20261019_0205.npy`
+- `scenarios/specs/five_shocks_2026_central.json`
+- `scenarios/specs/five_shocks_2026_subsets_central.json`
+- `validation/hosoe/hosoe_comparison.csv`
+- `validation/hosoe/pycge_results.json`
+- `validation/ifpri/gams_ph/1MODEL_PH.DAT`
+- `validation/ifpri/gams_ph/ifpri_results.csv`
+- `validation/ifpri/gams_ph/sam_netted.csv`
+- `validation/ifpri/out/comparison_infinity_gem_vs_ifpri.csv`
+- `validation/ifpri/out/comparison_infinity_gem_vs_ifpri_split_margins.csv`
+- `validation/ifpri/out/infinity_gem_results_condensed_long_run.csv`
+- `validation/ifpri/out/infinity_gem_results_condensed_long_run.json`
+- `validation/ifpri/out/mapping_41_to_9.csv`
+- `validation/ifpri/out/matched_cpi_test.csv`
+- `validation/ifpri/out/sam2023_condensed_9sectors.csv`
+- `validation/ifpri_full/gams_ph/1MODEL_PH.DAT`
+- `validation/ifpri_full/gams_ph/sam_netted.csv`
+- `validation/ifpri_full/out/infinity_gem_results_full.csv`
+- `validation/ifpri_full/out/sam2023_full.csv`
+- `validation/ifpri_home/gams_ph/1MODEL_PH.DAT`
+- `validation/ifpri_home/gams_ph/ifpri_results.csv`
+- `validation/ifpri_home/gams_ph/sam_netted_home.csv`
+- `validation/ifpri_home/out/comparison_home_composite.csv`
+- `validation/ifpri_home/out/comparison_home_split.csv`
+- `validation/julia_mpsge/out/comparison_no_tariffs_savings_omega2.csv`
+- `validation/julia_mpsge/out/comparison_no_tariffs_savings_omega2_matched.csv`
+- `validation/julia_mpsge/out/mpsge_results_cet_slot_test_copy.csv`
+- `validation/julia_mpsge/out/mpsge_results_original.csv`
+- `validation/labour_closures/disaster_entry_options.csv`
+- `validation/labour_closures/disaster_job_sign.csv`
+- `validation/labour_closures/out_1_signflip_by_upgrade.txt`
+- `validation/labour_closures/out_2_signflip_by_elasticity_and_activity.txt`
+- `validation/labour_closures/out_3_wage_closure_sensitivity.txt`
+- `validation/labour_closures/out_4_lfs_evidence.txt`
+- `validation/labour_closures/out_5_disaster_job_sign.txt`
+- `validation/labour_closures/out_6_disaster_entry_options.txt`
+- `validation/labour_closures/signflip_table.csv`
+- `validation/labour_closures/wage_closure_sensitivity.csv`

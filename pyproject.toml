@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "infinity-gem"
+version = "0.3.13.dev0"
+description = "Open-source general equilibrium models of the Philippine economy: SAM and input-output multipliers, a CGE model in the IFPRI standard tradition validated against IFPRI's GAMS code, a recursive-dynamic model, poverty microsimulation, time-series tools and research DSGE code"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+authors = [{ name = "Paolo Navata" }]
+keywords = ["computable general equilibrium", "CGE", "social accounting matrix", "input-output", "DSGE", "structural VAR", "Philippines"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "numpy>=2.0",
+    "scipy>=1.12",
+    "pandas>=2.2",
+    "statsmodels>=0.14",
+    "openpyxl>=3.1",
+    "xlrd>=2.0",
+    "matplotlib>=3.8",
+    "tabulate>=0.9",
+]
+
+[project.urls]
+Homepage = "https://github.com/psnavata-alt/infinity-gem"
+Repository = "https://github.com/psnavata-alt/infinity-gem"
+Issues = "https://github.com/psnavata-alt/infinity-gem/issues"
+
+[project.optional-dependencies]
+app = ["streamlit>=1.50"]
+
+[tool.setuptools]
+packages = ["infinity_gem", "app"]

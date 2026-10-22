@@ -1,0 +1,27 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+outputs/
+.infinity_gem_build
+# data you download yourself and may not redistribute (see the README files in data/raw/)
+# PSA input-output files that are not included (if you download them): coefficient tables, other inverses, PDFs
+data/raw/io/*Coefficient*
+data/raw/io/240-Industry20Matrix202018.xlsx
+data/raw/io/*Classification*
+data/raw/io/*.pdf
+data/raw/fies/*.csv
+!data/raw/fies/fies_w_prov_to_psa_province.csv
+data/raw/fies/*.dta
+data/raw/fies/fies_lfs_2023/
+data/raw/elasticities/GTAP10_*.csv
+data/raw/macro/macro_panel_*.xlsx
+# data whose terms do not allow redistribution, if you download them (data/raw/macro/README.md, data/raw/world/README.md)
+data/raw/macro/WUI_*.xlsx
+data/raw/macro/FRED_*
+data/raw/world/FRED_*/
+# GAMS and Julia outputs
+*.lst
+*.log
+*.gdx
+validation/julia_mpsge/julia/Project.toml

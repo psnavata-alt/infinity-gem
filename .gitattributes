@@ -1,0 +1,11 @@
+*.py text eol=lf
+*.md text eol=lf
+*.bat text eol=crlf
+*.xlsx binary
+*.xls binary
+*.nc binary
+*.npy binary
+# Data files are checksummed byte for byte (check D1, data/DATA_INVENTORY.md): git must never convert their line ends,
+# so every platform gets the bytes as published (the IFPRI SAMs, for example, stay identical to IFPRI's originals).
+# This line comes last: in .gitattributes a later line wins, so it overrides the *.py and *.md lines above for data/.
+data/** -text -eol

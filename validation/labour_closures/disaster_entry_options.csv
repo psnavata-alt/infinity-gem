@@ -1,0 +1,7 @@
+how damage enters,shock,GDP %,CPI %,low-skill jobs %,all labour %
+"(a) lost capital, GTAP substitution (now)",damage only,-0.1346640588121506,0.3172419327534648,0.38394190326818123,0.09110861757155586
+"(a) lost capital, GTAP substitution (now)",damage + rebuilding,-0.07545024332353822,0.5111933161055626,0.9828815096946331,0.23604510938985968
+"(b) lost productivity, average product of capital",damage only,-0.21706259818462526,0.5557014723168052,1.1720999806219545,0.24519309688744162
+"(b) lost productivity, average product of capital",damage + rebuilding,-0.15851673794001764,0.7538914942055497,1.7858904581391943,0.3936796878699189
+"(c) lost capital, little substitution (sigma_va 0.1 in hit industries)",damage only,0.0008599741696979635,2.047923604793178,0.7464183339943142,0.1794202961558522
+"(c) lost capital, little substitution (sigma_va 0.1 in hit industries)",damage + rebuilding,0.1280608065048927,3.576773201655814,1.5666406716338566,0.36670597885337664

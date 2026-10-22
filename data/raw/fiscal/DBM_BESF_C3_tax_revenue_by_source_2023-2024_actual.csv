@@ -1,0 +1,35 @@
+# Source: Department of Budget and Management, Budget of Expenditures and Sources of Financing (BESF), Table C.3 "Tax Revenue Program, by Collecting Department/Agency, by Source" (data from the Department of Finance). 2023 actual: BESF 2025 Table C.3 (https://www.dbm.gov.ph/wp-content/uploads/BESF/BESF2025/C3.pdf); 2024 actual: BESF 2026 Table C.3 (https://www.dbm.gov.ph/wp-content/uploads/BESF/BESF2026/C3.pdf). Downloaded 18 Oct 2026 (curl); PDFs kept in DBM_BESF_TableC3_downloaded_2026-10-18/. Values typed from the PDF text layer, million pesos, as published (actuals only). sam_use: how Infinity GEM's own SAM (tools/build_own_sam_2023.py) treats the line.
+agency,source,line,actual_2023_million_php,actual_2024_million_php,sam_use
+Bureau of Customs,Taxes on International Trade and Transactions,Import Duties and Taxes,105273,110453,mtax (tax on imports)
+Bureau of Customs,Taxes on International Trade and Transactions,VAT on Imports,532013,557098,stax (VAT: tax on the product)
+Bureau of Customs,Taxes on International Trade and Transactions,Excise Tax,228560,231652,stax (excise: tax on the product)
+Bureau of Customs,Taxes on International Trade and Transactions,Other Fees,17367,17471,mtax (tax on imports)
+Bureau of Customs,Taxes on International Trade and Transactions,Total,883213,916674,
+Bureau of Internal Revenue,Taxes on Net Income and Profits,"Company, Corporate and Enterprises",550921,583710,dtax (enterprises)
+Bureau of Internal Revenue,Taxes on Net Income and Profits,Individual,699483,764633,dtax (households)
+Bureau of Internal Revenue,Taxes on Net Income and Profits,Others,153839,184422,dtax (half enterprises half households: final taxes on interest and capital gains)
+Bureau of Internal Revenue,Taxes on Net Income and Profits,Total,1404243,1532765,
+Bureau of Internal Revenue,Taxes on Property,Property Transfer Tax,10358,11097,dtax (households)
+Bureau of Internal Revenue,Taxes on Domestic Goods and Services,"Gen. Sales, Turnover or VAT (Net of VAT Refunds)",475244,643846,stax (VAT)
+Bureau of Internal Revenue,Taxes on Domestic Goods and Services,Selective Excises on Goods: Alcohol Products,108197,,stax (cbeve)
+Bureau of Internal Revenue,Taxes on Domestic Goods and Services,Selective Excises on Goods: Tobacco Products,134909,,stax (cbeve)
+Bureau of Internal Revenue,Taxes on Domestic Goods and Services,Selective Excises on Goods: Fuel and Oils,7,,stax (cpetr)
+Bureau of Internal Revenue,Taxes on Domestic Goods and Services,Selective Excises on Goods: Mining,9627,,stax (cmine)
+Bureau of Internal Revenue,Taxes on Domestic Goods and Services,Selective Excises on Goods: Automobiles,5435,,stax (cmach)
+Bureau of Internal Revenue,Taxes on Domestic Goods and Services,Selective Excises on Goods: Miscellaneous,164,,stax (coman)
+Bureau of Internal Revenue,Taxes on Domestic Goods and Services,Selective Excises on Goods: Sweetened Beverages and Junk Food,34631,,stax (cbeve)
+Bureau of Internal Revenue,Taxes on Domestic Goods and Services,Selective Excises on Goods: Cosmetics Procedures,14,,stax (cosrv)
+Bureau of Internal Revenue,Taxes on Domestic Goods and Services,Selective Excises on Goods: Total,292984,,
+Bureau of Internal Revenue,Taxes on Domestic Goods and Services,Selective Taxes on Services: Other Percentage Taxes,58387,,stax (services of small non-VAT sellers)
+Bureau of Internal Revenue,Taxes on Domestic Goods and Services,Selective Taxes on Services: Banks/Financial Institutions,66503,,stax (cfsrv)
+Bureau of Internal Revenue,Taxes on Domestic Goods and Services,Selective Taxes on Services: Insurance Premiums,3500,,stax (cfsrv)
+Bureau of Internal Revenue,Taxes on Domestic Goods and Services,Selective Taxes on Services: Amusements,389,,stax (cosrv)
+Bureau of Internal Revenue,Taxes on Domestic Goods and Services,Selective Taxes on Services: Total,128779,,
+Bureau of Internal Revenue,Taxes on Domestic Goods and Services,Franchise Taxes,298,,stax (ccomm)
+Bureau of Internal Revenue,Taxes on Domestic Goods and Services,Total,897306,1084449,
+Bureau of Internal Revenue,Documentary Stamp Tax,Documentary Stamp Tax,179466,,stax (cfsrv)
+Bureau of Internal Revenue,Other Taxes,Miscellaneous,25613,,other (not a tax on products)
+Bureau of Internal Revenue,Total,Total,2516987,2851604,
+Department of Transportation,Taxes on Domestic Goods and Services,Motor Vehicle Tax (Land Transportation Office),22454,,other (not a tax on products)
+"DENR, DILG, DOJ, CHED, NCCA",Other Taxes,"Forest Charges, Fire Code Tax, Immigration Tax, Other Taxes",6638,,other (not a tax on products)
+All,Total,TOTAL TAX REVENUES,3429292,,

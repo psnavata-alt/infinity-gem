@@ -1,0 +1,70 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below (with the version and the settings you used), together with Lofgren, Harris and Robinson (2002) and the IFPRI SAM you use."
+title: "Infinity GEM: open-source general equilibrium models of the Philippine economy"
+version: 0.3.13.dev0
+license: MIT
+type: software
+authors:
+  - family-names: "Navata"
+    given-names: "Paolo"
+    affiliation: "Independent researcher"
+    orcid: "https://orcid.org/0009-0001-9476-1868"
+repository-code: "https://github.com/psnavata-alt/infinity-gem"
+url: "https://github.com/psnavata-alt/infinity-gem"
+keywords:
+  - computable general equilibrium
+  - social accounting matrix
+  - input-output
+  - recursive dynamic CGE
+  - DSGE
+  - structural VAR
+  - microsimulation
+  - Philippines
+references:
+  - type: software
+    title: "pystdcge: an open-source Python implementation of the IFPRI standard CGE model"
+    authors:
+      - family-names: "Navata"
+        given-names: "Paolo"
+    version: 0.3.3
+    date-released: 2026-10-10
+    repository-code: "https://github.com/psnavata-alt/pystdcge"
+  - type: book
+    title: "A Standard Computable General Equilibrium (CGE) Model in GAMS"
+    authors:
+      - family-names: Lofgren
+        given-names: Hans
+      - family-names: Harris
+        given-names: Rebecca Lee
+      - family-names: Robinson
+        given-names: Sherman
+    year: 2002
+    publisher:
+      name: "International Food Policy Research Institute"
+  - type: dataset
+    title: "2023 Social Accounting Matrix for Philippines"
+    authors:
+      - name: "International Food Policy Research Institute"
+    year: 2025
+    doi: 10.7910/DVN/WQXUQW
+  - type: report
+    title: "2023 Social Accounting Matrix for Philippines: A Nexus Project SAM"
+    authors:
+      - name: "International Food Policy Research Institute"
+    year: 2025
+    publisher:
+      name: "International Food Policy Research Institute"
+    notes: "Data Paper. Washington, DC: IFPRI."
+    url: "https://hdl.handle.net/10568/176224"
+  - type: dataset
+    title: "2018 Social Accounting Matrix for the Philippines"
+    authors:
+      - name: "International Food Policy Research Institute"
+    year: 2021
+    doi: 10.7910/DVN/XSEXEP
+  - type: dataset
+    title: "2018 Input-Output Tables of the Philippines"
+    authors:
+      - name: "Philippine Statistics Authority"
+    year: 2021
+    url: "https://psa.gov.ph/statistics/supply-and-use-input-output/tables"

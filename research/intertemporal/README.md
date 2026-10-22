@@ -1,0 +1,3 @@
+# Research code: a forward-looking (perfect-foresight) CGE
+
+Research code, not used by any default result. `pf_cge9.py` is a nine-sector perfect-foresight CGE calibrated to the condensed 2023 SAM (`validation/ifpri/out/sam2023_condensed_9sectors.csv`), solved by the stacked Newton solver in `pf_solver.py`; `benchmark_solver.py` checks the solver against the Brock-Mirman closed form and the Blanchard-Kahn linear solution. Check X2 of the validation suite runs these benchmarks and checks that the model's within-year block equals `infinity_gem/cge.py`. The guide is `docs/guides/10_DYNAMIC_STOCHASTIC_AND_FORWARD_LOOKING.md`.

@@ -1,0 +1,11 @@
+# Infinity GEM: Python 3.12 or later.  Install with:  python -m pip install -r requirements.txt
+# Versions tested on 22 October 2026 (Windows 11, Python 3.14).
+numpy>=2.0          # tested 2.4.4
+scipy>=1.12         # tested 1.17.1  (nonlinear solver for the CGE)
+pandas>=2.2         # tested 3.0.2
+statsmodels>=0.14   # tested 0.14.6  (OLS, Newey-West, VAR)
+openpyxl>=3.1       # tested 3.1.5   (Excel data files)
+xlrd>=2.0           # tested 2.0.2   (old-format .xls data files, check D1)
+matplotlib>=3.8     # tested 3.10.8  (charts)
+tabulate>=0.9       # tested 0.10.0  (Markdown tables in reports)
+streamlit>=1.50     # tested 1.64.0  (the Simulator front end, app/simulator.py; optional)

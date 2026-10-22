@@ -1,0 +1,26 @@
+# Employed persons by major industry group (2009 PSIC), 2025 annual (preliminary), thousands.
+# Source: PSA OpenSTAT table 0101B3FEMP2, "Number of Employed Persons by Major Industry Group", annual 2025 (the table
+# is in this folder: PSA_OpenSTAT_0101B3FEMP2_LFS_employed_by_major_industry_2012-2026.csv). Compiled 23 Sept 2026 into
+# 19 groups: professional, scientific and technical activities with administrative and support service activities;
+# activities of households as employers and of extraterritorial organizations with other service activities.
+# Total 49,013.2 thousand. Checked 22 Oct 2026 against the OpenSTAT table: every group equal.
+group,employed_thousand
+Agriculture and forestry,8748.91
+Fishing and aquaculture,1299.474
+Mining and quarrying,207.923
+Manufacturing,3487.378
+"Electricity, gas, steam and air-con supply",97.103
+"Water supply, sewerage, waste mgt",70.759
+Construction,4838.614
+Wholesale and retail trade; repair of vehicles,10067.513
+Transportation and storage,3767.367
+Accommodation and food services,2788.44
+Information and communication,497.256
+Financial and insurance,715.013
+Real estate,287.408
+"Professional, admin and support services",3187.183
+Public administration and defense,3001.557
+Education,1686.419
+Human health and social work,775.952
+"Arts, entertainment and recreation",459.185
+Other service activities,3029.717

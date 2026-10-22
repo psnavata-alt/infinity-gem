@@ -1,0 +1,7 @@
+                                                     how damage enters               shock  GDP %  CPI %  low-skill jobs %  all labour %
+                             (a) lost capital, GTAP substitution (now)         damage only -0.135  0.317             0.384         0.091
+                             (a) lost capital, GTAP substitution (now) damage + rebuilding -0.075  0.511             0.983         0.236
+                     (b) lost productivity, average product of capital         damage only -0.217  0.556             1.172         0.245
+                     (b) lost productivity, average product of capital damage + rebuilding -0.159  0.754             1.786         0.394
+(c) lost capital, little substitution (sigma_va 0.1 in hit industries)         damage only  0.001  2.048             0.746         0.179
+(c) lost capital, little substitution (sigma_va 0.1 in hit industries) damage + rebuilding  0.128  3.577             1.567         0.367

@@ -1,0 +1,679 @@
+# Source: PSA OpenSTAT table 0142B5BHFA1 'Household Final Consumption Expenditure by Purpose' (annual national accounts; table updated 2026-06-23), https://openstat.psa.gov.ph/PXWeb/api/v1/en/DB/2B/NA/AN/2HFCE/0142B5BHFA1.px
+# Downloaded 2026-10-18 about 3 AM through PSA's PXWeb API (all values). Million pesos; at current prices and at constant 2018 prices. Used for the own SAM's household basket check.
+purpose,valuation,year,value_php_million
+Food and non-alcoholic beverages,At Current Prices,2000,891413
+"Alcoholic beverages, tobacco",At Current Prices,2000,78063
+Clothing and footwear,At Current Prices,2000,105368
+"Housing, water, electricity, gas and other fuels",At Current Prices,2000,309696
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2000,135710
+Health,At Current Prices,2000,77731
+Transport,At Current Prices,2000,242119
+Communication,At Current Prices,2000,69108
+Recreation and culture,At Current Prices,2000,71978
+Education,At Current Prices,2000,112729
+Restaurants and hotels,At Current Prices,2000,233364
+Miscellaneous goods and services,At Current Prices,2000,324529
+Household Final Consumption Expenditure,At Current Prices,2000,2651809
+Food and non-alcoholic beverages,At Current Prices,2001,956238
+"Alcoholic beverages, tobacco",At Current Prices,2001,84377
+Clothing and footwear,At Current Prices,2001,111542
+"Housing, water, electricity, gas and other fuels",At Current Prices,2001,353347
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2001,152542
+Health,At Current Prices,2001,89059
+Transport,At Current Prices,2001,289810
+Communication,At Current Prices,2001,88214
+Recreation and culture,At Current Prices,2001,76810
+Education,At Current Prices,2001,128161
+Restaurants and hotels,At Current Prices,2001,254424
+Miscellaneous goods and services,At Current Prices,2001,349360
+Household Final Consumption Expenditure,At Current Prices,2001,2933886
+Food and non-alcoholic beverages,At Current Prices,2002,1031545
+"Alcoholic beverages, tobacco",At Current Prices,2002,90168
+Clothing and footwear,At Current Prices,2002,119945
+"Housing, water, electricity, gas and other fuels",At Current Prices,2002,373900
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2002,160967
+Health,At Current Prices,2002,99311
+Transport,At Current Prices,2002,308823
+Communication,At Current Prices,2002,104596
+Recreation and culture,At Current Prices,2002,81735
+Education,At Current Prices,2002,144112
+Restaurants and hotels,At Current Prices,2002,278718
+Miscellaneous goods and services,At Current Prices,2002,386628
+Household Final Consumption Expenditure,At Current Prices,2002,3180445
+Food and non-alcoholic beverages,At Current Prices,2003,1122866
+"Alcoholic beverages, tobacco",At Current Prices,2003,95295
+Clothing and footwear,At Current Prices,2003,124973
+"Housing, water, electricity, gas and other fuels",At Current Prices,2003,411252
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2003,168264
+Health,At Current Prices,2003,111072
+Transport,At Current Prices,2003,322604
+Communication,At Current Prices,2003,124495
+Recreation and culture,At Current Prices,2003,90392
+Education,At Current Prices,2003,159819
+Restaurants and hotels,At Current Prices,2003,293440
+Miscellaneous goods and services,At Current Prices,2003,443339
+Household Final Consumption Expenditure,At Current Prices,2003,3467809
+Food and non-alcoholic beverages,At Current Prices,2004,1272247
+"Alcoholic beverages, tobacco",At Current Prices,2004,102207
+Clothing and footwear,At Current Prices,2004,133845
+"Housing, water, electricity, gas and other fuels",At Current Prices,2004,442476
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2004,189100
+Health,At Current Prices,2004,125438
+Transport,At Current Prices,2004,387663
+Communication,At Current Prices,2004,149999
+Recreation and culture,At Current Prices,2004,101793
+Education,At Current Prices,2004,182935
+Restaurants and hotels,At Current Prices,2004,332673
+Miscellaneous goods and services,At Current Prices,2004,498000
+Household Final Consumption Expenditure,At Current Prices,2004,3918376
+Food and non-alcoholic beverages,At Current Prices,2005,1414247
+"Alcoholic beverages, tobacco",At Current Prices,2005,109470
+Clothing and footwear,At Current Prices,2005,139282
+"Housing, water, electricity, gas and other fuels",At Current Prices,2005,516860
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2005,197419
+Health,At Current Prices,2005,142510
+Transport,At Current Prices,2005,473529
+Communication,At Current Prices,2005,172746
+Recreation and culture,At Current Prices,2005,108238
+Education,At Current Prices,2005,201736
+Restaurants and hotels,At Current Prices,2005,359079
+Miscellaneous goods and services,At Current Prices,2005,540943
+Household Final Consumption Expenditure,At Current Prices,2005,4376060
+Food and non-alcoholic beverages,At Current Prices,2006,1545370
+"Alcoholic beverages, tobacco",At Current Prices,2006,117562
+Clothing and footwear,At Current Prices,2006,143949
+"Housing, water, electricity, gas and other fuels",At Current Prices,2006,566211
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2006,214916
+Health,At Current Prices,2006,156713
+Transport,At Current Prices,2006,535616
+Communication,At Current Prices,2006,185213
+Recreation and culture,At Current Prices,2006,118104
+Education,At Current Prices,2006,223028
+Restaurants and hotels,At Current Prices,2006,396526
+Miscellaneous goods and services,At Current Prices,2006,596767
+Household Final Consumption Expenditure,At Current Prices,2006,4799974
+Food and non-alcoholic beverages,At Current Prices,2007,1665125
+"Alcoholic beverages, tobacco",At Current Prices,2007,124657
+Clothing and footwear,At Current Prices,2007,149996
+"Housing, water, electricity, gas and other fuels",At Current Prices,2007,649188
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2007,218015
+Health,At Current Prices,2007,169749
+Transport,At Current Prices,2007,570607
+Communication,At Current Prices,2007,210046
+Recreation and culture,At Current Prices,2007,133465
+Education,At Current Prices,2007,247262
+Restaurants and hotels,At Current Prices,2007,441311
+Miscellaneous goods and services,At Current Prices,2007,621770
+Household Final Consumption Expenditure,At Current Prices,2007,5201191
+Food and non-alcoholic beverages,At Current Prices,2008,1977963
+"Alcoholic beverages, tobacco",At Current Prices,2008,138081
+Clothing and footwear,At Current Prices,2008,163588
+"Housing, water, electricity, gas and other fuels",At Current Prices,2008,697865
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2008,224474
+Health,At Current Prices,2008,186534
+Transport,At Current Prices,2008,622365
+Communication,At Current Prices,2008,221255
+Recreation and culture,At Current Prices,2008,143648
+Education,At Current Prices,2008,286528
+Restaurants and hotels,At Current Prices,2008,496639
+Miscellaneous goods and services,At Current Prices,2008,732665
+Household Final Consumption Expenditure,At Current Prices,2008,5891606
+Food and non-alcoholic beverages,At Current Prices,2009,2103133
+"Alcoholic beverages, tobacco",At Current Prices,2009,146203
+Clothing and footwear,At Current Prices,2009,167638
+"Housing, water, electricity, gas and other fuels",At Current Prices,2009,704787
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2009,228262
+Health,At Current Prices,2009,200861
+Transport,At Current Prices,2009,665474
+Communication,At Current Prices,2009,223898
+Recreation and culture,At Current Prices,2009,149068
+Education,At Current Prices,2009,306527
+Restaurants and hotels,At Current Prices,2009,516925
+Miscellaneous goods and services,At Current Prices,2009,728106
+Household Final Consumption Expenditure,At Current Prices,2009,6140884
+Food and non-alcoholic beverages,At Current Prices,2010,2236780
+"Alcoholic beverages, tobacco",At Current Prices,2010,152960
+Clothing and footwear,At Current Prices,2010,177420
+"Housing, water, electricity, gas and other fuels",At Current Prices,2010,795794
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2010,238642
+Health,At Current Prices,2010,223263
+Transport,At Current Prices,2010,716660
+Communication,At Current Prices,2010,227189
+Recreation and culture,At Current Prices,2010,162132
+Education,At Current Prices,2010,328681
+Restaurants and hotels,At Current Prices,2010,560139
+Miscellaneous goods and services,At Current Prices,2010,778045
+Household Final Consumption Expenditure,At Current Prices,2010,6597705
+Food and non-alcoholic beverages,At Current Prices,2011,2531135
+"Alcoholic beverages, tobacco",At Current Prices,2011,160599
+Clothing and footwear,At Current Prices,2011,189492
+"Housing, water, electricity, gas and other fuels",At Current Prices,2011,872448
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2011,259214
+Health,At Current Prices,2011,247557
+Transport,At Current Prices,2011,774700
+Communication,At Current Prices,2011,233480
+Recreation and culture,At Current Prices,2011,171499
+Education,At Current Prices,2011,363498
+Restaurants and hotels,At Current Prices,2011,623399
+Miscellaneous goods and services,At Current Prices,2011,890466
+Household Final Consumption Expenditure,At Current Prices,2011,7317487
+Food and non-alcoholic beverages,At Current Prices,2012,2764028
+"Alcoholic beverages, tobacco",At Current Prices,2012,176146
+Clothing and footwear,At Current Prices,2012,203222
+"Housing, water, electricity, gas and other fuels",At Current Prices,2012,955578
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2012,274752
+Health,At Current Prices,2012,284426
+Transport,At Current Prices,2012,839906
+Communication,At Current Prices,2012,256180
+Recreation and culture,At Current Prices,2012,188509
+Education,At Current Prices,2012,388083
+Restaurants and hotels,At Current Prices,2012,687081
+Miscellaneous goods and services,At Current Prices,2012,1007096
+Household Final Consumption Expenditure,At Current Prices,2012,8025008
+Food and non-alcoholic beverages,At Current Prices,2013,2978434
+"Alcoholic beverages, tobacco",At Current Prices,2013,192078
+Clothing and footwear,At Current Prices,2013,218476
+"Housing, water, electricity, gas and other fuels",At Current Prices,2013,1050910
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2013,288790
+Health,At Current Prices,2013,317180
+Transport,At Current Prices,2013,896865
+Communication,At Current Prices,2013,273659
+Recreation and culture,At Current Prices,2013,203739
+Education,At Current Prices,2013,425346
+Restaurants and hotels,At Current Prices,2013,750950
+Miscellaneous goods and services,At Current Prices,2013,1081296
+Household Final Consumption Expenditure,At Current Prices,2013,8677723
+Food and non-alcoholic beverages,At Current Prices,2014,3199773
+"Alcoholic beverages, tobacco",At Current Prices,2014,220924
+Clothing and footwear,At Current Prices,2014,238274
+"Housing, water, electricity, gas and other fuels",At Current Prices,2014,1140735
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2014,310097
+Health,At Current Prices,2014,353914
+Transport,At Current Prices,2014,998499
+Communication,At Current Prices,2014,285264
+Recreation and culture,At Current Prices,2014,219206
+Education,At Current Prices,2014,473518
+Restaurants and hotels,At Current Prices,2014,814140
+Miscellaneous goods and services,At Current Prices,2014,1158693
+Household Final Consumption Expenditure,At Current Prices,2014,9413037
+Food and non-alcoholic beverages,At Current Prices,2015,3418432
+"Alcoholic beverages, tobacco",At Current Prices,2015,239557
+Clothing and footwear,At Current Prices,2015,239501
+"Housing, water, electricity, gas and other fuels",At Current Prices,2015,1161493
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2015,324373
+Health,At Current Prices,2015,392744
+Transport,At Current Prices,2015,1109379
+Communication,At Current Prices,2015,309390
+Recreation and culture,At Current Prices,2015,242613
+Education,At Current Prices,2015,511544
+Restaurants and hotels,At Current Prices,2015,902931
+Miscellaneous goods and services,At Current Prices,2015,1253776
+Household Final Consumption Expenditure,At Current Prices,2015,10105734
+Food and non-alcoholic beverages,At Current Prices,2016,3711969
+"Alcoholic beverages, tobacco",At Current Prices,2016,267669
+Clothing and footwear,At Current Prices,2016,238219
+"Housing, water, electricity, gas and other fuels",At Current Prices,2016,1225567
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2016,337356
+Health,At Current Prices,2016,439605
+Transport,At Current Prices,2016,1230870
+Communication,At Current Prices,2016,320710
+Recreation and culture,At Current Prices,2016,264254
+Education,At Current Prices,2016,560374
+Restaurants and hotels,At Current Prices,2016,999079
+Miscellaneous goods and services,At Current Prices,2016,1383413
+Household Final Consumption Expenditure,At Current Prices,2016,10979086
+Food and non-alcoholic beverages,At Current Prices,2017,4029336
+"Alcoholic beverages, tobacco",At Current Prices,2017,274724
+Clothing and footwear,At Current Prices,2017,246653
+"Housing, water, electricity, gas and other fuels",At Current Prices,2017,1356162
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2017,368373
+Health,At Current Prices,2017,489831
+Transport,At Current Prices,2017,1325885
+Communication,At Current Prices,2017,332028
+Recreation and culture,At Current Prices,2017,271350
+Education,At Current Prices,2017,617888
+Restaurants and hotels,At Current Prices,2017,1125362
+Miscellaneous goods and services,At Current Prices,2017,1513271
+Household Final Consumption Expenditure,At Current Prices,2017,11950864
+Food and non-alcoholic beverages,At Current Prices,2018,4523903
+"Alcoholic beverages, tobacco",At Current Prices,2018,313861
+Clothing and footwear,At Current Prices,2018,249939
+"Housing, water, electricity, gas and other fuels",At Current Prices,2018,1525129
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2018,402428
+Health,At Current Prices,2018,527525
+Transport,At Current Prices,2018,1434727
+Communication,At Current Prices,2018,351314
+Recreation and culture,At Current Prices,2018,289736
+Education,At Current Prices,2018,696532
+Restaurants and hotels,At Current Prices,2018,1252967
+Miscellaneous goods and services,At Current Prices,2018,1682024
+Household Final Consumption Expenditure,At Current Prices,2018,13250084
+Food and non-alcoholic beverages,At Current Prices,2019,4823125
+"Alcoholic beverages, tobacco",At Current Prices,2019,343370
+Clothing and footwear,At Current Prices,2019,264995
+"Housing, water, electricity, gas and other fuels",At Current Prices,2019,1651088
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2019,433249
+Health,At Current Prices,2019,576383
+Transport,At Current Prices,2019,1519559
+Communication,At Current Prices,2019,375794
+Recreation and culture,At Current Prices,2019,316456
+Education,At Current Prices,2019,752561
+Restaurants and hotels,At Current Prices,2019,1373693
+Miscellaneous goods and services,At Current Prices,2019,1858059
+Household Final Consumption Expenditure,At Current Prices,2019,14288333
+Food and non-alcoholic beverages,At Current Prices,2020,5185183
+"Alcoholic beverages, tobacco",At Current Prices,2020,296341
+Clothing and footwear,At Current Prices,2020,223790
+"Housing, water, electricity, gas and other fuels",At Current Prices,2020,1762774
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2020,391354
+Health,At Current Prices,2020,578101
+Transport,At Current Prices,2020,1048819
+Communication,At Current Prices,2020,399933
+Recreation and culture,At Current Prices,2020,179133
+Education,At Current Prices,2020,683781
+Restaurants and hotels,At Current Prices,2020,800801
+Miscellaneous goods and services,At Current Prices,2020,1926065
+Household Final Consumption Expenditure,At Current Prices,2020,13476075
+Food and non-alcoholic beverages,At Current Prices,2021,5631918
+"Alcoholic beverages, tobacco",At Current Prices,2021,301917
+Clothing and footwear,At Current Prices,2021,259081
+"Housing, water, electricity, gas and other fuels",At Current Prices,2021,1868390
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2021,414184
+Health,At Current Prices,2021,680589
+Transport,At Current Prices,2021,1152840
+Communication,At Current Prices,2021,437278
+Recreation and culture,At Current Prices,2021,184086
+Education,At Current Prices,2021,751572
+Restaurants and hotels,At Current Prices,2021,868806
+Miscellaneous goods and services,At Current Prices,2021,2057887
+Household Final Consumption Expenditure,At Current Prices,2021,14608547
+Food and non-alcoholic beverages,At Current Prices,2022,6332467
+"Alcoholic beverages, tobacco",At Current Prices,2022,328373
+Clothing and footwear,At Current Prices,2022,279996
+"Housing, water, electricity, gas and other fuels",At Current Prices,2022,2085783
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2022,464534
+Health,At Current Prices,2022,717313
+Transport,At Current Prices,2022,1518007
+Communication,At Current Prices,2022,471915
+Recreation and culture,At Current Prices,2022,236100
+Education,At Current Prices,2022,831463
+Restaurants and hotels,At Current Prices,2022,1163320
+Miscellaneous goods and services,At Current Prices,2022,2295775
+Household Final Consumption Expenditure,At Current Prices,2022,16725045
+Food and non-alcoholic beverages,At Current Prices,2023,6853549
+"Alcoholic beverages, tobacco",At Current Prices,2023,354222
+Clothing and footwear,At Current Prices,2023,264093
+"Housing, water, electricity, gas and other fuels",At Current Prices,2023,2288371
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2023,482907
+Health,At Current Prices,2023,798193
+Transport,At Current Prices,2023,1803980
+Communication,At Current Prices,2023,496997
+Recreation and culture,At Current Prices,2023,286654
+Education,At Current Prices,2023,916860
+Restaurants and hotels,At Current Prices,2023,1477881
+Miscellaneous goods and services,At Current Prices,2023,2580749
+Household Final Consumption Expenditure,At Current Prices,2023,18604458
+Food and non-alcoholic beverages,At Current Prices,2024,7252163
+"Alcoholic beverages, tobacco",At Current Prices,2024,378021
+Clothing and footwear,At Current Prices,2024,276504
+"Housing, water, electricity, gas and other fuels",At Current Prices,2024,2446729
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2024,512185
+Health,At Current Prices,2024,903637
+Transport,At Current Prices,2024,1980517
+Communication,At Current Prices,2024,525175
+Recreation and culture,At Current Prices,2024,323013
+Education,At Current Prices,2024,999583
+Restaurants and hotels,At Current Prices,2024,1694747
+Miscellaneous goods and services,At Current Prices,2024,2848630
+Household Final Consumption Expenditure,At Current Prices,2024,20140904
+Food and non-alcoholic beverages,At Current Prices,2025,7659928
+"Alcoholic beverages, tobacco",At Current Prices,2025,382208
+Clothing and footwear,At Current Prices,2025,284309
+"Housing, water, electricity, gas and other fuels",At Current Prices,2025,2526782
+"Furnishings, household equipment and routine household maintenance",At Current Prices,2025,527732
+Health,At Current Prices,2025,1012437
+Transport,At Current Prices,2025,2117375
+Communication,At Current Prices,2025,550966
+Recreation and culture,At Current Prices,2025,350599
+Education,At Current Prices,2025,1110162
+Restaurants and hotels,At Current Prices,2025,1843384
+Miscellaneous goods and services,At Current Prices,2025,3036284
+Household Final Consumption Expenditure,At Current Prices,2025,21402164
+Food and non-alcoholic beverages,At Constant 2018 Prices,2000,1859694
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2000,192965
+Clothing and footwear,At Constant 2018 Prices,2000,179955
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2000,664270
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2000,193394
+Health,At Constant 2018 Prices,2000,174931
+Transport,At Constant 2018 Prices,2000,613781
+Communication,At Constant 2018 Prices,2000,72716
+Recreation and culture,At Constant 2018 Prices,2000,109512
+Education,At Constant 2018 Prices,2000,285042
+Restaurants and hotels,At Constant 2018 Prices,2000,415812
+Miscellaneous goods and services,At Constant 2018 Prices,2000,594339
+Household Final Consumption Expenditure,At Constant 2018 Prices,2000,5356412
+Food and non-alcoholic beverages,At Constant 2018 Prices,2001,1918801
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2001,198014
+Clothing and footwear,At Constant 2018 Prices,2001,183738
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2001,691632
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2001,210676
+Health,At Constant 2018 Prices,2001,183778
+Transport,At Constant 2018 Prices,2001,635399
+Communication,At Constant 2018 Prices,2001,91002
+Recreation and culture,At Constant 2018 Prices,2001,113259
+Education,At Constant 2018 Prices,2001,293133
+Restaurants and hotels,At Constant 2018 Prices,2001,432264
+Miscellaneous goods and services,At Constant 2018 Prices,2001,615879
+Household Final Consumption Expenditure,At Constant 2018 Prices,2001,5567577
+Food and non-alcoholic beverages,At Constant 2018 Prices,2002,2007046
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2002,205101
+Clothing and footwear,At Constant 2018 Prices,2002,191545
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2002,695267
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2002,218338
+Health,At Constant 2018 Prices,2002,192697
+Transport,At Constant 2018 Prices,2002,667261
+Communication,At Constant 2018 Prices,2002,107073
+Recreation and culture,At Constant 2018 Prices,2002,118255
+Education,At Constant 2018 Prices,2002,303025
+Restaurants and hotels,At Constant 2018 Prices,2002,460413
+Miscellaneous goods and services,At Constant 2018 Prices,2002,685501
+Household Final Consumption Expenditure,At Constant 2018 Prices,2002,5851522
+Food and non-alcoholic beverages,At Constant 2018 Prices,2003,2142515
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2003,212529
+Clothing and footwear,At Constant 2018 Prices,2003,193473
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2003,736754
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2003,223991
+Health,At Constant 2018 Prices,2003,200485
+Transport,At Constant 2018 Prices,2003,684078
+Communication,At Constant 2018 Prices,2003,130460
+Recreation and culture,At Constant 2018 Prices,2003,127877
+Education,At Constant 2018 Prices,2003,311030
+Restaurants and hotels,At Constant 2018 Prices,2003,472462
+Miscellaneous goods and services,At Constant 2018 Prices,2003,730656
+Household Final Consumption Expenditure,At Constant 2018 Prices,2003,6166308
+Food and non-alcoholic beverages,At Constant 2018 Prices,2004,2275327
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2004,221992
+Clothing and footwear,At Constant 2018 Prices,2004,201718
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2004,759642
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2004,247535
+Health,At Constant 2018 Prices,2004,215730
+Transport,At Constant 2018 Prices,2004,716438
+Communication,At Constant 2018 Prices,2004,158441
+Recreation and culture,At Constant 2018 Prices,2004,140222
+Education,At Constant 2018 Prices,2004,327693
+Restaurants and hotels,At Constant 2018 Prices,2004,514091
+Miscellaneous goods and services,At Constant 2018 Prices,2004,751562
+Household Final Consumption Expenditure,At Constant 2018 Prices,2004,6530391
+Food and non-alcoholic beverages,At Constant 2018 Prices,2005,2409976
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2005,224301
+Clothing and footwear,At Constant 2018 Prices,2005,203061
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2005,819402
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2005,253653
+Health,At Constant 2018 Prices,2005,231369
+Transport,At Constant 2018 Prices,2005,728689
+Communication,At Constant 2018 Prices,2005,182253
+Recreation and culture,At Constant 2018 Prices,2005,142993
+Education,At Constant 2018 Prices,2005,339410
+Restaurants and hotels,At Constant 2018 Prices,2005,527674
+Miscellaneous goods and services,At Constant 2018 Prices,2005,757851
+Household Final Consumption Expenditure,At Constant 2018 Prices,2005,6820633
+Food and non-alcoholic beverages,At Constant 2018 Prices,2006,2518555
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2006,230701
+Clothing and footwear,At Constant 2018 Prices,2006,204358
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2006,846683
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2006,272448
+Health,At Constant 2018 Prices,2006,239235
+Transport,At Constant 2018 Prices,2006,739512
+Communication,At Constant 2018 Prices,2006,192437
+Recreation and culture,At Constant 2018 Prices,2006,150725
+Education,At Constant 2018 Prices,2006,356547
+Restaurants and hotels,At Constant 2018 Prices,2006,551221
+Miscellaneous goods and services,At Constant 2018 Prices,2006,803478
+Household Final Consumption Expenditure,At Constant 2018 Prices,2006,7105899
+Food and non-alcoholic beverages,At Constant 2018 Prices,2007,2619329
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2007,238050
+Clothing and footwear,At Constant 2018 Prices,2007,208445
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2007,892932
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2007,273390
+Health,At Constant 2018 Prices,2007,247719
+Transport,At Constant 2018 Prices,2007,785928
+Communication,At Constant 2018 Prices,2007,216217
+Recreation and culture,At Constant 2018 Prices,2007,166967
+Education,At Constant 2018 Prices,2007,369771
+Restaurants and hotels,At Constant 2018 Prices,2007,605504
+Miscellaneous goods and services,At Constant 2018 Prices,2007,823402
+Household Final Consumption Expenditure,At Constant 2018 Prices,2007,7447652
+Food and non-alcoholic beverages,At Constant 2018 Prices,2008,2727231
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2008,252240
+Clothing and footwear,At Constant 2018 Prices,2008,217555
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2008,929035
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2008,275100
+Health,At Constant 2018 Prices,2008,253139
+Transport,At Constant 2018 Prices,2008,803184
+Communication,At Constant 2018 Prices,2008,226778
+Recreation and culture,At Constant 2018 Prices,2008,173112
+Education,At Constant 2018 Prices,2008,397817
+Restaurants and hotels,At Constant 2018 Prices,2008,621641
+Miscellaneous goods and services,At Constant 2018 Prices,2008,857749
+Household Final Consumption Expenditure,At Constant 2018 Prices,2008,7734582
+Food and non-alcoholic beverages,At Constant 2018 Prices,2009,2810042
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2009,261372
+Clothing and footwear,At Constant 2018 Prices,2009,219036
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2009,933444
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2009,276047
+Health,At Constant 2018 Prices,2009,262202
+Transport,At Constant 2018 Prices,2009,825160
+Communication,At Constant 2018 Prices,2009,230581
+Recreation and culture,At Constant 2018 Prices,2009,175362
+Education,At Constant 2018 Prices,2009,409538
+Restaurants and hotels,At Constant 2018 Prices,2009,644249
+Miscellaneous goods and services,At Constant 2018 Prices,2009,883347
+Household Final Consumption Expenditure,At Constant 2018 Prices,2009,7930379
+Food and non-alcoholic beverages,At Constant 2018 Prices,2010,2899560
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2010,257779
+Clothing and footwear,At Constant 2018 Prices,2010,227276
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2010,961633
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2010,286747
+Health,At Constant 2018 Prices,2010,278968
+Transport,At Constant 2018 Prices,2010,863995
+Communication,At Constant 2018 Prices,2010,232250
+Recreation and culture,At Constant 2018 Prices,2010,183529
+Education,At Constant 2018 Prices,2010,420178
+Restaurants and hotels,At Constant 2018 Prices,2010,679999
+Miscellaneous goods and services,At Constant 2018 Prices,2010,923150
+Household Final Consumption Expenditure,At Constant 2018 Prices,2010,8215063
+Food and non-alcoholic beverages,At Constant 2018 Prices,2011,3073175
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2011,262295
+Clothing and footwear,At Constant 2018 Prices,2011,236360
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2011,989553
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2011,305541
+Health,At Constant 2018 Prices,2011,299890
+Transport,At Constant 2018 Prices,2011,890138
+Communication,At Constant 2018 Prices,2011,237842
+Recreation and culture,At Constant 2018 Prices,2011,191462
+Education,At Constant 2018 Prices,2011,444145
+Restaurants and hotels,At Constant 2018 Prices,2011,731675
+Miscellaneous goods and services,At Constant 2018 Prices,2011,1009100
+Household Final Consumption Expenditure,At Constant 2018 Prices,2011,8671175
+Food and non-alcoholic beverages,At Constant 2018 Prices,2012,3270368
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2012,278190
+Clothing and footwear,At Constant 2018 Prices,2012,243239
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2012,1050361
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2012,315182
+Health,At Constant 2018 Prices,2012,335994
+Transport,At Constant 2018 Prices,2012,944139
+Communication,At Constant 2018 Prices,2012,261352
+Recreation and culture,At Constant 2018 Prices,2012,209387
+Education,At Constant 2018 Prices,2012,455580
+Restaurants and hotels,At Constant 2018 Prices,2012,785688
+Miscellaneous goods and services,At Constant 2018 Prices,2012,1111246
+Household Final Consumption Expenditure,At Constant 2018 Prices,2012,9260725
+Food and non-alcoholic beverages,At Constant 2018 Prices,2013,3460621
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2013,279810
+Clothing and footwear,At Constant 2018 Prices,2013,246956
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2013,1125162
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2013,321334
+Health,At Constant 2018 Prices,2013,357924
+Transport,At Constant 2018 Prices,2013,999928
+Communication,At Constant 2018 Prices,2013,279145
+Recreation and culture,At Constant 2018 Prices,2013,221890
+Education,At Constant 2018 Prices,2013,479500
+Restaurants and hotels,At Constant 2018 Prices,2013,836864
+Miscellaneous goods and services,At Constant 2018 Prices,2013,1190474
+Household Final Consumption Expenditure,At Constant 2018 Prices,2013,9799607
+Food and non-alcoholic beverages,At Constant 2018 Prices,2014,3613557
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2014,308040
+Clothing and footwear,At Constant 2018 Prices,2014,259869
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2014,1186423
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2014,336251
+Health,At Constant 2018 Prices,2014,391490
+Transport,At Constant 2018 Prices,2014,1096694
+Communication,At Constant 2018 Prices,2014,287327
+Recreation and culture,At Constant 2018 Prices,2014,233247
+Education,At Constant 2018 Prices,2014,517208
+Restaurants and hotels,At Constant 2018 Prices,2014,890791
+Miscellaneous goods and services,At Constant 2018 Prices,2014,1245564
+Household Final Consumption Expenditure,At Constant 2018 Prices,2014,10366461
+Food and non-alcoholic beverages,At Constant 2018 Prices,2015,3823839
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2015,323202
+Clothing and footwear,At Constant 2018 Prices,2015,255371
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2015,1227484
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2015,345506
+Health,At Constant 2018 Prices,2015,426261
+Transport,At Constant 2018 Prices,2015,1221056
+Communication,At Constant 2018 Prices,2015,312196
+Recreation and culture,At Constant 2018 Prices,2015,255686
+Education,At Constant 2018 Prices,2015,529667
+Restaurants and hotels,At Constant 2018 Prices,2015,980597
+Miscellaneous goods and services,At Constant 2018 Prices,2015,1333669
+Household Final Consumption Expenditure,At Constant 2018 Prices,2015,11034535
+Food and non-alcoholic beverages,At Constant 2018 Prices,2016,4086916
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2016,341576
+Clothing and footwear,At Constant 2018 Prices,2016,247549
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2016,1315863
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2016,355279
+Health,At Constant 2018 Prices,2016,465600
+Transport,At Constant 2018 Prices,2016,1347644
+Communication,At Constant 2018 Prices,2016,322783
+Recreation and culture,At Constant 2018 Prices,2016,273999
+Education,At Constant 2018 Prices,2016,565390
+Restaurants and hotels,At Constant 2018 Prices,2016,1059460
+Miscellaneous goods and services,At Constant 2018 Prices,2016,1441402
+Household Final Consumption Expenditure,At Constant 2018 Prices,2016,11823461
+Food and non-alcoholic beverages,At Constant 2018 Prices,2017,4304342
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2017,330259
+Clothing and footwear,At Constant 2018 Prices,2017,250762
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2017,1409828
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2017,380043
+Health,At Constant 2018 Prices,2017,506650
+Transport,At Constant 2018 Prices,2017,1411748
+Communication,At Constant 2018 Prices,2017,333344
+Recreation and culture,At Constant 2018 Prices,2017,277005
+Education,At Constant 2018 Prices,2017,610369
+Restaurants and hotels,At Constant 2018 Prices,2017,1167787
+Miscellaneous goods and services,At Constant 2018 Prices,2017,1545693
+Household Final Consumption Expenditure,At Constant 2018 Prices,2017,12527828
+Food and non-alcoholic beverages,At Constant 2018 Prices,2018,4523903
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2018,313861
+Clothing and footwear,At Constant 2018 Prices,2018,249939
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2018,1525129
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2018,402428
+Health,At Constant 2018 Prices,2018,527525
+Transport,At Constant 2018 Prices,2018,1434727
+Communication,At Constant 2018 Prices,2018,351314
+Recreation and culture,At Constant 2018 Prices,2018,289736
+Education,At Constant 2018 Prices,2018,696532
+Restaurants and hotels,At Constant 2018 Prices,2018,1252967
+Miscellaneous goods and services,At Constant 2018 Prices,2018,1682024
+Household Final Consumption Expenditure,At Constant 2018 Prices,2018,13250084
+Food and non-alcoholic beverages,At Constant 2018 Prices,2019,4754895
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2019,305252
+Clothing and footwear,At Constant 2018 Prices,2019,259550
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2019,1620237
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2019,422059
+Health,At Constant 2018 Prices,2019,559861
+Transport,At Constant 2018 Prices,2019,1508337
+Communication,At Constant 2018 Prices,2019,375892
+Recreation and culture,At Constant 2018 Prices,2019,310551
+Education,At Constant 2018 Prices,2019,751230
+Restaurants and hotels,At Constant 2018 Prices,2019,1336027
+Miscellaneous goods and services,At Constant 2018 Prices,2019,1823566
+Household Final Consumption Expenditure,At Constant 2018 Prices,2019,14027456
+Food and non-alcoholic beverages,At Constant 2018 Prices,2020,4988488
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2020,227536
+Clothing and footwear,At Constant 2018 Prices,2020,215763
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2020,1713782
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2020,367492
+Health,At Constant 2018 Prices,2020,546536
+Transport,At Constant 2018 Prices,2020,1004873
+Communication,At Constant 2018 Prices,2020,398568
+Recreation and culture,At Constant 2018 Prices,2020,174422
+Education,At Constant 2018 Prices,2020,667131
+Restaurants and hotels,At Constant 2018 Prices,2020,758839
+Miscellaneous goods and services,At Constant 2018 Prices,2020,1847928
+Household Final Consumption Expenditure,At Constant 2018 Prices,2020,12911357
+Food and non-alcoholic beverages,At Constant 2018 Prices,2021,5159982
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2021,210218
+Clothing and footwear,At Constant 2018 Prices,2021,244486
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2021,1768544
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2021,379727
+Health,At Constant 2018 Prices,2021,624079
+Transport,At Constant 2018 Prices,2021,1006193
+Communication,At Constant 2018 Prices,2021,434718
+Recreation and culture,At Constant 2018 Prices,2021,179289
+Education,At Constant 2018 Prices,2021,726064
+Restaurants and hotels,At Constant 2018 Prices,2021,793898
+Miscellaneous goods and services,At Constant 2018 Prices,2021,1927919
+Household Final Consumption Expenditure,At Constant 2018 Prices,2021,13455117
+Food and non-alcoholic beverages,At Constant 2018 Prices,2022,5455458
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2022,211802
+Clothing and footwear,At Constant 2018 Prices,2022,257074
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2022,1851187
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2022,412424
+Health,At Constant 2018 Prices,2022,640501
+Transport,At Constant 2018 Prices,2022,1173974
+Communication,At Constant 2018 Prices,2022,466322
+Recreation and culture,At Constant 2018 Prices,2022,224673
+Education,At Constant 2018 Prices,2022,788211
+Restaurants and hotels,At Constant 2018 Prices,2022,1017584
+Miscellaneous goods and services,At Constant 2018 Prices,2022,2071137
+Household Final Consumption Expenditure,At Constant 2018 Prices,2022,14570348
+Food and non-alcoholic beverages,At Constant 2018 Prices,2023,5485462
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2023,208586
+Clothing and footwear,At Constant 2018 Prices,2023,232444
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2023,1937671
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2023,408076
+Health,At Constant 2018 Prices,2023,686248
+Transport,At Constant 2018 Prices,2023,1372864
+Communication,At Constant 2018 Prices,2023,487836
+Recreation and culture,At Constant 2018 Prices,2023,261856
+Education,At Constant 2018 Prices,2023,839366
+Restaurants and hotels,At Constant 2018 Prices,2023,1211226
+Miscellaneous goods and services,At Constant 2018 Prices,2023,2245566
+Household Final Consumption Expenditure,At Constant 2018 Prices,2023,15377201
+Food and non-alcoholic beverages,At Constant 2018 Prices,2024,5561786
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2024,213003
+Clothing and footwear,At Constant 2018 Prices,2024,236321
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2024,2038938
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2024,420638
+Health,At Constant 2018 Prices,2024,755478
+Transport,At Constant 2018 Prices,2024,1496341
+Communication,At Constant 2018 Prices,2024,513449
+Recreation and culture,At Constant 2018 Prices,2024,285857
+Education,At Constant 2018 Prices,2024,877366
+Restaurants and hotels,At Constant 2018 Prices,2024,1326444
+Miscellaneous goods and services,At Constant 2018 Prices,2024,2401991
+Household Final Consumption Expenditure,At Constant 2018 Prices,2024,16127612
+Food and non-alcoholic beverages,At Constant 2018 Prices,2025,5807656
+"Alcoholic beverages, tobacco",At Constant 2018 Prices,2025,207849
+Clothing and footwear,At Constant 2018 Prices,2025,238479
+"Housing, water, electricity, gas and other fuels",At Constant 2018 Prices,2025,2056894
+"Furnishings, household equipment and routine household maintenance",At Constant 2018 Prices,2025,424062
+Health,At Constant 2018 Prices,2025,825172
+Transport,At Constant 2018 Prices,2025,1606892
+Communication,At Constant 2018 Prices,2025,536076
+Recreation and culture,At Constant 2018 Prices,2025,303691
+Education,At Constant 2018 Prices,2025,938945
+Restaurants and hotels,At Constant 2018 Prices,2025,1411151
+Miscellaneous goods and services,At Constant 2018 Prices,2025,2498794
+Household Final Consumption Expenditure,At Constant 2018 Prices,2025,16855661

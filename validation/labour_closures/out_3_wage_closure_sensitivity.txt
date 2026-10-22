@@ -1,0 +1,26 @@
+0.2 published real done
+0.2 published nominal done
+0.3 recommended real done
+0.3 recommended nominal done
+                                                                            GDP %  CPI %  low-skill jobs %  medium-skill jobs %  real consumption %     new poor
+shock                           setting         wage                                                                                                            
+Ayuda cut -90.21 bn             0.2 published   indexed to CPI (published) -0.054 -0.372            -0.078               -0.019              -0.372  1534348.231
+                                                fixed in pesos (sticky)    -0.074 -0.354            -0.353               -0.299              -0.381  1530316.359
+                                0.3 recommended indexed to CPI (published) -0.031 -0.373             0.042                0.091              -0.355  1517134.938
+                                                fixed in pesos (sticky)    -0.061 -0.357            -0.313               -0.319              -0.372  1525422.414
+Four shocks together            0.2 published   indexed to CPI (published) -0.859  1.172            -3.736               -3.959              -2.982  1764199.212
+                                                fixed in pesos (sticky)    -0.797  1.119            -2.895               -3.104              -2.949  1782282.556
+                                0.3 recommended indexed to CPI (published) -0.923  0.120            -4.672               -5.242              -2.882  2038686.630
+                                                fixed in pesos (sticky)    -0.914  0.116            -4.563               -5.117              -2.877  2031729.906
+Infrastructure freeze -238.3 bn 0.2 published   indexed to CPI (published) -0.279 -1.223            -1.797               -1.920              -0.696   497479.010
+                                                fixed in pesos (sticky)    -0.345 -1.169            -2.698               -2.837              -0.732   490047.349
+                                0.3 recommended indexed to CPI (published) -0.231 -0.959            -1.914               -2.059              -0.516   446277.635
+                                                fixed in pesos (sticky)    -0.306 -0.923            -2.815               -3.101              -0.562   477792.950
+Remittances -10%                0.2 published   indexed to CPI (published) -0.072 -0.616            -0.049                0.013              -0.609   168809.006
+                                                fixed in pesos (sticky)    -0.105 -0.586            -0.506               -0.453              -0.625   157121.474
+                                0.3 recommended indexed to CPI (published) -0.042 -0.600             0.076                0.144              -0.590   145887.052
+                                                fixed in pesos (sticky)    -0.090 -0.575            -0.496               -0.517              -0.617   164333.198
+World oil +20%                  0.2 published   indexed to CPI (published) -0.215  1.114            -1.140               -1.154              -1.244   600660.639
+                                                fixed in pesos (sticky)    -0.156  1.060            -0.327               -0.325              -1.215   619934.190
+                                0.3 recommended indexed to CPI (published) -0.260  0.412            -1.393               -1.600              -1.239   690236.466
+                                                fixed in pesos (sticky)    -0.228  0.395            -1.009               -1.156              -1.220   676523.665

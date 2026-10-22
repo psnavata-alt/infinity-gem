@@ -1,0 +1,12 @@
+default (0.2)                  low-skill emp -0.078%  GDP -0.054%  exports +0.422%
+PH sigma_va only               low-skill emp +0.022%  GDP -0.045%  exports +0.458%
+PH sigma_q only                low-skill emp -0.084%  GDP -0.046%  exports +0.464%
+PH omega_t only                low-skill emp -0.078%  GDP -0.053%  exports +0.431%
+PH trade (sigma_q + omega_t)   low-skill emp -0.084%  GDP -0.045%  exports +0.473%
+full PH set                    low-skill emp +0.024%  GDP -0.036%  exports +0.508%
+--- default (0.2): low-skill job change by activity (% of all low-skill employment); top gains and losses
+   losses: Rice -0.034; Fisheries -0.028; Processed foods -0.017; Wholesale and retail trade -0.015; Maize -0.015
+   gains:  Other services +0.005; Fruits and nuts +0.005; Machinery, equipment and veh +0.005; Construction +0.008; Business services +0.053
+--- full PH set: low-skill job change by activity (% of all low-skill employment); top gains and losses
+   losses: Rice -0.026; Processed foods -0.025; Fisheries -0.012; Maize -0.011; Other crops -0.008
+   gains:  Wholesale and retail trade +0.007; Machinery, equipment and veh +0.007; Public administration +0.009; Construction +0.020; Business services +0.071

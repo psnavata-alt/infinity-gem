@@ -1,0 +1,6 @@
+0.3 recommended wage rule: nominal
+                 wage rule               shock  GDP %  CPI %  low-skill jobs %  all labour %
+indexed to CPI (published)         damage only -0.161  0.331             0.068         0.012
+indexed to CPI (published) damage + rebuilding -0.118  0.535             0.473         0.108
+            fixed in pesos         damage only -0.135  0.317             0.384         0.091
+            fixed in pesos damage + rebuilding -0.075  0.511             0.983         0.236
