@@ -1,13 +1,13 @@
 # Status of this repository
 
-**Version 0.3.13.dev0, built 22 October 2026. Research code, published for outside review.**
+**Version 0.3.13.dev1, built 23 October 2026. Research code, published for outside review.**
 
 Infinity GEM is an independent research project by Paolo Navata, developed in his own time. It is not an official publication of any government office or other institution, and nothing in it states the position of any institution. Results produced with this code are research results, for discussion: they are not forecasts and not official statistics. The code was written by the author with AI coding assistants, and it is checked by the validation suite (`checks/`), including comparisons with implementations written by people (IFPRI's GAMS code, pycge, statsmodels). The comments keep the dates and reasons of the development history (2025-2026 analyses of the Philippine economy).
 
 ## What is included
 
 - **All the model code** (`infinity_gem/`): SAM tools and multipliers, the static and recursive-dynamic CGE with every opt-in upgrade, household demand, elasticity sets, oil shocks, the input-output models, the poverty microsimulation and macro-micro link, the time-series tools, the stochastic CGE.
-- **The validation suite** (`checks/`, 74 checks) and the frozen reference results of version 0.2.
+- **The validation suite** (`checks/`, 75 checks) and the frozen reference results of version 0.2.
 - **The validation studies** (`validation/`): IFPRI's standard CGE model in GAMS (GPL v2) with its saved results on a condensed and on the full 2023 SAM, with and without home consumption; the cross-check with pycge; a Julia/MPSGE comparison; labour-closure and backtest studies.
 - **The scenarios** (`scenarios/`, `preshock/`): the 2026 shock scenarios (world oil and fertilizer prices, the fall in public construction, El Nino, and their combination with a costed response), their sensitivity analyses, and the models that size each shock from data; the earlier oil, infrastructure and cash-transfer scenarios; a template for your own shock.
 - **Research code** (`research/`): the DSGE model with Bayesian estimation, with the posterior draws of its first estimation on public data (`research/dsge/draws/`, read by one test of check X3); the forward-looking CGE.
@@ -60,8 +60,8 @@ Excel files that are included were cleaned of the metadata a document library ad
 
 ## The validation suite in a clean clone
 
-Run on 22 October 2026, 21:14 on a fresh `git clone` of this repository (547 files), Windows 11, Python 3.14.4, one processor core, without any of the files that are not distributed; 7 minutes.
+Run on 23 October 2026, 05:56 on a fresh `git clone` of this repository (552 files), Windows 11, Python 3.14.4, one processor core, without any of the files that are not distributed; 9 minutes.
 
-**61 of the 61 checks that could run passed**. 13 checks reported NOT RUN because they need files that are not distributed (the table above): P1, V1, A1, H2, H3, A2, V6, X1, ML1, S3, S6, ML2, PC1.
+**62 of the 62 checks that could run passed**. 13 checks reported NOT RUN because they need files that are not distributed (the table above): P1, V1, A1, H2, H3, A2, V6, X1, ML1, S3, S6, ML2, PC1.
 
 R0 compared the results it could compute and named the others; H1 ran without its GTAP benchmark. Add the files the README files in `data/raw/` describe and the NOT RUN checks run; NOT RUN is never counted as a pass.

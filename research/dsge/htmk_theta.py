@@ -14,6 +14,10 @@ too. Draws from every converged chain of the specification, solved WITH the cali
 Run:  py htmk_theta.py [model=htmki] [n_per_chain=300] [obs=inv] [theta_fix=0.95]   (writes outputs/dsge_<model>_theta_<stamp>[_inv][_thfix..].md;
 obs=inv: the chains estimated with PSA investment data, milestone 23c; theta_fix=: the chains with the Calvo parameter
 calibrated at that value, 22 Oct 2026)
+model=htmkf (milestone 25, 22-23 Oct 2026, night): soe_htmkf, soe_htmki plus the flexible-price share of the CPI.
+pattern=<glob in outputs/> (milestone 25): score the files matching the glob instead of the specification's Metropolis chains,
+e.g. an SMC run's particles (`pattern=dsge_smc_<stamp>_..._particles.npy`; equal weights after the final resampling); the output
+then carries "_smc" (or "_files" for another glob). The columns must be the specification's parameters (ER.NAMES).
 """
 from __future__ import annotations
 
@@ -29,7 +33,8 @@ sys.path.insert(0, str(HERE))
 _ARGS = sys.argv[1:]
 INV = "obs=inv" in _ARGS            # the chains estimated WITH investment data (milestone 23c); default: without
 THFIX = next((a for a in _ARGS if a.startswith("theta_fix=")), None)   # 22 Oct 2026: chains with the Calvo parameter fixed
-MODEL = next((a.split("=", 1)[1] for a in _ARGS if a.startswith("model=")), "htmk")   # 22 Oct 2026: or htmki (milestone 24)
+MODEL = next((a.split("=", 1)[1] for a in _ARGS if a.startswith("model=")), "htmk")   # 22 Oct 2026: or htmki (milestone 24), htmkf (25)
+FILES_GLOB = next((a.split("=", 1)[1] for a in _ARGS if a.startswith("pattern=")), None)   # milestone 25: e.g. SMC particles
 sys.argv = ([sys.argv[0], f"model={MODEL}", "prior=ratio2", "sample=long", "gdp=stl"] + (["obs=inv"] if INV else [])
             + ([THFIX] if THFIX else []))
 import estimate_rot as ER   # noqa: E402
@@ -44,6 +49,8 @@ PATTERN = f"dsge_ph_{MODEL}_draws_*" + SPEC + "*.npy"
 
 
 def chain_files():
+    if FILES_GLOB:                                            # milestone 25: the files named on the command line (e.g. SMC particles)
+        return sorted(OUT.glob(FILES_GLOB))
     return [f for f in sorted(OUT.glob(PATTERN)) if re.search(re.escape(SPEC) + r"(_seed\d+)?$", f.stem)]
 
 
@@ -95,7 +102,7 @@ def main():
     q["at the parameters' median"] = pd.Series(at_med)
     th1 = T["theta, year 1"]
     stamp = dt.datetime.now().strftime("%Y%m%d_%H%M")
-    L = [f"# The investment semi-elasticity theta implied by soe_htmk ({dt.datetime.now():%d %B %Y, %H:%M})", "",
+    L = [f"# The investment semi-elasticity theta implied by soe_{MODEL} ({dt.datetime.now():%d %B %Y, %H:%M})", "",
          f"**NOT FOR CITATION** (research code, `research/dsge/htmk_theta.py`). {len(T)} posterior draws solved ({fails} failed) "
          f"from {', '.join(f.name for f in files)}, with the calibrated capital share 0.5, investment share 0.24 and depreciation "
          f"0.025. A policy shock scaled to +1 pp on impact; theta = minus the year's average investment response (%) over the "
@@ -106,7 +113,8 @@ def main():
          "For comparison (the link's values so far, `investment_lp.py` docstring and `research/dsge/README.md`): milestone 14's "
          "0.55; the QPM, rate held for a year, 1.9; soe_htmu matched through the output gap, 2.7-3.3; central 2.",
          ]
-    path = OUT / f"dsge_{MODEL}_theta_{stamp}{'_inv' if INV else ''}{TFTAG}.md"
+    src = ("_smc" if "dsge_smc_" in FILES_GLOB else "_files") if FILES_GLOB else ""     # milestone 25: pattern= runs
+    path = OUT / f"dsge_{MODEL}_theta_{stamp}{'_inv' if INV else ''}{TFTAG}{src}.md"
     path.write_text("\n".join(L) + "\n", encoding="utf-8")
     print("\n".join(L)); print("saved", path)
 

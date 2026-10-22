@@ -192,6 +192,14 @@ Checks
       formula), and a demand change moves them only through the flexible prices; Walras' law,
       the GDP identity and the rebuilt SAM hold; a tampered SAM (capital paid its benchmark rent, not the residual) is caught;
       a construction cut lowers prices less and GDP more than with flexible prices. With the option off: check R0.
+  CS1 Short-run consumption rule (0.3.13, 22 Oct 2026, a design note (not included); dynamic.py
+      sr_consumption={"htm": lam}): on Infinity GEM's own SAM with the 2026 scenarios' engine (wage curve, hoarding 0.85) and a 2026 oil and
+      construction shock, lam 1 reproduces the engine without the rule (every year); a zero shock with the rule reproduces the
+      baseline; at lam 0.62 total household spending equals the rule's formula (recomputed here) and the wage curve's fixed point
+      holds jointly, consumption falls less and households save less; with the employment cap binding the rule still holds;
+      homogeneity: the year's nominal anchors (peso, peso wage anchors, world prices in pesos, the rule's baseline spending and
+      price reference) +10% give every price +10% with quantities and later years unchanged, also with the rule's reference held
+      at its real value; a tampered rule (CPI term dropped) is caught; the guards refuse what the rule is not defined for.
   X2  (18 Oct 2026: also the Keynesian year of Build 2 against cge.py's Keynesian closure, with a tamper test, and Build 1's
       foreign-saving bridge: 2023 borrows the SAM's temporary excess of foreign saving, the debt stays bounded.)
   X2  Forward-looking CGE (0.3.9, the forward-looking CGE; research/intertemporal/, not used by any Infinity GEM result): the
@@ -1804,6 +1812,7 @@ def x3():
               "test_milestone23.py",                      # 21 Oct 2026, about 1:40 AM: capital and investment adjustment costs (soe_htmk.py)
               "test_milestone23c.py",                     # 21 Oct 2026, about 11:30 PM: investment data as an observable (obs=inv)
               "test_milestone24.py",                      # 22 Oct 2026, about 5:05 PM: the investment-specific shock (soe_htmki.py)
+              "test_milestone25.py",                      # 22-23 Oct 2026, night: a flexible-price share of the CPI (soe_htmkf.py)
               "test_smc.py"):                             # 21 Oct 2026, about 1:05 AM: the sequential Monte Carlo sampler (smc.py)
         r = subprocess.run([sys.executable, "-I", str(d / t)], capture_output=True, text=True, cwd=str(d), timeout=600)
         last = [l for l in r.stdout.splitlines() if l.strip()][-1] if r.stdout.strip() else "no output"
@@ -2195,6 +2204,127 @@ def mk1():
                 f"vs {mf.gdp(fc)['real'] / mf.gdp(bf)['real'] - 1:+.2%}; refused {refused}/3 (option off: check R0)")
 
 
+@check("CS1", "short-run consumption rule (0.3.13): lam 1 = the rule off; zero shock = baseline; the rule holds (also with "
+              "the employment cap binding); homogeneity; tamper caught; guards")
+def cs1():
+    from infinity_gem.dynamic import DynamicCGE
+    from infinity_gem.oil import cge_oil_shock
+    from infinity_gem.settings import dynamic_kwargs
+    kw = dynamic_kwargs("0.3 recommended", rice=True, land="fixed")       # Infinity GEM's own SAM v0.5 (the default), the 2026 scenarios' engine:
+    kw.update(wage_curve=10.5, hoarding=0.85, short_run_years=(2026,))    # wage curve at about its central beta, hoarding 0.85
+    d = DynamicCGE(**kw)
+    b = d.baseline()
+    t, lam, beta = 2026, 0.62, 10.5
+    shock = {t: {**cge_oil_shock(d.m, 0.30), "qinv_scale": {"ccons": 0.85}}}   # world oil +30%, construction investment -15%
+    F, m = d.m.F, d.m
+    keys = ("QA", "QH", "QE", "QM", "QINV", "EMP", "PQ", "WF", "EH", "DY", "YH")
+    qkeys = ("QA", "QH", "QE", "QM", "QINV", "QG", "EMP")
+    lab = [k for k, f in enumerate(F) if f.startswith("flab")]
+    rd = lambda a_, b_: float(np.max(np.abs(np.asarray(a_, float) - np.asarray(b_, float))
+                                     / np.maximum(np.abs(np.asarray(b_, float)), 1e-9)))
+    prices = lambda s_: [np.asarray(s_["PQ"], float)[d.ms.iQ], np.asarray(s_["PDS"], float)[d.ms.iD], np.asarray(s_["WF"], float)[lab],
+                         np.asarray(s_["W"], float)[d.ms.kcap, d.ms.iK], np.asarray(s_["EH"], float), np.asarray(s_["DY"], float),
+                         np.asarray(s_["YH"], float), np.array([float(s_["CPI"]), float(s_["EXR"])])]
+    hom = lambda p_, q_: (max(rd(p_.solutions[t][k], q_.solutions[t][k]) for k in qkeys),          # quantities unchanged,
+                          max(rd(x_ / 1.1, y_) for x_, y_ in zip(prices(p_.solutions[t]), prices(q_.solutions[t]))),   # prices +10%,
+                          abs(float(p_.solutions[t]["MPSADJ"]) - float(q_.solutions[t]["MPSADJ"])),  # the same saving rates,
+                          max(rd(p_.solutions[y][k], q_.solutions[y][k]) for y in d.years if y > t for k in keys))   # later years
+
+    def run(lam_, sh=shock):
+        d.a["sr_consumption"] = None if lam_ is None else {"htm": lam_}
+        return d.scenario(sh)
+
+    def rule_gap(s_, ref=b.solutions[t]):        # the rule, written here independently of dynamic.py: total household spending =
+        mb = np.clip(np.asarray(d.ms.mps, float) * (1 + float(ref["MPSADJ"])), -1.0, 1.0)   # lam (1 - baseline saving rates) DY
+        target = (lam * float(((1 - mb) * np.asarray(s_["DY"], float)).sum())               # + (1 - lam) baseline spending x CPI /
+                  + (1 - lam) * float(np.sum(ref["EH"])) * float(s_["CPI"]) / float(ref["CPI"]))   # baseline CPI
+        return abs(float(np.sum(s_["EH"])) - target) / target
+
+    bs = b.solutions[t]
+    p_off, p_1, p_c = run(None), run(1.0), run(lam)
+    z = run(lam, {t: {}})
+    # (1) nesting: lam 1 = the engine without the rule, every year; (2) zero shock = the baseline
+    nest = max(rd(p_1.solutions[y][k], p_off.solutions[y][k]) for y in d.years for k in keys)
+    zd = max(float((z.table.real_gdp / b.table.real_gdp - 1).abs().max()), float((z.table.cpi / b.table.cpi - 1).abs().max()))
+    # (3) the rule holds in the solution; the wage curve's fixed point holds jointly (anchor in pesos or real, as the wage rule);
+    # households smooth: consumption falls less than without the rule, and the saving-rate adjustment falls
+    s = p_c.solutions[t]
+    gap = rule_gap(s)
+    ix = (lambda sol: float(sol["CPI"])) if d.ms.wage == "real" else (lambda sol: 1.0)
+    capped_c = str(p_c.table.loc[t, "employment_capped"]).split(",")
+    fp = max(abs(float(s["WF"][k]) / ix(s) / (float(bs["WF"][k]) / ix(bs)) - min(1.0, float(s["EMP"][k] / bs["EMP"][k])) ** beta)
+             for k in lab if F[k] in d.ms.unemployed and F[k] not in capped_c)
+    c_off = float(np.sum(p_off.solutions[t]["QH"]) / np.sum(bs["QH"]) - 1)
+    c_on = float(np.sum(s["QH"]) / np.sum(bs["QH"]) - 1)
+    dmps = float(s["MPSADJ"]) - float(bs["MPSADJ"])
+    dirn = c_off < c_on < 0 and dmps < 0
+    # (3b) the employment cap binding (a large demand shock, as Y6): the rule re-solved after the change of regime still holds
+    p_big = run(lam, {t: {"qinv_scale": {"ccons": 1.3}, "trg_h_add": {"hhd-r1": 60.0, "hhd-u1": 60.0}}})
+    capped = str(p_big.table.loc[t, "employment_capped"])
+    gap_cap = rule_gap(p_big.solutions[t])
+    # (4) homogeneity: the baseline year solved at a consumer price level 10% higher (every price +10%, quantities the same, as
+    # check C3) carries every nominal anchor of the short-run year +10%: the peso, the peso wage anchors and the wage curve's,
+    # world prices in pesos, and the rule's baseline spending and price reference. (4a) all of them; (4b) the same with the rule's
+    # reference held at the original baseline's, whose REAL spending is the same: nothing real may change in either
+    x11 = bs.x.copy()
+    for k_ in ("PDS", "PQ", "WF", "RK", "RL", "RN", "EXR"):                # the long-run model's price unknowns
+        x11[m.slices[k_]] *= 1.1
+    b11 = m.solve({**bs.shocks, "cpi": 1.1}, x_start=x11)
+    ref_c, tgt_c = d._sr_consumption_ref, d._sr_consumption_target
+    held = lambda t_, model: (dict(ref_c(t_, model), EH=np.asarray(bs["EH"], float), CPI=float(bs["CPI"])) if t_ == t
+                              else ref_c(t_, model))
+    no_cpi = lambda s_, ref: (ref["lam"] * (1.0 - ref["mps"]) * np.asarray(s_["DY"], float)   # TAMPER: the CPI term dropped (the
+                              + (1.0 - ref["lam"]) * ref["EH"])                                 # rule holds nominal spending)
+    try:
+        d.base.solutions[t] = b11
+        p_h = run(lam)
+        d._sr_consumption_ref = held
+        p_r = run(lam)
+        # (5) tamper: the rule without its CPI term, on the original baseline and on the scaled one with the reference held
+        d._sr_consumption_target = no_cpi
+        p_tr = run(lam)
+        d.base.solutions[t] = bs
+        p_t = run(lam)
+    finally:
+        d.base.solutions[t] = bs
+        d.__dict__.pop("_sr_consumption_ref", None)
+        d.__dict__.pop("_sr_consumption_target", None)
+    h_a, h_b = hom(p_h, p_c), hom(p_r, p_c)
+    gap_t = rule_gap(p_t.solutions[t])
+    hq_t = hom(p_tr, p_t)[0]
+    # (6) guards: lam outside [0, 1] or not a number, a wrong key, no hybrid closure (at construction and when set afterwards),
+    # and a scenario saving-rate shock in a short-run year are refused
+    refused = 0
+    for bad in ({"htm": 1.2}, {"htm": -0.1}, {"htm": float("nan")}, {"htm": True}, {"lam": lam}, lam):
+        try:
+            DynamicCGE(**dict(kw, sr_consumption=bad))
+        except ValueError:
+            refused += 1
+    try:
+        DynamicCGE(**dict(kw, hybrid=False, sr_consumption={"htm": lam}))
+    except ValueError:
+        refused += 1
+    try:
+        run(lam, {t: {**shock[t], "mpsadj": 0.1}})
+    except ValueError:
+        refused += 1
+    d.a["hybrid"] = False
+    try:
+        run(lam)
+    except ValueError:
+        refused += 1
+    finally:
+        d.a["hybrid"], d.a["sr_consumption"] = True, None
+    ok = (nest < 1e-9 and zd < 1e-9 and gap < 1e-8 and fp < 1e-8 and dirn and bool(capped) and gap_cap < 1e-8 and b11.ok
+          and max(h_a) < 1e-9 and max(h_b) < 1e-9 and gap_t > 1e-6 and hq_t > 1e-6 and refused == 9)
+    return ok, (f"2026 oil +30%, construction -15% (Infinity GEM SAM, beta {beta}, hoarding 0.85): lam 1 vs off {nest:.1e} (all years); zero "
+                f"shock {zd:.1e}; lam {lam}: rule gap {gap:.1e}, wage-curve fixed point {fp:.1e}, consumption {c_on:+.2%} vs {c_off:+.2%} "
+                f"without the rule, saving-rate adjustment {dmps:+.3f}; cap binding ({capped}): rule gap {gap_cap:.1e}; homogeneity "
+                f"(anchors +10%): quantities {h_a[0]:.1e}, prices {h_a[1]:.1e}, MPSADJ {h_a[2]:.1e}, later years {h_a[3]:.1e}; with the "
+                f"rule's real reference held: {max(h_b):.1e}; tamper (CPI term dropped): rule gap {gap_t:.1e}, homogeneity with the "
+                f"real reference {hq_t:.1e} (caught); refused {refused}/9")
+
+
 @check("LG1", "no-shock 2026 labour path option (0.3.9)")
 def lg1():
     import pandas as pd
@@ -2293,7 +2423,7 @@ def x2():
     return ok, "; ".join(out)
 
 
-EXTRA = [i3, i4, c8, y2, y3, v2, v3, e1, y4, y5, l1, h1, s1, v4, i5, v5, s2, h2, h3, a2, w1, v6, v7, m2, d3, w2, x1, ml1, lp1, sh1, cr1, s3, y6, pk1, sr1, wc1, ex1, vd1, ic1, ps1, s4, lg1, e2, x2, s5, s6, ml2, pc1, hd1, x3, en1, en2, st1, ir1, vn1, mp1, mk1]    # checks added in 0.3 (MK1: 0.3.13; MP1: 0.3.12; VN1: 0.3.12; IR1: 0.3.11; ST1: 0.3.11, sectoral stickiness; EN1, EN2: 0.3.11; HD1, X3: 0.3.11; S5, S6, ML2: 0.3.9; E2, X2: 0.3.9; LG1: 0.3.9; IC1, PS1, S4: 0.3.8; S3, Y6, PK1, SR1, WC1, EX1, VD1: 0.3.7; CR1: 0.3.6; ML1, LP1, SH1: 0.3.5; V4, I5, V5, S2, H2, H3: 0.3.1; W1: 0.3.2; D3: 0.3.3; W2: 0.3.4)
+EXTRA = [i3, i4, c8, y2, y3, v2, v3, e1, y4, y5, l1, h1, s1, v4, i5, v5, s2, h2, h3, a2, w1, v6, v7, m2, d3, w2, x1, ml1, lp1, sh1, cr1, s3, y6, pk1, sr1, wc1, ex1, vd1, ic1, ps1, s4, lg1, e2, x2, s5, s6, ml2, pc1, hd1, x3, en1, en2, st1, ir1, vn1, mp1, mk1, cs1]    # checks added in 0.3 (CS1: 0.3.13, the short-run consumption rule; MK1: 0.3.13; MP1: 0.3.12; VN1: 0.3.12; IR1: 0.3.11; ST1: 0.3.11, sectoral stickiness; EN1, EN2: 0.3.11; HD1, X3: 0.3.11; S5, S6, ML2: 0.3.9; E2, X2: 0.3.9; LG1: 0.3.9; IC1, PS1, S4: 0.3.8; S3, Y6, PK1, SR1, WC1, EX1, VD1: 0.3.7; CR1: 0.3.6; ML1, LP1, SH1: 0.3.5; V4, I5, V5, S2, H2, H3: 0.3.1; W1: 0.3.2; D3: 0.3.3; W2: 0.3.4)
 
 
 if __name__ == "__main__":

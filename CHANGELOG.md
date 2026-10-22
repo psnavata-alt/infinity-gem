@@ -2,6 +2,12 @@
 
 The public repository continues the version numbers of the code base it was built from, so the version notes in the code ("added in 0.3.7") stay meaningful. Every upgrade after 0.2 is opt-in: with default settings the model reproduces the 0.2 results exactly (check R0).
 
+## 0.3.13.dev1 (23 October 2026)
+
+- **A short-run consumption rule** (opt-in; check CS1): `DynamicCGE(sr_consumption={"htm": lam})`, with lam between 0 and 1. In the hybrid closure's short-run years, the share lam of household spending follows disposable income at the baseline saving rates (hand-to-mouth households) and the rest keeps its baseline real value (households that smooth their consumption). The rule is met by the year's saving-rate adjustment, one factor for every household, solved together with the wage curve and re-solved whenever the employment cap changes regime. With the option off (the default) or lam = 1 the results are unchanged. `scenarios/consumption_rule_2026.py` applies it to the central 2026 case.
+- **Research DSGE, milestone 25:** the capital model with a flexible-price energy share of the CPI (`research/dsge/soe_htmkf.py`; its test `test_milestone25.py` runs in check X3), and the same model with sticky (Calvo) wages (`soe_htmkw.py`; its test `test_milestone25b.py` is run by hand). `estimate_rot.py` takes `model=htmkf` and `model=htmkw`; `htmk_theta.py` takes `model=htmkf` and a `pattern=` option that scores saved sampler output.
+- The validation suite has 75 checks. With default settings the model still reproduces version 0.2 exactly (check R0).
+
 ## 0.3.13.dev0 (22 October 2026): first public build
 
 The development copy, published for outside review under the name Infinity GEM (by Paolo Navata; it extends pystdcge, https://github.com/psnavata-alt/pystdcge); new since 0.3.12: markup pricing in short-run years (opt-in; check MK1). Compared with the code it was built from: the package is renamed `infinity_gem`; data that may not be redistributed are left out (`docs/STATUS.md`), and the checks that need them report NOT RUN; PSA's 2018 input-output and supply-use tables are included, so the input-output checks run; the 2026 oil-shock sizes are measured from public monthly series (World Bank Pink Sheet, EIA STEO) instead of a compiled weekly tracker; comments and report text are worded neutrally (no people, organizational units, working documents or planning lists), with the code unchanged.

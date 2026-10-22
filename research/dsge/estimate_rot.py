@@ -70,8 +70,8 @@ if END is not None:
 # investment's comovement with the rate and output. Outputs and chains carry "_inv"; without obs=inv nothing changes.
 OBS_INV = any(a == "obs=inv" for a in sys.argv[1:])
 if OBS_INV:
-    if MODEL not in ("htmk", "htmki"):
-        raise SystemExit("obs=inv needs model=htmk or model=htmki")
+    if MODEL not in ("htmk", "htmki", "htmkf", "htmkw"):
+        raise SystemExit("obs=inv needs model=htmk, model=htmki, model=htmkf or model=htmkw")
     STAG += "_inv"
 RATIO_PRIOR = {"infl": (-0.35, 0.10), "growth": (-0.20, 0.15),       # trough per pp of first-year tightening: mean, s.d.
                "persist": (3.0, 2.0)}                                 # ratio2 only: first-year cumulative rate path per pp of impact
@@ -105,6 +105,10 @@ elif MODEL == "htmk":        # milestone 23 (21 Oct 2026): soe_htmk.py, the cand
     import soe_htmk as R     # noqa: E402
 elif MODEL == "htmki":       # milestone 24 (22 Oct 2026): soe_htmki.py, soe_htmk plus an investment-specific (MEI) shock
     import soe_htmki as R    # noqa: E402
+elif MODEL == "htmkf":       # milestone 25 (22-23 Oct 2026): soe_htmkf.py, soe_htmki plus a flexible-price share a_f of the CPI
+    import soe_htmkf as R    # noqa: E402
+elif MODEL == "htmkw":       # milestone 25b (23 Oct 2026): soe_htmkw.py, soe_htmkf plus sticky nominal (Calvo) wages
+    import soe_htmkw as R    # noqa: E402
 else:
     import soe_rot as R      # noqa: E402
 OILM = ("oil", "oilu", "oilw", "oilf")                               # the oil models
@@ -112,22 +116,22 @@ OILM = ("oil", "oilu", "oilw", "oilf")                               # the oil m
 EST = [e for e in EM.EST if e[0] not in ("gH", "gF")]
 i_after = [e[0] for e in EST].index("hab") + 1
 EST[i_after:i_after] = [("omega_H", "beta", 0.40, 0.20, 0.0, 0.95), ("omega_F", "beta", 0.40, 0.20, 0.0, 0.95)]
-if MODEL in ("htm", "htmu", "htmk", "htmki") + OILM:
+if MODEL in ("htm", "htmu", "htmk", "htmki", "htmkf", "htmkw") + OILM:
     EST[i_after + 2:i_after + 2] = [("lam_h", "beta", 0.30, 0.15, 0.0, 0.90), ("kappa", "beta", 0.30, 0.15, 0.0, 0.90)]
 SHOCKS = list(EM.SHOCKS)
 FIXED = {}
-if MODEL in ("htmk", "htmki"):
+if MODEL in ("htmk", "htmki", "htmkf", "htmkw"):
     # milestone 23 (21 Oct 2026): capital and investment. phi_i (adjustment-cost curvature) with Smets and Wouters' prior; the
     # shares calibrated (soe_htmk.py's docstring: Infinity GEM's own SAM v0.5 gives capital 0.60 of value added incl. mixed income, so 0.5;
     # investment 0.24 of household consumption plus investment; depreciation 2.5% a quarter)
     EST.insert(i_after + 4, ("phi_i", "normal", 4.0, 1.5, 0.5, 15.0))
     EST.insert(i_after + 5, ("psi_u", "beta", 0.50, 0.15, 0.05, 0.95))      # utilisation-cost elasticity, Smets-Wouters' prior
     FIXED = dict(alpha_k=0.5, i_y=0.24, delta=0.025)
-if MODEL in ("htmu", "htmk", "htmki", "oilu", "oilw", "oilf"):  # milestone 19: the cost-push shock's persistence and size (quarterly inflation, %; as sd_v)
+if MODEL in ("htmu", "htmk", "htmki", "htmkf", "htmkw", "oilu", "oilw", "oilf"):  # milestone 19: the cost-push shock's persistence and size (quarterly inflation, %; as sd_v)
     EST.insert([e[0] for e in EST].index("rho_z") + 1, ("rho_u", "beta", 0.50, 0.20, 0.0, 0.99))
     EST.append(("sd_u", "invgamma", 0.25, 1.0, 1e-3, 10.0))
     SHOCKS.append("u")
-if MODEL == "htmki":
+if MODEL in ("htmki", "htmkf", "htmkw"):
     # milestone 24 (22 Oct 2026): the investment-specific (MEI) shock's persistence and size (% a quarter), with the same loose
     # priors as the other shocks; it enters the investment Euler equation with unit weight (Smets and Wouters 2007, eq. 3)
     EST.insert([e[0] for e in EST].index("rho_u") + 1, ("rho_ei", "beta", 0.50, 0.20, 0.0, 0.99))
@@ -147,6 +151,17 @@ if MODEL == "oilf":
     # s_f = their fuel cost share, CPI-weighted, from Infinity GEM's own SAM v0.5 (transport: refined petroleum 16.1% of cost; electricity:
     # refined petroleum 17.1% plus coal and gas 5.0%, the DSGE's one oil price standing for all fossil fuels): 0.19 (oil only 0.17)
     FIXED = dict(FIXED, a_f=0.091, s_f=0.19)
+if MODEL in ("htmkf", "htmkw"):
+    # milestone 25 (22-23 Oct 2026, night): the same flexible-price, energy-intensive services as milestone 22 (CPI weight a_f =
+    # passenger transport services 4.54% + electricity 4.55%, PSA 2018 weights), priced at the economy's marginal cost each
+    # quarter (soe_htmkf.py: no oil price in this model, so no fuel share s_f); no new estimated parameter
+    FIXED = dict(FIXED, a_f=0.091)
+if MODEL == "htmkw":
+    # milestone 25b (23 Oct 2026, night): sticky nominal wages (soe_htmkw.py). The Calvo wage parameter with a prior mean of 0.75,
+    # a mean wage duration of one year (Philippine minimum wages are set in pesos by the regional boards about once a year;
+    # Smets and Wouters' US prior is beta(0.5, 0.1)); the elasticity of substitution between labour types calibrated (Gali 2015)
+    EST.insert([e[0] for e in EST].index("theta_F") + 1, ("theta_w", "beta", 0.75, 0.10, 0.05, 0.97))
+    FIXED = dict(FIXED, eps_w=4.5)
 if MODEL in ("oilw", "oilf"):
     # milestone 21: the oil price's loading on world output (o = o_s + chi_o ystar), positive (world booms raise oil prices);
     # gamma with mean 5 and s.d. 4: a 1% world-output gap moves the real oil price by about 1-13%, the range implied by the

@@ -24,6 +24,28 @@ Hybrid closure (0.3, opt-in: DynamicCGE(hybrid=True))
   `gap_persistence` each year (default 0.5: half the gap is left after one year, an eighth after three).
   One run therefore shows both the first-year demand loss and its persistence.
 
+Short-run consumption rule (0.3.13, 22 Oct 2026, opt-in: DynamicCGE(sr_consumption={"htm": lam});
+a design note (not included), sections 3b, 6 and 7)
+  Without it a short-run year keeps the baseline year's saving rates (the Keynesian closure takes the saving-rate adjustment
+  MPSADJ as given, and _short_run_spec sets the baseline's), so household spending moves one-for-one with disposable income
+  within the year: the channel the design note found to over-contract against PSA's household consumption. With the rule,
+  total household spending in each short-run year is
+      sum_h EH_h = lam x sum_h (1 - s_h) DY_h  +  (1 - lam) x sum_h EHb_h x CPI / CPIb,
+  s_h the baseline year's saving rates (mps x (1 + MPSADJ_b), as the model clips them), DY disposable income, EHb and CPIb
+  the baseline year's spending and consumer price index. A share lam of spending follows current income at the baseline
+  saving rates (hand-to-mouth households: Campbell and Mankiw 1989; Gali, Lopez-Salido and Valles 2007, JEEA 5(1)); the rest
+  keeps its baseline REAL value through the year (households that smooth). The rule is met by the year's MPSADJ, one factor
+  for every household (so most of the dissaving falls on the top quintiles, which do most of the saving), solved jointly with
+  the wage curve's unknowns as one root (_sr_fixed_point; each evaluation a full solve of the short-run model) and re-solved
+  after any change of regime of the employment cap, so it holds in the year's final solution. Long-run years are unchanged.
+  lam: the project's DSGE hand-to-mouth share, 0.62 central (pooled ratio2 posterior; 0.48-0.85 across the models estimated;
+  research/dsge/README.md, 21 Oct 2026); the data check is PSA's household consumption. lam = 1 is the engine without the
+  rule to the root's tolerance (about 1e-10); None (default) = as before, results unchanged. Refused: lam outside [0, 1];
+  hybrid=False (no short-run years: in the long-run closures the saving rate is not free, it clears savings and investment or
+  is held at the baseline's); a scenario 'mpsadj' in a short-run year (the rule sets it). A household-specific lam would
+  need MPSADJ by household in cge.py (the design note's later refinement). Prototype: the 'smooth' hook of
+  a development script (not in this repository), whose numbers this reproduces. Check CS1.
+
 Public capital (0.3, opt-in: DynamicCGE(public_capital={...}))
   Lost roads and bridges lower the productivity of every industry, not only the capital stock. In a scenario,
   the change in construction investment relative to the baseline is treated as public investment (true for the
@@ -154,6 +176,7 @@ Usage
 from __future__ import annotations
 
 import copy
+import numbers
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -250,6 +273,11 @@ DEFAULT_ASSUMPTIONS = dict(
     monetary=None,                # 0.3.12: a BSP policy rule inside the dynamic model: the keyword arguments of
                                   # monetary_scenario() as a dict, e.g. {"rule": infinity_gem.monetary.rule("pamph"), "theta": 2.0};
                                   # scenario() then solves every path with the rule. None = no rule (default, results unchanged)
+    sr_consumption=None,          # 0.3.13 (22 Oct 2026, a design note (not included)): in the
+                                  # hybrid's short-run years {"htm": lam}, 0 <= lam <= 1: household spending = lam x (1 - baseline
+                                  # saving rates) x disposable income + (1 - lam) x baseline spending x CPI / baseline CPI, met by
+                                  # the year's saving-rate adjustment MPSADJ, solved jointly with the wage curve (module notes,
+                                  # _sr_fixed_point). None = saving rates at the baseline's (default, results unchanged). Check CS1.
 )
 
 # PSA GVA industries (OpenSTAT 0052B5BPRA1) -> activities of the IFPRI 2023 SAM
@@ -404,6 +432,7 @@ class DynamicCGE:
         self.by_act = self.putty or self.vintage                 # capital kept by activity between years
         if a["capital_allocation"] not in ("mobile", "putty-clay", "vintage"):
             raise ValueError("capital_allocation must be 'mobile', 'putty-clay' or 'vintage'")
+        self._check_sr_consumption(a)                # 0.3.13: checked here, before any model is built
         kw = dict(closure=a["closure"], unemployed=a["unemployed"],
                   capital="fixed" if self.putty else ("vintage" if self.vintage else a["capital"]),
                   les=a["les"], elasticities=a["elasticities"], margins=a["margins"], wage=a["wage"])
@@ -635,6 +664,107 @@ class DynamicCGE:
             raise RuntimeError(f"Year {t}: the wage curve did not converge (largest gap {gap:.1e}; {msg})")
         return state["sol"], model
 
+    @staticmethod
+    def _check_sr_consumption(a):
+        """0.3.13 (22 Oct 2026): refuse an sr_consumption assumption the rule is not defined for (at construction, and
+        again before a scenario path, since scripts may set assumptions afterwards, as they set wage_curve). Returns lam or None."""
+        sc = a["sr_consumption"]
+        if sc is None:
+            return None
+        lam = sc.get("htm") if isinstance(sc, dict) else None
+        if (not isinstance(sc, dict) or set(sc) != {"htm"} or isinstance(lam, bool) or not isinstance(lam, numbers.Real)
+                or not np.isfinite(float(lam)) or not 0.0 <= float(lam) <= 1.0):
+            raise ValueError("sr_consumption must be None or {'htm': lam} with 0 <= lam <= 1, the hand-to-mouth share of "
+                             "household spending in short-run years (lam = 1 is the engine without the rule)")
+        if not a["hybrid"]:
+            raise ValueError("sr_consumption is a rule of the hybrid closure's short-run years and needs hybrid=True: without "
+                             "it every year is solved in a long-run closure, where the saving rate is not free (it clears "
+                             "savings and investment, or is held at the baseline's)")
+        return float(lam)
+
+    def _sr_consumption_ref(self, t, model):
+        """0.3.13 (22 Oct 2026; sr_consumption): the consumption rule's reference in short-run year t, from the baseline
+        year's solution: the hand-to-mouth share lam, the baseline saving-rate adjustment, the baseline saving rates by household
+        (mps x (1 + MPSADJ_b), clipped to [-1, 1] as cge.py clips them), and the baseline spending EH (by household) and CPI."""
+        b = self.base.solutions[t]
+        mpsadj_b = float(b["MPSADJ"])
+        return {"lam": float(self.a["sr_consumption"]["htm"]), "mpsadj": mpsadj_b,
+                "mps": np.clip(np.asarray(model.mps, float) * (1.0 + mpsadj_b), -1.0, 1.0),
+                "EH": np.asarray(b["EH"], float), "CPI": float(b["CPI"])}
+
+    def _sr_consumption_target(self, s, ref):
+        """0.3.13: the rule's household spending at solution s, by household: lam x (1 - baseline saving rate) x
+        disposable income + (1 - lam) x baseline spending x CPI / baseline CPI (the share 1 - lam keeps its baseline real value;
+        check CS1 recomputes it independently, and its tamper test drops the CPI term here)."""
+        lam = ref["lam"]
+        return (lam * (1.0 - ref["mps"]) * np.asarray(s["DY"], float)
+                + (1.0 - lam) * ref["EH"] * (float(s["CPI"]) / ref["CPI"]))
+
+    def _sr_fixed_point(self, sol, model, spec, t, K, wage=True):
+        """0.3.13 (22 Oct 2026, a design note (not included), section 7; check CS1): the
+        short-run consumption rule (sr_consumption) of year t, solved jointly with the wage curve (as _wage_curve: each fixed-wage
+        labour type's anchor wbar x min(1, EMP/EMP_baseline) ** beta) as ONE root, with scipy's hybrid Powell method; each
+        evaluation is a full solve of the short-run model. Unknowns: x = ln(anchor / baseline anchor) for each fixed-wage labour
+        type (when the wage curve is on, the model has fixed-wage types and wage is True), and v, with the year's saving-rate
+        adjustment 1 + MPSADJ = (1 + MPSADJ_b)(1 + v). Residuals: the wage curve's, and the rule's (the rule's household spending
+        less household spending, summed over households, over household saving at the baseline rates: algebraically the
+        prototype's residual, the 'smooth' hook of a development script (not in this repository), but measured on the solution's own
+        spending). Start: the baseline anchors (x = 0) and the year's last v (0, the baseline saving rates, before the first
+        solve), as the prototype. wage=False (the employment cap's re-solve after a change of regime, when the cap is not solving
+        the wage curve jointly) keeps the anchors as they are and solves v alone. As _wage_curve, a start that is already the
+        fixed point (a year with no shock) is accepted when the root does not stop (gap below 1e-10). Refused after the root: a
+        saving rate the rule would push outside [-1, 1] (cge.py clips them). Returns (solution, model)."""
+        from scipy.optimize import root
+        m, b = self.m, self.base.solutions[t]
+        ref = self._sr_consumption_ref(t, model)
+        use_wc = bool(wage) and bool(self.a["wage_curve"]) and bool(model.unemployed)
+        fs = list(model.unemployed) if use_wc else []
+        nf = len(fs)
+        if use_wc:
+            beta = float(self.a["wage_curve"])
+            idx = float(b["CPI"]) if model.wage == "real" else 1.0
+            w0 = np.array([float(b["WF"][m.F.index(f)] / idx) for f in fs])
+            e0 = np.array([float(b["EMP"][m.F.index(f)]) for f in fs])
+        mo = self._mps_override.get(t)
+        v0 = 0.0 if mo is None else (1.0 + float(mo)) / (1.0 + ref["mpsadj"]) - 1.0
+        state = {"sol": sol}
+
+        def resid(z):
+            x, v = z[:nf], float(z[nf])
+            if use_wc:
+                self._wbar_override[t] = dict(zip(fs, w0 * np.exp(x)))
+            self._mps_override[t] = ref["mpsadj"] if v == 0.0 else (1.0 + ref["mpsadj"]) * (1.0 + v) - 1.0
+            s = model.solve(self._short_run_spec(spec, t, K, model), x_start=state["sol"].x)
+            if not s.ok:
+                raise RuntimeError(f"Year {t}: consumption-rule solve failed ({s.message})")
+            state["sol"] = s
+            out = []
+            if use_wc:
+                e = np.array([float(s["EMP"][m.F.index(f)]) for f in fs])
+                out += list(x - beta * np.log(np.minimum(1.0, e / e0)))
+            DY = np.asarray(s["DY"], float)
+            out.append(float(self._sr_consumption_target(s, ref).sum() - np.sum(s["EH"])) / float(ref["mps"] @ DY))
+            return np.array(out)
+
+        z0 = np.concatenate([np.zeros(nf), [v0]])
+        try:
+            r = root(resid, z0, method="hybr", options={"xtol": 1e-12})
+            res, msg = resid(r.x), r.message         # leave the model at the root's solution
+        except RuntimeError as err:
+            res, msg = None, str(err)
+        if res is None or not np.all(np.abs(res) < 1e-8):
+            r0 = resid(z0)                           # the start may itself be the fixed point (no shock): see _wage_curve
+            if not np.all(np.abs(r0) < 1e-10):
+                gap = np.abs(res).max() if res is not None else float("nan")
+                raise RuntimeError(f"Year {t}: the consumption rule{' and the wage curve' if use_wc else ''} did not converge "
+                                   f"(largest gap {gap:.1e}; {msg})")
+        s = state["sol"]
+        rate = np.asarray(model.mps, float) * (1.0 + float(s["MPSADJ"]))
+        if np.any(np.abs(rate) >= 1.0):
+            raise RuntimeError(f"Year {t}: the consumption rule needs a saving rate outside [-1, 1] (largest "
+                               f"{float(np.abs(rate).max()):.2f}); the model clips saving rates there")
+        return s, model
+
     def _cap_employment(self, sol, model, spec, t, K, L_index):
         """0.3.7: employment of a fixed-wage labour type may not exceed its supply. Types whose demand would
         exceed it are re-solved at full employment with a flexible wage; a capped type whose market wage falls below its
@@ -672,7 +802,9 @@ class DynamicCGE:
             sol = model.solve(self._short_run_spec(spec, t, K, model), x_start=self._short_run_start(t, model))
             if not sol.ok:
                 raise RuntimeError(f"Year {t}: solve with employment capped at supply failed ({sol.message})")
-            if joint and model.unemployed:
+            if self.a["sr_consumption"] is not None:     # 0.3.13: the consumption rule re-solved in the new regime,
+                sol, model = self._sr_fixed_point(sol, model, spec, t, K, wage=joint)   # with the wage curve when joint
+            elif joint and model.unemployed:
                 sol, model = self._wage_curve(sol, model, spec, t, K)
         raise RuntimeError(f"Year {t}: the employment cap did not settle")
 
@@ -720,7 +852,14 @@ class DynamicCGE:
             spec["en_shares"] = ms.energy_shares_at(bsol["PQ"], bsol["PVA"], bsol["QA"], self.m)
         if ms.hoarding > 0:                      # 0.3.11: hoarding relative to the baseline year's labour by activity
             spec["hoard_ref"] = np.asarray(bsol["QF"], float)
-        spec["mpsadj"] = float(bsol["MPSADJ"])
+        if self.a["sr_consumption"] is not None:     # 0.3.13: the consumption rule sets the year's saving-rate adjustment
+            if "mpsadj" in spec:                     # (_sr_fixed_point); before its first solve, the baseline's
+                raise ValueError(f"Year {t}: a scenario 'mpsadj' (saving-rate shock) is not defined with sr_consumption, whose "
+                                 "rule sets the saving rate of short-run years")
+            mo = (getattr(self, "_mps_override", None) or {}).get(t)
+            spec["mpsadj"] = float(bsol["MPSADJ"]) if mo is None else float(mo)
+        else:
+            spec["mpsadj"] = float(bsol["MPSADJ"])
         if self.m.closure == "interest":         # 0.3.11: the baseline's real investment includes its
             spec["iadj"] = spec["iadj"] * float(np.exp(-self.m.interest["theta"] / 100 * float(bsol["RINT"])))   # r term
         idx = float(bsol["CPI"]) if ms.wage == "real" else 1.0          # 0.3.4: sticky pesos = the baseline peso wage
@@ -772,6 +911,9 @@ class DynamicCGE:
         pubcap = self.a["public_capital"] is not None and shocks is not None and not calibrate
         dKG = 0.0                                    # public capital relative to the baseline (₱ bn, SAM prices)
         self._wbar_override = {}                     # 0.3.7: wage-curve anchors of this path only
+        self._mps_override = {}                      # 0.3.13: the consumption rule's saving-rate adjustments, this path only
+        if shocks is not None and not calibrate and self.a["sr_consumption"] is not None:
+            self._check_sr_consumption(self.a)       # 0.3.13: also when set after construction
         icons = m.C.index("ccons")
         sols, tfps, caps, rows, dems = {}, {}, {}, [], {}
         K = self.K0a.copy() if self.by_act else self.K0
@@ -889,7 +1031,9 @@ class DynamicCGE:
             if not sol.ok:
                 raise RuntimeError(f"Year {t}: solve failed ({sol.message}, residual {sol.residual_max:.2e})")
             capped = []
-            if short and self.a["wage_curve"]:           # 0.3.7 (16 Oct): pay gives a little when work falls (check WC1)
+            if short and self.a["sr_consumption"] is not None:   # 0.3.13: the consumption rule, solved with the wage
+                sol, model = self._sr_fixed_point(sol, model, spec, t, K)   # curve as one root (check CS1)
+            elif short and self.a["wage_curve"]:         # 0.3.7 (16 Oct): pay gives a little when work falls (check WC1)
                 sol, model = self._wage_curve(sol, model, spec, t, K)
             if short and self.a["employment_cap"]:      # 0.3.7: employment at most the labour supply
                 sol, model, capped = self._cap_employment(sol, model, spec, t, K, L_index)
