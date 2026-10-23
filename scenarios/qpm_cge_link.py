@@ -15,7 +15,7 @@ Run (Git Bash):  export INFINITY_GEM_SCENARIO_SAM=own; py scenarios/qpm_cge_link
   so the CGE's 2027 gap differs from the QPM's by that capital legacy, which is reported instead of forced away.
 - h=: paid labour hoarding in the CGE's short run (PSA's data support about 0.85). With h = 0 the CGE's demand
   multiplier is about 0.2, so an implausibly large investment cut (8%) is needed to reproduce PAMPh's output response.
-- mode=elastic [theta=0.55] (20 Oct 2026): no matching at all; real investment moves by theta % per pp of the real-rate gap in
+- mode=elastic [theta=1.5] (20 Oct 2026; the default was 0.55 until 23 Oct 2026): no matching at all; real investment moves by theta % per pp of the real-rate gap in
   every year. For scenarios whose output gap is near zero, where matching fails (see the comment in main()).
 - source=dsge (milestone 14, 19 Oct 2026, about 11 AM): the annual output gap, real exchange rate and real-rate gap come from
   the estimated DSGE (research/dsge/soe_htm.py at the posterior mean of milestone 13, the system prior on transmission
@@ -167,9 +167,10 @@ def main():
     theta = None
     if mode == "elastic":            # 20 Oct 2026, about 02:35: a FIXED semi-elasticity in every year, no matching. Why: with an
         # output gap near zero (the BSP's oil response on the cleaned DSGE, -0.02%) matching is dominated by the exchange-rate
-        # channel and returned a wrong-signed (rising) investment. Default 0.55% of real investment per pp of real-rate gap:
-        # milestone 14's implied value (the project's DSGE matched to the CGE); theta=3.0 is milestone 9's (the QPM), an upper case.
-        theta = arg("theta", 0.55) / 100
+        # channel and returned a wrong-signed (rising) investment. Default 1.5% of real investment per pp of real-rate gap since
+        # 23 Oct 2026: the link's central after DSGE milestone 25 (the decision; 0.7 low, 2 high). It was 0.55, milestone 14's
+        # implied value (the project's DSGE matched to the CGE); theta=3.0 is milestone 9's (the QPM).
+        theta = arg("theta", 1.5) / 100
     for y in YEARS:                                                 # bisection on the investment scale, year by year
         if mode in ("rate", "elastic") and theta is not None:       # later years (all years with elastic): from the real rate
             scale[y] = 1.0 - theta * tgt[y]["real_rate_gap_pp"]

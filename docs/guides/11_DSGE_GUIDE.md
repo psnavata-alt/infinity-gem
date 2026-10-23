@@ -13,7 +13,7 @@ Work on the DSGE started on 19 Oct 2026.
    - Three chains have converged.
 2. **"100 bp" is now quoted on a defined path,** the policy rate held 1 point higher for a year. A shock to the model's rule brings further tightening with it, so it is not the same experiment.
 3. **Oil:** supply shocks are separated from world-demand-driven oil prices (milestone 21).
-4. **Investment's response to interest rates** cannot be measured from Philippine aggregate data; the CGE link keeps a matched value.
+4. **Investment's response to interest rates** is pinned down only loosely by Philippine data: the capital DSGE with sticky wages (milestone 25) gives 1.43 (90% band 0.72-2.23). Since 23 Oct 2026 the CGE link uses 1.5, with 0.7 low and 2 high (it used a matched 2 before).
 
 ## 1. What it is for
 
@@ -108,7 +108,7 @@ So a year of 1-point-tighter policy costs roughly **0.4-0.9% of 2026 GDP and 0.3
 **θ, investment's sensitivity to the real interest rate** (milestone 20b, `outputs/dsge_investment_response_20261020_0924.md`):
 - Philippine data on 2002-2026 do not identify it.
 - After a measured tightening, CPI falls but GDP and investment rise (the "output puzzle": the BSP tends to tighten on news of strong demand).
-- Until market-based policy surprises are available, θ comes from the matching above: 1.9 (PAMPh's transmission) to 3.3 (the project's DSGE); about 2 is used as the central value.
+- Until market-based policy surprises are available, θ comes from the matching above: 1.9 (PAMPh's transmission) to 3.3 (the project's DSGE); about 2 was the central value until 23 Oct 2026. **Since then the central value is 1.5, with 0.7 low and 2 high:** the capital DSGE with sticky wages, estimated with PSA's investment data (milestone 25, the best fit of every version), puts year-1 θ at 1.43, 90% band 0.72-2.23 (`research/dsge/README.md`, 23 Oct).
 
 **An interest rate in the CGE itself** (opt-in: `closure="interest"`): in long-run years a real interest rate can now clear savings and investment, as in the World Bank's MANAGE model (check IR1). The first research run on the 2026 scenarios' case is in `outputs/interest_closure_check_*`.
 
@@ -133,7 +133,7 @@ They are estimated with Dubai crude as an extra data series.
 3. **With price stickiness from the BSP's micro price data,** the oil supply shock is contractionary as expected. The micro data (WPS 2020-02) show prices changing about every 10 months, a quarterly Calvo of 0.73. For a shock the size of 2026's (+36% in logs):
    - **the BSP's estimated response** (+0.7 point on the policy rate in the first year) lowers headline inflation from about +3.8 to +2.7 points and core from +2.6 to +1.6;
    - **it costs about 0.16% of output in the first year and 0.18% in the second.**
-4. **Through the CGE,** that response adds about **0.1-0.7 million poor in 2026**. The answer depends almost entirely on how strongly investment responds to interest rates: +0.13 M at θ 0.55, **+0.45 M at θ 2**, +0.74 M at θ 3.3. In exchange, inflation is about a point lower.
+4. **Through the CGE,** that response adds about **0.15-0.45 million poor in 2026, about 0.3 million at the central θ** (0.34 M with the Calvo parameter at 0.73, 0.28 M at 0.85; 23 Oct 2026). The answer depends almost entirely on how strongly investment responds to interest rates (Calvo 0.73): +0.17 M at θ 0.7, **+0.34 M at θ 1.5**, +0.45 M at θ 2 (`outputs/qpm_cge_link_20261023_0859_*_thfix0.73.md`; before 23 Oct the range was θ 0.55-3.3: +0.13 M at 0.55, +0.74 M at 3.3). In exchange, inflation is about a point lower.
 
 **Status: indicative only.**
 - The micro-calibrated model fits the data about 16 log points worse than the estimated one.
@@ -148,7 +148,7 @@ So no DSGE oil number is ready for use yet. The 19 Oct figures (0.02-0.08% of ou
 
 ## 5c. Two checks made before any monetary number is cited (20 Oct 2026, evening)
 
-**1. The poverty figures already net the price benefit.** The question (20 Oct 2026, evening) was whether the "+0.1 to +0.75 million poor" from the BSP's oil response count only the output cost. They do not: the poor are counted from each FIES family's own basket inflation and its group's nominal income change (`infinity_gem.microlink.MicroLink.poverty`), so the lower prices the tightening brings are netted against the income it costs. `scenarios/bsp_oil_response_netting.py` separates the parts (`outputs/bsp_oil_response_netting_20261020_2213_*thfix0.73.md`, four chains pooled, and `_2204_*thfix0.85.md`, three chains pooled). At the central investment response (θ 2), 2026:
+**1. The poverty figures already net the price benefit.** The question (20 Oct 2026, evening) was whether the "+0.1 to +0.75 million poor" from the BSP's oil response count only the output cost. They do not: the poor are counted from each FIES family's own basket inflation and its group's nominal income change (`infinity_gem.microlink.MicroLink.poverty`), so the lower prices the tightening brings are netted against the income it costs. `scenarios/bsp_oil_response_netting.py` separates the parts (`outputs/bsp_oil_response_netting_20261020_2213_*thfix0.73.md`, four chains pooled, and `_2204_*thfix0.85.md`, three chains pooled). At θ 2 (the central value until 23 Oct 2026, now the high case), 2026:
 
 | | Calvo 0.73 | Calvo 0.85 |
 |---|---|---|
@@ -157,7 +157,7 @@ So no DSGE oil number is ready for use yet. The 19 Oct figures (0.02-0.08% of ou
 | prices only (nominal incomes held) | −0.68 M | −0.63 M |
 | consumer prices 2026 | −1.27% | −1.18% |
 
-The gross income loss alone would add about twice the published count; the lower prices alone would take out more than half of it. The peso channel (the DSGE's stronger peso) carries almost all of the price fall in 2027 but little of the poverty effect; the investment channel carries the poverty effect. The three counts do not add exactly because families cross the line one at a time. What is not in either model: any second-round benefit of better-anchored expectations.
+**At the central θ 1.5 (23 Oct 2026; `outputs/bsp_oil_response_netting_20261023_0903_*thfix0.73.md`, `_0910_*thfix0.85.md`):** the published count is +0.34 M (Calvo 0.73) and +0.28 M (Calvo 0.85); incomes only +0.96 M and +0.88 M; prices only −0.59 M and −0.56 M. At θ 0.7, the low case: +0.17 M and +0.15 M. The gross income loss alone would add about three times the published count; the lower prices alone take out about 60% of it. The peso channel (the DSGE's stronger peso) carries almost all of the price fall in 2027 but little of the poverty effect; the investment channel carries the poverty effect. The three counts do not add exactly because families cross the line one at a time. What is not in either model: any second-round benefit of better-anchored expectations.
 
 **2. The estimated rule against the BSP's actual 2026 decisions** (`research/dsge/rule_check_2026.py`; `outputs/dsge_rule_check_2026_20261020_2140_*thfix0.73.md`, `_2141_*thfix0.85.md`). The Kalman smoother reads the 2002-2026 data through the model and gives, quarter by quarter, the rate the rule prescribes and the policy "shock" the rule does not explain:
 - in the first half of 2026 the BSP's rate (4.33% and 4.58%, quarterly averages) sat about half a point below the rule's prescription (4.9-5.1%): policy shocks of −1.0 to −1.2 times their usual size, inside the sample's range (95th percentile 1.5; the largest, 2007Q3, −4.3);
@@ -170,16 +170,16 @@ So the rule is consistent with the BSP's 2026 behaviour in size and direction, w
 
 **What it is.** `DynamicCGE.monetary_scenario()`, or the setting `DynamicCGE(monetary={...})`, closes the loop the CGE link of section 5 leaves open: the CGE's own gaps of each year (output; inflation in the short-run years, where the peso is the numeraire; the peso's depreciation) feed a policy rule within the year, the rule's rate less expected inflation scales real investment demand by exp(−θ r/100), and the whole path is solved as a fixed point (a damped step, then a safeguarded secant step; tolerance 0.01 pp; four to seven iterations on the 2026 scenarios' case). Coefficients by name from `infinity_gem.monetary.rule`: "pamph" (the QPM's PAMPh match: smoothing 0.72, inflation 2.05, output 0.10), "dsge" (the candidate soe_htmu: 0.95, 1.34, 1.27 pp a year per % of output gap, depreciation 0.13), "oil0.85" and "oil0.73" (the oil model: 0.95, 1.40-1.52, 1.20-1.50, 0.14-0.16); nothing typed in. Suite check MP1. The design note's §6 records the four departures from the design (the rule acts within the year; the quarterly rule is integrated exactly over the year; expectations are an option, "adaptive" by default; the peso moves only by an imposed scale) and why.
 
-**What it gives on the four 2026 shocks** (`scenarios/monetary_check.py`; `outputs/monetary_check_20261020_2303_own.md`; Infinity GEM's own SAM, hoarding 0.85, θ 2, adaptive expectations):
+**What it gives on the four 2026 shocks** (`scenarios/monetary_check.py`; `outputs/monetary_check_20261023_0928_own.md`, 23 Oct 2026; Infinity GEM's own SAM, hoarding 0.85, **θ 1.5**, adaptive expectations):
 
-| | no rule (the 2026 scenarios) | oil0.85 rule | dsge rule | PAMPh-type rule |
-|---|---|---|---|---|
-| policy-rate gap 2026 / 2027 (pp) | 0 / 0 | −1.03 / −1.32 | −0.85 / −1.09 | −1.41 / −0.22 |
-| GDP 2026 / 2027 / 2030 (%) | −2.91 / −1.82 / −0.67 | −2.86 / −1.61 / −0.26 | −2.90 / −1.67 / −0.32 | −2.75 / −1.95 / −0.61 |
-| new poor 2026 / 2027 (M) | 3.41 / 1.79 | 3.38 / 1.56 | 3.43 / 1.60 | 3.33 / 1.98 |
-| 2025-2030 loss (₱ bn) | 2,618 | 2,201 | 2,297 | 2,514 |
+| | no rule (the 2026 scenarios) | oil0.85 rule | oil0.73 rule | dsge rule | PAMPh-type rule |
+|---|---|---|---|---|---|
+| policy-rate gap 2026 / 2027 (pp) | 0 / 0 | −1.04 / −1.34 | −0.90 / −1.11 | −0.86 / −1.10 | −1.44 / −0.11 |
+| GDP 2026 / 2027 / 2030 (%) | −2.91 / −1.82 / −0.67 | −2.87 / −1.66 / −0.36 | −2.90 / −1.70 / −0.41 | −2.90 / −1.70 / −0.41 | −2.80 / −1.93 / −0.63 |
+| new poor 2026 / 2027 (M) | 3.41 / 1.79 | 3.39 / 1.61 | 3.42 / 1.64 | 3.43 / 1.64 | 3.36 / 1.95 |
+| 2025-2030 loss (₱ bn) | 2,618 | 2,301 | 2,369 | 2,374 | 2,548 |
 
-θ 0.55 / 3.3 with the oil0.85 rule: loss ₱2,498 / ₱1,961 bn. "foresight" expectations: no convergence in 15 iterations (recorded, not used).
+With the oil0.85 rule, θ 0.7 / 2 give a loss of ₱2,466 / ₱2,201 bn. θ 2 reproduces the 20 Oct run exactly (`outputs/monetary_check_20261020_2303_own.md`, then the central case; there θ 0.55 / 3.3 gave ₱2,498 / ₱1,961 bn). "foresight" expectations: not solved at θ 1.5 either (in 2026 the employment cap did not settle; recorded, not used).
 
 **Reading.** In the CGE's own reading, the combined 2026 shocks are a demand slump with a LOWER price level in 2026 (consumer prices −1.05% in the 2026 scenarios' run: under the wage curve the public-works cut outweighs oil) and a large negative output gap, so a rule that reads the CGE's gaps cuts: 2026 barely changes, 2027-2030 are cushioned as investment recovers. A PAMPh-type rule, with little weight on output, cuts in 2026 and tightens in 2027, when the CGE's prices recover (inflation gap +0.6 to +1.2 pp), and makes 2027 worse. This is the opposite sign to the oil-only link of section 5b (+0.1 to +0.75 million poor from the BSP's tightening), and the difference is not an error: the DSGE sees the oil shock alone, with observed inflation dominating; the CGE sees all four shocks with the public-works cut dominating and its 2026 price level falling, against the 5.4% inflation actually observed in January-September 2026. So the closed loop's answer is governed by the CGE's short-run price response, which understates 2026 inflation (the sticky-price sensitivity is the related sensitivity). Until that is resolved, the oil-only link is the better guide to what the BSP's actual 2026 response cost, and neither number is for citation.
 

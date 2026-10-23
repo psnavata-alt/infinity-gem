@@ -13,4 +13,4 @@ var, svar  Time-series tools: OLS with Newey-West errors, VARs, structural VARs,
 
 Start with README.md and docs/STATUS.md. Research results only: nothing here is an official statement.
 """
-__version__ = "0.3.13.dev1"   # built from the development copy (23 Oct 2026); see CHANGELOG.md
+__version__ = "0.3.13.dev2"   # built from the development copy (23 Oct 2026); see CHANGELOG.md

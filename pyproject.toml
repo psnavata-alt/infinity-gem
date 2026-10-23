@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "infinity-gem"
-version = "0.3.13.dev1"
+version = "0.3.13.dev2"
 description = "Open-source general equilibrium models of the Philippine economy: SAM and input-output multipliers, a CGE model in the IFPRI standard tradition validated against IFPRI's GAMS code, a recursive-dynamic model, poverty microsimulation, time-series tools and research DSGE code"
 readme = "README.md"
 license = "MIT"

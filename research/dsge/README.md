@@ -9,3 +9,5 @@ Research code, not used by any default result of the CGE models. The guide is `d
 - `test_milestone*.py`, `test_smc.py`: the tests that check X3 of the validation suite runs (`test_milestone25b.py`, for the sticky-wage model, is run by hand: `python test_milestone25b.py` in this folder).
 
 Long estimation runs write their chains to `outputs/` (not part of the repository); the tests run without them.
+
+**The link's investment response (23 October 2026).** The money block (`DynamicCGE.monetary_scenario`) and the link scripts move real investment by theta percent per point of the real-interest-rate gap. The default is 1.5, with 0.7 and 2 as the low and high cases: the capital model with sticky wages (`soe_htmkw.py`, milestone 25), the best-fitting version, puts the year-1 response at 1.43 (90% band 0.72-2.23). The value used before, 2, came from matching the CGE to the quarterly projection model (1.9) and to an earlier DSGE (3.3).

@@ -1,6 +1,6 @@
 # Status of this repository
 
-**Version 0.3.13.dev1, built 23 October 2026. Research code, published for outside review.**
+**Version 0.3.13.dev2, built 23 October 2026. Research code, published for outside review.**
 
 Infinity GEM is an independent research project by Paolo Navata, developed in his own time. It is not an official publication of any government office or other institution, and nothing in it states the position of any institution. Results produced with this code are research results, for discussion: they are not forecasts and not official statistics. The code was written by the author with AI coding assistants, and it is checked by the validation suite (`checks/`), including comparisons with implementations written by people (IFPRI's GAMS code, pycge, statsmodels). The comments keep the dates and reasons of the development history (2025-2026 analyses of the Philippine economy).
 
@@ -60,7 +60,7 @@ Excel files that are included were cleaned of the metadata a document library ad
 
 ## The validation suite in a clean clone
 
-Run on 23 October 2026, 05:56 on a fresh `git clone` of this repository (552 files), Windows 11, Python 3.14.4, one processor core, without any of the files that are not distributed; 9 minutes.
+Run on 23 October 2026, 11:03 on a fresh `git clone` of this repository (552 files), Windows 11, Python 3.14.4, one processor core, without any of the files that are not distributed; 13 minutes.
 
 **62 of the 62 checks that could run passed**. 13 checks reported NOT RUN because they need files that are not distributed (the table above): P1, V1, A1, H2, H3, A2, V6, X1, ML1, S3, S6, ML2, PC1.
 

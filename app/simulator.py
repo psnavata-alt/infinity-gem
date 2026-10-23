@@ -707,7 +707,7 @@ elif engine == "Money and the BSP (research)":
                 "research DSGE, a small New Keynesian model of the Philippines estimated on 2002-2026 data (`research/dsge/`, guide 11), "
                 "supplies two things the CGE cannot: the BSP's policy rate and the inflation it reacts to. Its results are fed into the "
                 "CGE through investment's response to the real interest rate. **Everything below is research, not for citation:** the "
-                "candidate model rests on one estimation sample and the investment response is not identified by Philippine data.")
+                "candidate model rests on one estimation sample and Philippine data pin the investment response down only loosely.")
     srcs = []
     # 1. a 100 bp tightening
     f = _newest("dsge_rate_path_review_*.md")
@@ -753,21 +753,24 @@ elif engine == "Money and the BSP (research)":
             st.dataframe(tb[0], width="stretch")
         st.caption(f"Source: `{f.name}` (annual averages of the quarterly responses; 'rate held' = no response for four quarters).")
     rows = {}
-    for g in sorted(_OUT.glob("qpm_cge_link_*dsge_oil36*thfix*.md")):
+    # 23 Oct 2026: only the link's current low, central and high values (0.7, 1.5, 2: DSGE milestone 25), with the Calvo parameter
+    # at the BSP's micro-data value (thfix0.73), the case the text above describes; older runs (0.55, 3.3, thfix0.85) stay in outputs/
+    for g in sorted(_OUT.glob("qpm_cge_link_*dsge_oil36*thfix0.73.md")):
         mt = re.search(r"elastic([\d.]+)_", g.name)
         tb = _md_tables(g)
-        if mt and tb:
+        if mt and tb and float(mt.group(1)) in (0.7, 1.5, 2.0):
             rows[f"investment response {float(mt.group(1)):g}% per pp"] = {
                 "CGE GDP gap 2026 (%)": tb[0].loc["CGE GDP gap (%)", "2026"], "new poor 2026 (M)": tb[0].loc["CGE new poor (M)", "2026"],
                 "new poor 2027 (M)": tb[0].loc["CGE new poor (M)", "2027"], "file": g.name}
             srcs.append(g.name)
     if rows:
         st.markdown("**Through the CGE:** the cost of the BSP's oil response in new poor, for three values of investment's response to "
-                    "the real rate (the Philippine data cannot pin it down; the central value, 2% per point, is matched to the DSGE):")
+                    "the real rate (Philippine data pin it down only loosely; the central value, 1.5% per point since 23 October 2026, comes from "
+                    "the DSGE with sticky wages, which puts it at 1.43 with a 90% band of 0.72-2.23; 0.7 and 2 are the low and high cases):")
         st.dataframe(pd.DataFrame(rows).T.sort_index(), width="stretch")
     # 4-6 (20 Oct 2026, evening): the two checks asked for before any monetary number is cited, and the closed loop
     st.subheader("3. What the poverty figures include: the price benefit is netted")
-    f = _newest("bsp_oil_response_netting_*.md")
+    f = _newest("bsp_oil_response_netting_*thfix0.73.md")
     if f is None:
         st.caption("No saved decomposition (scenarios/bsp_oil_response_netting.py) found in outputs/.")
     else:
@@ -776,11 +779,12 @@ elif engine == "Money and the BSP (research)":
         st.markdown("The poor are counted from each family's own basket prices and its group's nominal income, so the figures above "
                     "already net the lower prices the BSP's tightening brings against the income it costs. The table separates the two: "
                     "'incomes only' holds every family's prices at the baseline, 'prices only' holds nominal incomes; columns are the "
-                    "investment response (0.55, 2, 3.3) and the channel (both, investment only, peso only).")
+                    "investment response (0.7, 1.5, 2) and the channel (both, investment only, peso only).")
         if len(tb) > 1:
             st.dataframe(tb[1], width="stretch")
-        st.caption(f"Source: `{f.name}`. At the central investment response the gross income loss alone would add about twice the "
-                   "published count and the lower prices alone would take out more than half of it; the published figure is the net.")
+        st.caption(f"Source: `{f.name}`. At the central investment response (1.5) the income loss alone would add nearly three "
+                   "times the published count, and the lower prices alone take out about 60% of that loss; the published figure is "
+                   "the net (23 Oct 2026 run: +0.96 M, -0.59 M, net +0.34 M in 2026).")
     st.subheader("4. The estimated rule against the BSP's actual 2026 decisions")
     f = _newest("dsge_rule_check_2026_*.md")
     if f is None:

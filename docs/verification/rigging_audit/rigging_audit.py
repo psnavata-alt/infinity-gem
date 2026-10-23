@@ -65,6 +65,9 @@ DECLARED_INPUTS = {
     100.0: "a round test input: check VN1's release elasticity e = 100 (large enough for the vintage model to reproduce mobile "
            "capital; 0.3.12, 20 Oct 2026); in model and scenario code 100.0 is the percent scale (x / 100.0, 100.0 * x) "
            "(added 20 Oct 2026, evening)",
+    10.5: "the wage curve's slope beta, rounded: its central calibration on Infinity GEM's own SAM is 10.513 (outputs/"
+          "wage_curve_calibration_20261018_own.csv, row 'central (e)'; scenarios/calibrate_wage_curve.py); an INPUT of check "
+          "CS1 and a column label ('beta 10.5') in scenario scripts (added 23 Oct 2026)",
 }
 # Matches read by a person (9 Oct 2026; re-read whenever they change): {(file, number): note}.
 REVIEWED = {
@@ -74,6 +77,10 @@ REVIEWED = {
     ("app/simulator.py", 835400.0): "help text quoting an earlier published figure, as an example to compare",
     ("scenarios/four_shock_scenario.py", 0.06): "a coefficient of an earlier VAR estimate used as an INPUT; check V1 re-estimates "
                                                "it from the data with infinity_gem/var.py",
+    ("scenarios/markup_pricing_2026_test.py", 2.16): "the upper end of a VAR band quoted as a data target ('+1.63 (1.06 "
+                                                "to 2.16)', oil and energy's contribution to 2026 inflation, January-"
+                                                "September); it matches check M1's 2.162, a SAM household-income "
+                                                "multiplier, by coincidence (read 23 Oct 2026)",
 }
 
 

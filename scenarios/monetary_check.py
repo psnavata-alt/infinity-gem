@@ -9,8 +9,9 @@ cumulative loss, and the rule's own path (inflation gap, output gap, policy rate
 iterations). The policies common to every run (the rice tariff, the 2027 aid cut) are in the no-shock path as in the 2026 scenarios.
 Run (Git Bash, repository root):
   export INFINITY_GEM_SCENARIO_SAM=own
-  py scenarios/monetary_check.py [rules=oil0.85,oil0.73,dsge,pamph] [thetas=2] [h=0.85] [expectations=adaptive]
-                                 [extra=oil0.85:0.55,oil0.85:3.3,oil0.85:2:foresight] [tol=0.01] [max_iter=15]
+  py scenarios/monetary_check.py [rules=oil0.85,oil0.73,dsge,pamph] [thetas=1.5] [h=0.85] [expectations=adaptive]
+                                 [extra=oil0.85:0.7,oil0.85:2,oil0.85:1.5:foresight] [tol=0.01] [max_iter=15]
+  (23 Oct 2026: defaults moved to the link's new central, theta 1.5, with 0.7 low and 2 high: DSGE milestone 25, the decision. The 20 Oct 2026 run: thetas=2 extra=oil0.85:0.55,oil0.85:3.3,oil0.85:2:foresight.)
 Output: outputs/monetary_check_<stamp><tag>.md
 
 21 Oct 2026, about 12:45 AM (the CGE's 2026 price response, the reason the closed loop cuts): engine
@@ -159,14 +160,14 @@ def run_observed(beta, h, rule, theta, gaps, engine=None, tol=0.01, max_iter=12,
 
 def main():
     rules = [r for r in arg("rules", "oil0.85,oil0.73,dsge,pamph").split(",") if r]
-    thetas = [float(x) for x in arg("thetas", "2").split(",")]
+    thetas = [float(x) for x in arg("thetas", "1.5").split(",")]
     h = float(arg("h", "0.85"))
     exp0 = arg("expectations", "adaptive")
     cases = [(r, th, exp0) for r in rules for th in thetas]
-    for e in [x for x in arg("extra", "oil0.85:0.55,oil0.85:3.3,oil0.85:2:foresight").split(",") if x]:
+    for e in [x for x in arg("extra", "oil0.85:0.7,oil0.85:2,oil0.85:1.5:foresight").split(",") if x]:
         p = e.split(":")
         cases.append((p[0], float(p[1]), p[2] if len(p) > 2 else exp0))
-    tol = float(arg("tol", "0.01"))                   # pp: a 0.01 pp rate difference moves investment by 0.02% at theta 2
+    tol = float(arg("tol", "0.01"))                   # pp: a 0.01 pp rate difference moves investment by 0.015% at theta 1.5
     max_iter = int(arg("max_iter", "12"))
     sticky, energy, observed, tag = arg("sticky", "none"), arg("energy", "none"), arg("observed", "none"), arg("tag", "")
     if arg("only_observed", "0") == "1":             # observed=...: skip the rule cases (already on file) and run only the observed ones

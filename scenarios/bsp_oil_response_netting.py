@@ -13,7 +13,8 @@ PCI x nominal spending change / (1 + family inflation)). So the published count 
   nonlinear (families cross the line), so the table shows all three.
 Run (Git Bash, repository root):
   export INFINITY_GEM_SCENARIO_SAM=own
-  py scenarios/bsp_oil_response_netting.py model=oilw theta_fix=0.73 spec=_long_stl_thfix0.73 oil=36 h=0.85 thetas=0.55,2,3.3
+  py scenarios/bsp_oil_response_netting.py model=oilw theta_fix=0.73 spec=_long_stl_thfix0.73 oil=36 h=0.85 thetas=0.7,1.5,2
+(23 Oct 2026: the default thetas follow the link's new central, 1.5, with 0.7 low and 2 high (DSGE milestone 25, the decision); the 20 Oct 2026 runs used thetas=0.55,2,3.3.)
 (model=, theta_fix= and spec= as for qpm_cge_link.py source=dsge_oil; they select the DSGE chains. Output:
 outputs/bsp_oil_response_netting_<stamp><tag>_oil<oil><spec>.md.)
 """
@@ -60,7 +61,7 @@ def main():
     oil = QL.arg("oil", 36.0)
     spec = QL.arg("spec", "", str)
     h = QL.arg("h", 0.85)
-    thetas = [float(x) for x in QL.arg("thetas", "0.55,2,3.3", str).split(",")]
+    thetas = [float(x) for x in QL.arg("thetas", "0.7,1.5,2", str).split(",")]
     tgt, src = QL.dsge_oil_annual(oil, spec)                         # the BSP's response: rule minus held, by year
     beta = float(pd.read_csv(_common.calibration_file(), index_col=0).loc["central (e)", "beta"])
     R = CR.Runs("low", wage_curve=beta, **({"hoarding": h} if h else {}))

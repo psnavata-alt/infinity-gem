@@ -271,7 +271,7 @@ DEFAULT_ASSUMPTIONS = dict(
     interest=None,                # 0.3.11: with closure="interest" (long-run years), CGE 'interest'
                                   # {'theta': ..., 'eps': ...}: a real interest rate clears savings and investment; None = as before
     monetary=None,                # 0.3.12: a BSP policy rule inside the dynamic model: the keyword arguments of
-                                  # monetary_scenario() as a dict, e.g. {"rule": infinity_gem.monetary.rule("pamph"), "theta": 2.0};
+                                  # monetary_scenario() as a dict, e.g. {"rule": infinity_gem.monetary.rule("pamph"), "theta": 1.5};
                                   # scenario() then solves every path with the rule. None = no rule (default, results unchanged)
     sr_consumption=None,          # 0.3.13 (22 Oct 2026, a design note (not included)): in the
                                   # hybrid's short-run years {"htm": lam}, 0 <= lam <= 1: household spending = lam x (1 - baseline
@@ -1173,7 +1173,7 @@ class DynamicCGE:
         i_avg = target + (i_end_prev - target) * (rho * (1 - rho ** 4) / (4 * (1 - rho)))
         return i_avg, i_end
 
-    def monetary_scenario(self, shocks: dict, rule: dict = None, theta: float = 2.0, fx_per_pp: float = 0.0,
+    def monetary_scenario(self, shocks: dict, rule: dict = None, theta: float = 1.5, fx_per_pp: float = 0.0,
                           expectations: str = "adaptive", path: dict = None, years=None, tol: float = 0.01,
                           max_iter: int = 15, accelerate: bool = True, relax: float = 0.5) -> Path:
         """The money block (0.3.12, 20 Oct 2026): the path with a BSP policy rule inside the model, solved as a fixed point over the
@@ -1183,7 +1183,9 @@ class DynamicCGE:
           gap of year t follows annual_rule() from the gaps of year t itself (monetary_gaps), so the rule acts within the year.
           infinity_gem.monetary.rule(name) gives PAMPh's and the project's estimated coefficients.
         - theta: real investment demand is scaled by exp(-theta x real-rate gap / 100) in every year the rule acts (the CGE link's
-          channel, scenarios/qpm_cge_link.py; theta is not identified by Philippine data, 1.9-3.3 matched, 2 central). The
+          channel, scenarios/qpm_cge_link.py; Philippine data alone do not pin theta down. 23 Oct 2026, the decision on DSGE
+          milestone 25 (sticky wages: investment's response 1.43, 90% band 0.72-2.23): 1.5 central, 0.7 low, 2 high; until then
+          2 central, 1.9-3.3 matched). The
           real-rate gap is the policy-rate gap less the expected inflation gap: expectations="adaptive" (default) = last year's
           inflation gap (backward-looking, as the hand-to-mouth candidate's households), "current" = the same year's (an ex post
           real rate), "foresight" = next year's gap of the path (model-consistent, as in the DSGE; zero after the last year).
@@ -1201,7 +1203,7 @@ class DynamicCGE:
           map can diverge in the 2026 scenarios' setting, where the years are coupled through expectations), replaced after two iterations by
           a secant step on the residual, year by year, where the last two paths differ by at least ten times tol (the slope is
           clipped to [-0.9, 0.5]; near the solver's noise floor the secant would amplify noise). Convergence = the largest change
-          between the rate the rule gives and the rate the path was run with is below tol (0.01 pp: at theta 2 that is 0.02% of
+          between the rate the rule gives and the rate the path was run with is below tol (0.01 pp: at theta 1.5 that is 0.015% of
           investment, below the model's own solve noise); the result does not depend on the step scheme.
         Returns a Path whose .monetary table carries the gaps, the policy-rate gap, expected inflation, the real-rate gap and
         the scales applied, with attrs 'iterations', 'converged' and 'deltas' (the largest change of the rate path, pp, by

@@ -2,6 +2,12 @@
 
 The public repository continues the version numbers of the code base it was built from, so the version notes in the code ("added in 0.3.7") stay meaningful. Every upgrade after 0.2 is opt-in: with default settings the model reproduces the 0.2 results exactly (check R0).
 
+## 0.3.13.dev2 (23 October 2026)
+
+- **The DSGE-CGE link's investment response is now 1.5 by default** (the percent fall in real investment per point of real-interest-rate gap; it was 2): `DynamicCGE.monetary_scenario(theta=1.5)`, and the defaults of `scenarios/qpm_cge_link.py` (`mode=elastic`, theta 1.5), `scenarios/bsp_oil_response_netting.py` (thetas 0.7, 1.5 and 2) and `scenarios/monetary_check.py` (theta 1.5; extra cases 0.7, 2, and 1.5 under foresight). The basis is DSGE milestone 25: the capital model with sticky wages, the best-fitting version, puts the year-1 response at 1.43 (90% band 0.72-2.23); 0.7 and 2 are the low and high cases. The Simulator's research page reads only those three runs. Default results do not change (check R0): the money block is opt-in.
+- The rigging audit (`docs/verification/rigging_audit/rigging_audit.py`) declares 10.5, the wage curve's central beta rounded, as an input, and records one coincidental match as reviewed.
+- The validation suite has 75 checks.
+
 ## 0.3.13.dev1 (23 October 2026)
 
 - **A short-run consumption rule** (opt-in; check CS1): `DynamicCGE(sr_consumption={"htm": lam})`, with lam between 0 and 1. In the hybrid closure's short-run years, the share lam of household spending follows disposable income at the baseline saving rates (hand-to-mouth households) and the rest keeps its baseline real value (households that smooth their consumption). The rule is met by the year's saving-rate adjustment, one factor for every household, solved together with the wage curve and re-solved whenever the employment cap changes regime. With the option off (the default) or lam = 1 the results are unchanged. `scenarios/consumption_rule_2026.py` applies it to the central 2026 case.

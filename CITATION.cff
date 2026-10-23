@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below (with the version and the settings you used), together with Lofgren, Harris and Robinson (2002) and the IFPRI SAM you use."
 title: "Infinity GEM: open-source general equilibrium models of the Philippine economy"
-version: 0.3.13.dev1
+version: 0.3.13.dev2
 license: MIT
 type: software
 authors:
