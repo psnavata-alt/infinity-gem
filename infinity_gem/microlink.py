@@ -84,7 +84,8 @@ CATEGORY_MAP = {
     "CLOTH": ["ctext", "ccott"],                                   # ccott: fibres (0.3.9, Infinity GEM SAM)
     "RENT": ["creal"],
     "UTILITIES": ["celec", "cwatr", "cchem", "cpetr", "ccons", "cfore",    # electricity, water, LPG/kerosene, repairs, firewood
-                  "cnmet", "cmetl", "cmine"],                     # repair materials, coal (0.3.9: households buy them in PSA's I-O)
+                  "cnmet", "cmetl", "cmine", "ccoal"],            # repair materials, coal (0.3.9: households buy them in PSA's I-O;
+                                                                  # ccoal: Infinity GEM SAM v0.7 only, coal split from mining, 24 Oct 2026)
     "FURNISHING": ["coman", "cwood", "ctext", "cmach", "cchem", "cosrv", "cnmet", "cmetl"],   # + glassware, utensils (0.3.9)
     "HEALTH": ["cheal", "cchem"],
     "TRANSPORT": ["ctran", "cchem", "cpetr", "cmach"],             # fares, fuel, vehicles

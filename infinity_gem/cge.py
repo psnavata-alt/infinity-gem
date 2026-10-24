@@ -92,7 +92,7 @@ class CGE:
     def __init__(self, sam: SAM, elasticities=None, closure="investment", unemployed=(), capital="mobile", les=None,
                  margins="composite", home="market", gov="real", inv="fixed", wage="real", land="mobile",
                  fx="fixed", pricing="flex", sticky_acts=None, hoarding=0.0, energy_nest=None, interest=None, vintage=None,
-                 markup_acts=None):
+                 markup_acts=None, labour_cap=False):
         """closure: 'investment' (real investment fixed, saving rates adjust), 'savings' (saving rates
         fixed, investment adjusts) or 'keynesian' (short-run, demand-driven: investment AND saving rates
         fixed; the exchange rate is fixed and serves as numeraire; foreign savings (the current account)
@@ -146,6 +146,26 @@ class CGE:
         import bill. 'flexible': foreign savings stay at the level of the shock key 'fsav_scale' and the exchange rate adjusts
         (a balance-of-payments constraint); needs wage='nominal' and at least one `unemployed` labour type, whose peso wage is
         then the nominal anchor.
+        Incomplete pass-through of the peso to import prices (0.3.13, 23 Oct 2026, P2(b) of docs/design/MARKUP_DEMAND_SIDE_
+        PROPOSAL_22Oct2026.md, opt-in; the Keynesian closure with the fixed peso only): the shock keys 'erpt' (phi: one share, or
+        {commodity: share}, commodities not listed 1) and 'exr_ref' (the peso at which foreign suppliers anchor their peso prices;
+        default 1, the benchmark's) set the import price PM = pwm x exr_ref x (EXR / exr_ref) ** phi x (1 + tm): the foreign
+        supplier absorbs the share 1 - phi of a move of the peso within the period (pricing to market), so its US$ price, pwm x
+        (EXR / exr_ref) ** (phi - 1), is what the current account pays. Re-exports keep the world price (they are not sold here).
+        The key left out (or phi = 1) is the model as before. BSP DP 2025-16 (Parmanand, Platitas, Castanares and Dacio, Dec 2025,
+        Table 5): pass-through of a depreciation to inflation 0.10 in the short run, 0.75 in the long run. Check ER1.
+        A within-year share of the world price reaching domestic import prices (0.3.13, 23 Oct 2026, opt-in; next step 1 in a review note (not included); the Keynesian closure only): the shock keys 'oil_pass'
+        (omega: one share, or {commodity: share}, commodities not listed 1) and 'oil_ref' (R: the reference world price in pesos,
+        pwm x EXR at the reference; one number or {commodity: value}; default 1, the benchmark's) set the domestic peso price of those
+        imports, before the tariff, to R x (pwm x EXR / R) ** omega, and PM = that x (1 + tm) (plus the margin with 'split'): within the
+        period only the share omega of a move of the world price in pesos (a world price or a peso change) reaches buyers at home.
+        The country still pays the world price (the current account pays pwm), so the government absorbs the rest at the border:
+        MTAX = tm x (domestic price) x QM - (pwm x EXR - domestic price) x QM, a subsidy when the world price is above R and a levy
+        when it is below (reported: 'OILSUB' by commodity, 'PM_dom'). It stands for what keeps retail fuel prices from rising in
+        proportion to world fuel prices within the year, mainly the excise, a fixed peso amount per litre (the model's sales tax is
+        ad valorem, so the revenue it books rises with the price where the excise's does not), and lags in retail prices; it is
+        calibrated to PSA's retail fuel CPI against world fuel prices in pesos in 2022 and 2026 (scenarios/row83_oil_passthrough.py).
+        A share of 1, or the keys left out, is the model as before; a commodity may not carry both 'erpt' and 'oil_pass'. Check OP1.
         pricing: how activity prices are set in the Keynesian closure (0.3.8, review D2). 'flex' (default, as before): zero
         profit, so prices follow full unit cost, including the rents of fixed capital, which fall when demand falls. 'sticky':
         prices of the activities in `sticky_acts` (a list of activity codes; required) are rigid downward: a rise in unit cost
@@ -181,7 +201,13 @@ class CGE:
         (lam; default 1) charges the markup on only the share lam of a cost change: home unit revenue = AVC + mu x (lam x AVC +
         (1 - lam) x A / (1 + mu)), A the anchor; lam = 0 keeps the margin per unit fixed in pesos, so the cost push is the plain
         input-output price model's (check I1's formula on the SAM), as regulated prices pass fuel on (ERC's generation charge,
-        LTFRB fares); both are homogeneous, the margin being tied to the anchor. The other activities keep
+        LTFRB fares); both are homogeneous, the margin being tied to the anchor. A pass-through that depends on the output gap
+        (0.3.13, 23 Oct 2026, P6 of a design note (not included); shock keys 'mk_gap' = s and 'mk_gdp'
+        = Y_ref): the margin per unit is mu x (A / (1 + mu) + lam_e x (AVC - A / (1 + mu))) with lam_e = lam + s x g, g = 100 x
+        (Y / Y_ref - 1) the output gap in percent, Y real GDP at benchmark prices (as gdp()) and Y_ref its reference (default the
+        benchmark's). With s > 0 margins absorb more of a cost rise in a slump and pass more of it on in a boom (state-dependent
+        pass-through); with costs at the reference the margin is the reference margin whatever the gap. s = 0 (default) is the
+        rule above exactly. Check MG1. The other activities keep
         zero-profit prices ('flex'). Downward stickiness stays available on top (shock keys 'stickiness' and 'pa_anchor', as for
         'sticky'): for the activities in `sticky_acts` (default: the markup activities) only the share (1 - stickiness) of a fall
         of the markup price (1 + mu) x AVC below the anchor is passed on; stickiness 0 (default) = pure markup. Markup activities
@@ -197,7 +223,20 @@ class CGE:
         (supply - productive employment; 19 Oct 2026: no idle workers at full employment). Employment
         (EMP, the labour markets and the wage curve's slack) and labour income include QFH; its wage bill is paid out of capital
         income (lower profits), so value added, GDP and every account are unchanged in total. Evidence (PSA, 2026): real GVA in
-        construction −9.5% y/y in H1 while LFS construction jobs fell 0.8% and mean hours 0.17%."""
+        construction −9.5% y/y in H1 while LFS construction jobs fell 0.8% and mean hours 0.17%.
+        labour_cap: the employment cap as one smooth complementarity condition (0.3.13, 23 Oct 2026, opt-in; step 2 of a design note (not included), section 3; the Keynesian closure with the fixed peso only). False (default)
+        = as before: employment of the `unemployed` (fixed-wage) labour types follows demand without a ceiling (the dynamic model's
+        employment cap, if any, switches a type to market clearing between solves). True: each fixed-wage type k gets a wage premium
+        LP_k (unknown, slice 'LCAP') with W_k = wbar_k x (CPI if wage='real' else 1) x (1 + LP_k), and the complementarity
+            E_k <= S_k,  LP_k >= 0,  (S_k - E_k) x LP_k = 0,
+        E_k its PRODUCTIVE employment (labour demand QF summed over activities), S_k = QFS0_k x qfs_scale_k its cap (the labour
+        supply), written as the Fischer-Burmeister residual a + b - sqrt(a^2 + b^2 + 2e-20) with a = (S_k - E_k) / QFS0_k and
+        b = LP_k (smoothed as capital='vintage', check VN1). Paid hoarding (hoarding > 0) is bounded by the slack S_k - E_k, so
+        employment with hoarded labour (EMP) stays at most S_k and a type at its cap hoards nothing, as the switching rule had it (a
+        capped type there clears its market and does not hoard; a cap on EMP itself would leave hoarding free to fill any gap at
+        the cap, a continuum of solutions). Below the cap LP_k = 0 to about 1e-18 (the model as before); at the cap the wage rises
+        above its anchor and employment equals S_k, the market-clearing regime, with no switching between models. Reported:
+        'LPREM' (by factor; 0 for the others). Check EC1."""
         if not 0.0 <= hoarding < 1.0:
             raise ValueError("hoarding must be in [0, 1)")
         if hoarding > 0 and closure != "keynesian":
@@ -254,6 +293,11 @@ class CGE:
                 raise ValueError("closure='interest' needs interest={'theta': >= 0, 'eps': >= 0}, not both 0")
         self.interest = {"theta": float((interest or {}).get("theta", 0.0)), "eps": float((interest or {}).get("eps", 0.0))}
         self.unemployed = list(unemployed)
+        if labour_cap and (closure != "keynesian" or not unemployed):     # 0.3.13 (check EC1)
+            raise ValueError("labour_cap is an option of the Keynesian (short-run) closure with fixed-wage ('unemployed') labour types")
+        if labour_cap and fx == "flexible":
+            raise ValueError("labour_cap needs fx='fixed': with every fixed-wage type at its cap no peso wage would anchor prices")
+        self.labour_cap = bool(labour_cap)
         if capital not in ("mobile", "fixed", "vintage"):
             raise ValueError("capital must be 'mobile', 'fixed' or 'vintage'")
         self.capital = capital
@@ -511,6 +555,10 @@ class CGE:
             vc = self.QF0[self.mk_lab].sum(axis=0) + self.ica.sum(axis=0) * self.QA0
             self.mu0 = np.where(self.isMK & (vc > 0), self.QF0[kc_] / np.where(vc > 0, vc, 1.0), 0.0)
             self.hasK = self.QF0[kc_] > 0
+            # 0.3.13 (P6): real GDP at the benchmark (as gdp(): household, government, investment and stocks, exports less
+            # imports, at benchmark prices 1), the default reference of 'mk_gdp'
+            self.real_gdp0 = float(t.loc[C, H].values.sum() + self.qg.sum() + self.qinv.sum() + self.qdst.sum() + self.QE0.sum()
+                                   - self.QM0.sum())
             self.iMK = np.where(self.isMK)[0]
             self.iMKK = np.where(self.isMK & self.hasK)[0]                     # markup activities with installed capital
 
@@ -536,7 +584,8 @@ class CGE:
                  ("RK", len(self.iK)), ("RL", len(self.iL)),
                  ("NK", len(self.iK) if self.capital == "vintage" else 0), ("RN", 1 if self.capital == "vintage" else 0),   # 0.3.12
                  ("EXR", 1), ("CLOS", 0 if self.closure == "keynesian" else 1),
-                 ("GADJ", 1 if self.gov == "cd" else 0), ("WALRAS", 1)]
+                 ("GADJ", 1 if self.gov == "cd" else 0), ("WALRAS", 1),
+                 ("LCAP", len(self.iU) if getattr(self, "labour_cap", False) else 0)]   # 0.3.13: wage premia at the cap
         self.slices, pos = {}, 0
         for k, n in sizes:
             self.slices[k] = slice(pos, pos + n)
@@ -595,7 +644,16 @@ class CGE:
         pwe = self.pwe * sh["pwe_scale"]
         tm = self.tm * sh["tm_scale"]
         tq = self.tq * sh["tq_scale"]
+        pwm_x = pwm                             # 0.3.13 (P2(b)): the world price, paid for re-exports in any case
+        if sh["erpt"] is not None:              # incomplete pass-through: the suppliers' US$ price of imports sold here (check ER1)
+            pwm = self._ptm(pwm, EXR, sh)
         PM = pwm * EXR * (1 + tm)
+        oil_on = sh["oil_pass"] is not None     # 0.3.13 (check OP1): only the share omega of a move of the world price in
+        if oil_on:                              # pesos reaches the domestic price of the listed imports within the period; the government
+            WOIL = pwm * EXR                    # absorbs the rest at the border (MTAX below)
+            lst = sh["oil_pass"] != 1.0
+            PMd = np.where(lst, self._oil_dom(WOIL, sh), WOIL)
+            PM = np.where(lst, PMd * (1 + tm), PM)
         PE = pwe * EXR
         # 0.3: input-intensity TWIST. A commodity's coefficient is scaled for every user and all other
         # intermediate inputs are scaled the other way, so total intermediate input per unit of output (at benchmark
@@ -621,6 +679,9 @@ class CGE:
         CPI = float(self.cwts @ PQ)
         for k in self.iU:                       # fixed wage: indexed to the CPI ('real') or fixed in pesos ('nominal')
             WF[k] = sh["wbar"][k] * (CPI if self.wage == "real" else 1.0)
+        if self.labour_cap:                     # 0.3.13 (labour_cap): at its cap a fixed-wage type is paid its anchor x (1 + LP)
+            LP = g("LCAP")
+            WF[self.iU] = WF[self.iU] * (1.0 + LP)
 
         # ---- supply side: CET split of domestic output
         QX = self.theta.T @ QA
@@ -726,7 +787,8 @@ class CGE:
             mk, st, A_ = self.isMK, self.isST, sh["pa_anchor"]
             URD = np.where(mk, PDS[self.mk_com] * (1 - ta), UNITREV)   # unit revenue at home (markup acts), or of all output (others)
             mu_, lam = sh["markup"], sh["mk_pass"]              # the price the rule sets: markup price, or zero-profit cost (others)
-            CM = np.where(mk, AVC + mu_ * (lam * AVC + (1 - lam) * A_ / (1 + mu_)), UCOST)   # mk_pass 1: (1 + mu) x AVC
+            MG = mu_ * (lam * AVC + (1 - lam) * A_ / (1 + mu_))  # the margin per unit (0.3.13, P6: kept for the gap rule below)
+            CM = np.where(mk, AVC + MG, UCOST)                  # mk_pass 1: (1 + mu) x AVC
             z = (A_ - CM) / A_
             eps = 1e-4                                          # C1 smoothing of max(0, z) near 0, as for 'sticky'
             fz = np.where(z <= 0, 0.0, np.where(z < eps, z * z / (2 * eps), z - eps / 2))
@@ -831,10 +893,21 @@ class CGE:
             QM = um * QQ
             QDd = ud * QQ
         PQcalc = (1 + tq) * (PARM + icq * PTRC)
+        if self.pricing == "markup" and sh["mk_gap"] != 0.0:   # 0.3.13 (P6, check MG1): the pass-through lam + s x output gap (%)
+            YR = float(QH.sum() + QHA.sum() + QG.sum() + (QINV + self.qdst).sum() + QE.sum() - QM.sum())   # real GDP, as gdp()
+            lam_e = lam + sh["mk_gap"] * self._output_gap(YR, sh)
+            MG = mu_ * (lam_e * AVC + (1 - lam_e) * A_ / (1 + mu_))
+            CM = np.where(mk, AVC + MG, UCOST)
+            z = (A_ - CM) / A_
+            fz = np.where(z <= 0, 0.0, np.where(z < 1e-4, z * z / (2 * 1e-4), z - 1e-4 / 2))   # as above (eps 1e-4)
+            ZP = URD - (CM + np.where(st, sh["stickiness"] * A_ * fz, 0.0))
 
         # ---- government
         ATAX = ta * PA * QA
         MTAX = tm * pwm * EXR * QM
+        if oil_on:                              # 0.3.13 (check OP1): the tariff on the domestic price less what the government absorbs,
+            OILSUB = np.where(lst, (WOIL - PMd) * QM, 0.0)     # (pwm x EXR - domestic price) x QM: a subsidy above the reference
+            MTAX = np.where(lst, tm * PMd * QM - OILSUB, MTAX)
         STAX = tq * (PARM + icq * PTRC) * QQ
         YG = (self.te * YE + (tins * YH).sum() + (self.tf * YF).sum() + MTAX.sum() + STAX.sum() + ATAX.sum()
               + self.sheg * YE + (self.tgh * YH).sum() + self.grow_in * EXR)
@@ -875,7 +948,8 @@ class CGE:
         if self.land == "fixed":
             kl, il = self.klnd, self.iL
             res.append((QF[kl, il] - self.QF0[kl, il] * sh["lscale"][il] * sh["qfs_scale"][kl]) / self.QF0[kl, il])
-        fcu_out = (pwm * (QM + self.rex)).sum() + self.frow_out.sum() + self.erow_out + self.hrow_out.sum() + self.grow_out \
+        imp_fcu = (pwm * (QM + self.rex)).sum() if sh["erpt"] is None else (pwm * QM + pwm_x * self.rex).sum()   # 0.3.13 (P2(b))
+        fcu_out = imp_fcu + self.frow_out.sum() + self.erow_out + self.hrow_out.sum() + self.grow_out \
             + sh["grow_out_add"]
         fcu_in = (pwe * (QE + self.rex)).sum() + frow_in.sum() + self.erow_in + hrow_in.sum() + self.grow_in + self.fsav * FSAVS
         res.append(np.array([(fcu_out - fcu_in) / self.QM0.sum()]))        # current account
@@ -886,6 +960,10 @@ class CGE:
             res.append(np.array([CPI - sh["cpi"]]))                        # numeraire (the fixed exchange rate is the numeraire otherwise)
         if self.gov == "cd":
             res.append(np.array([(GEXP - (1 - self.ssg) * YG) / self.qg.sum()]))   # government spends revenue net of saving
+        if self.labour_cap:                     # 0.3.13 (labour_cap, check EC1): E <= S, LP >= 0, (S - E) LP = 0, Fischer-Burmeister
+            ku = self.iU                        # (smoothed 1e-10, as capital='vintage'); E = productive employment: hoarding is bounded
+            a_ = (self.QFS0[ku] * sh["qfs_scale"][ku] - QF.sum(axis=1)[ku]) / self.QFS0[ku]   # by the slack, so none at the cap
+            res.append(a_ + LP - np.sqrt(a_ * a_ + LP * LP + 2e-20))
         R = np.concatenate(res)
 
         V = dict(W=W, EMP=(QF + QFH).sum(axis=1), QFH=QFH, pwm=pwm, pwe=pwe, QA=QA, QX=QX, QE=QE, QD=QDd, QM=QM, QQ=QQ, QF=QF, QVA=QVA, QINT=QINT, QH=QH, QHA=QHA, QG=QG,
@@ -896,6 +974,15 @@ class CGE:
                  WALRAS=WALRAS, fcu_out=fcu_out, fcu_in=fcu_in, FSAV=self.fsav * FSAVS, UNITREV=UNITREV)
         if self.capital == "vintage":
             V["NK"], V["RN"] = NK_v, RN_v
+        if self.labour_cap:                      # 0.3.13: the wage premium over the anchor, by factor (0 below the cap)
+            V["LPREM"] = np.zeros(len(self.F))
+            V["LPREM"][self.iU] = LP
+        if sh["erpt"] is not None:               # 0.3.13 (P2(b)): 'pwm' = the US$ unit value of imports sold here and re-exports,
+            qr = QM + self.rex                   # so gdp() and rebuild_sam() value both at what the current account pays; 'pwm_home':
+            V["pwm"] = np.where(qr > 0, (pwm * QM + pwm_x * self.rex) / np.where(qr > 0, qr, 1.0), pwm)   # the suppliers' price
+            V["pwm_home"] = pwm                  # of imports sold here
+        if oil_on:                               # 0.3.13 (check OP1): the government's absorption by commodity (pesos) and the domestic
+            V["OILSUB"], V["PM_dom"] = OILSUB, PMd   # peso price of imports before the tariff (the world price where omega is 1)
         if self.pricing == "markup":             # 0.3.13: unit variable cost, utilisation, markups; PVA of markup activities =
             V["AVC"], V["UTIL"], V["MU"] = AVC, UTIL, np.asarray(sh["markup"], float)   # factor payments per unit of value added
             V["PVA"] = np.where(self.isMK, (W * QF).sum(axis=0) / _pos(QVA), PVA)
@@ -913,7 +1000,10 @@ class CGE:
                     sav_add=0.0, grow_out_add=0.0, pa_anchor=1 - self.ta, stickiness=0.0, hoard_ref=None, en_shares=None,
                     knew=0.0,                                   # 0.3.12: new capital, share of the stock
                     markup=self.mu0.copy(), mk_coef=None, mk_qd=None,   # 0.3.13 (pricing='markup'); None = the SAM's
-                    mk_pass=1.0)
+                    mk_pass=1.0,
+                    erpt=None, exr_ref=1.0,                     # 0.3.13 (P2(b)): None = full pass-through of the peso (as before)
+                    mk_gap=0.0, mk_gdp=None,                    # 0.3.13 (P6): 0 = mk_pass as given (as before); None = benchmark GDP
+                    oil_pass=None, oil_ref=np.ones(nC))         # 0.3.13: None = the world price in full (as before)
 
     def make_shocks(self, spec=None):
         """Translate a readable shock spec into arrays. Keys:
@@ -951,6 +1041,15 @@ class CGE:
                    is charged: home unit revenue = AVC + mu x (lam x AVC + (1 - lam) x A / (1 + mu)), A = 'pa_anchor'. 1 (default)
                    = the proportional markup on prime cost (Taylor 1983; the design note's equation); 0 = the margin per unit
                    fixed in pesos at the reference (A - A / (1 + mu)), whose cost push is the plain input-output price model's.
+        'mk_gap': s, 'mk_gdp': Y_ref (pricing='markup' only; 0.3.13, P6): the pass-through is mk_pass + s x the output gap in
+                   percent, 100 x (real GDP / Y_ref - 1); Y_ref default the benchmark's real GDP. s = 0 (default) = as before.
+        'erpt': one share or {commodity: share} in [0, 1] (commodities not listed: 1), 'exr_ref': the reference peso (default 1)
+                   (0.3.13, P2(b); Keynesian closure with the fixed peso only): import prices PM = pwm x exr_ref x (EXR /
+                   exr_ref) ** erpt x (1 + tm), the foreign supplier absorbing the rest (see __init__). Check ER1.
+        'oil_pass': one share or {commodity: share} in [0, 1] (not listed: 1), 'oil_ref': the reference world price in pesos, one
+                   positive number or {commodity: value} (default 1) (0.3.13; Keynesian closure only): the domestic
+                   peso price of those imports is oil_ref x (pwm x EXR / oil_ref) ** oil_pass before the tariff, the government
+                   absorbing the rest at the border (see __init__). A commodity may not carry both 'erpt' and 'oil_pass'. Check OP1.
         """
         sh = self.default_shocks()
         idx = {"c": {c: i for i, c in enumerate(self.C)}, "a": {a: i for i, a in enumerate(self.A)},
@@ -964,8 +1063,15 @@ class CGE:
                     "pa_anchor": ("pa_anchor", "a"), "markup": ("markup", "a")}
         if "lscale" in (spec or {}) and self.land != "fixed":
             raise ValueError("'lscale' needs land='fixed' (with mobile land it would be ignored)")
-        if self.pricing != "markup" and any(k in (spec or {}) for k in ("markup", "mk_coef", "mk_qd", "mk_pass")):    # 0.3.13
-            raise ValueError("'markup', 'mk_coef', 'mk_qd' and 'mk_pass' need pricing='markup' (otherwise they would be ignored)")
+        if self.pricing != "markup" and any(k in (spec or {}) for k in ("markup", "mk_coef", "mk_qd", "mk_pass", "mk_gap", "mk_gdp")):
+            raise ValueError("'markup', 'mk_coef', 'mk_qd', 'mk_pass', 'mk_gap' and 'mk_gdp' need pricing='markup' (otherwise they "
+                             "would be ignored)")                    # 0.3.13
+        if any(k in (spec or {}) for k in ("erpt", "exr_ref")) and not (self.closure == "keynesian" and self.fx == "fixed"):
+            raise ValueError("'erpt' and 'exr_ref' (incomplete pass-through of the peso to import prices; 0.3.13) need the "
+                             "Keynesian closure with the fixed peso (fx='fixed'): elsewhere the peso is determined by the model")
+        if any(k in (spec or {}) for k in ("oil_pass", "oil_ref")) and self.closure != "keynesian":
+            raise ValueError("'oil_pass' and 'oil_ref' (a within-year share of the world price reaching domestic prices; 0.3.13) "
+                             "need the Keynesian (short-run) closure: in the long run world prices pass through in full")
         for k, val in (spec or {}).items():
             if k == "qg_scale":
                 if isinstance(val, dict):
@@ -996,6 +1102,46 @@ class CGE:
                     for a, f in val.items(): sh[k][idx["a"][a]] = f
                 else:
                     sh[k] = float(val)
+            elif k == "mk_gap":                         # 0.3.13 (P6): one number, the change of mk_pass per percent of output gap
+                if isinstance(val, (bool, np.bool_)) or not np.isfinite(float(val)):
+                    raise ValueError(f"'mk_gap' must be a finite number, not {val!r}")
+                sh[k] = float(val)
+            elif k == "mk_gdp":                         # 0.3.13 (P6): the reference real GDP (benchmark prices); None = benchmark
+                if val is not None and (isinstance(val, (bool, np.bool_)) or not np.isfinite(float(val)) or float(val) <= 0):
+                    raise ValueError(f"'mk_gdp' must be None or a positive number, not {val!r}")
+                sh[k] = None if val is None else float(val)
+            elif k == "erpt":                           # 0.3.13 (P2(b)): one share or {commodity: share}; not listed: 1
+                vals = dict(val) if isinstance(val, dict) else {c: val for c in self.C}
+                bad = [c for c in vals if c not in idx["c"]]
+                if bad:
+                    raise ValueError(f"'erpt': not commodities of this SAM: {bad}")
+                e_ = np.ones(len(self.C))
+                for c, f in vals.items():
+                    if isinstance(f, (bool, np.bool_)) or not np.isfinite(float(f)) or not 0.0 <= float(f) <= 1.0:
+                        raise ValueError(f"'erpt' ({c}): the share of a move of the peso passed into import prices must be a "
+                                         f"number in [0, 1], not {f!r}")
+                    e_[idx["c"][c]] = float(f)
+                sh[k] = e_
+            elif k == "exr_ref":                        # 0.3.13 (P2(b)): the peso the suppliers' peso prices are anchored to
+                if isinstance(val, (bool, np.bool_)) or not np.isfinite(float(val)) or float(val) <= 0:
+                    raise ValueError(f"'exr_ref' must be a positive number, not {val!r}")
+                sh[k] = float(val)
+            elif k in ("oil_pass", "oil_ref"):          # 0.3.13: one value or {commodity: value}; not listed: 1
+                vals = dict(val) if isinstance(val, dict) else {c: val for c in self.C}
+                bad = [c for c in vals if c not in idx["c"]]
+                if bad:
+                    raise ValueError(f"'{k}': not commodities of this SAM: {bad}")
+                o_ = np.ones(len(self.C))
+                for c, f in vals.items():
+                    if isinstance(f, (bool, np.bool_)) or not np.isfinite(float(f)):
+                        raise ValueError(f"'{k}' ({c}) must be a finite number, not {f!r}")
+                    if k == "oil_pass" and not 0.0 <= float(f) <= 1.0:
+                        raise ValueError(f"'oil_pass' ({c}): the share of a move of the world price in pesos reaching domestic prices "
+                                         f"within the period must be in [0, 1], not {f!r}")
+                    if k == "oil_ref" and float(f) <= 0:
+                        raise ValueError(f"'oil_ref' ({c}): the reference world price in pesos must be positive, not {f!r}")
+                    o_[idx["c"][c]] = float(f)
+                sh[k] = o_
             elif k == "hoard_ref":                      # 0.3.11: labour by factor x activity of the reference year
                 sh[k] = None if val is None else np.asarray(val, float)
             elif k in ("mk_coef", "mk_qd"):             # 0.3.13 (pricing='markup'): installed technology; reference home sales
@@ -1009,6 +1155,10 @@ class CGE:
                 sh[k] = None if val is None else {n: np.asarray(val[n], float) for n in ("dva", "den", "de")}
             else:
                 raise KeyError(f"Unknown shock '{k}'")
+        if sh["oil_pass"] is not None and sh["erpt"] is not None and np.any((sh["oil_pass"] != 1.0) & (sh["erpt"] != 1.0)):
+            both = [c for i, c in enumerate(self.C) if sh["oil_pass"][i] != 1.0 and sh["erpt"][i] != 1.0]
+            raise ValueError(f"{both}: a commodity may not carry both 'erpt' (the peso's pass-through, the supplier absorbing the rest) "
+                             "and 'oil_pass' (the world price's, the government absorbing the rest)")
         return sh
 
     def solve(self, spec=None, x_start=None, tol=1e-10, verbose=False) -> Solution:
@@ -1119,6 +1269,24 @@ class CGE:
         return dict(dva=np.where(on, QVA / safe(QVAE) * (_pos(PVA) / PVAE) ** s1, en["dva"]),
                     den=np.where(on, QEN / safe(QVAE) * (PEN / PVAE) ** s1, en["den"]),
                     de=np.where(en["has"] & (QEN > 0), QEd / safe(QEN)[None, :] * (PE_ / PEN[None, :]) ** s2, en["de"]))
+
+    def _output_gap(self, Y, sh):
+        """0.3.13 (P6, check MG1): the output gap the markup pass-through responds to, in percent: 100 x (Y / Y_ref - 1), Y real
+        GDP at benchmark prices, Y_ref the shock key 'mk_gdp' (the dynamic model's baseline year) or the benchmark's."""
+        ref = self.real_gdp0 if sh["mk_gdp"] is None else sh["mk_gdp"]
+        return 100.0 * (Y / ref - 1.0)
+
+    def _ptm(self, pwm, EXR, sh):
+        """0.3.13 (P2(b), check ER1): the US$ price foreign suppliers charge for imports sold here when they absorb the share
+        1 - erpt of a move of the peso against its reference exr_ref (pricing to market): pwm x (EXR / exr_ref) ** (erpt - 1), so
+        that the peso price is pwm x exr_ref x (EXR / exr_ref) ** erpt. erpt 1 = the world price (full pass-through)."""
+        return pwm * (EXR / sh["exr_ref"]) ** (sh["erpt"] - 1.0)
+
+    def _oil_dom(self, W, sh):
+        """0.3.13 (check OP1): the domestic peso price, before the tariff, of imports whose world price in pesos W =
+        pwm x EXR reaches buyers at home only by the share oil_pass within the period: oil_ref x (W / oil_ref) ** oil_pass, oil_ref the
+        reference world price in pesos (in the dynamic model the baseline year's). oil_pass 1 = W, the world price in full."""
+        return sh["oil_ref"] * (W / sh["oil_ref"]) ** sh["oil_pass"]
 
     def markup_at(self, ref: Solution, tfp=1.0) -> dict:
         """0.3.13 (pricing='markup'): the shock keys that centre this model on a zero-profit solution `ref` of a model of the

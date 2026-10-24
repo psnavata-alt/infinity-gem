@@ -18,9 +18,21 @@ This script looks for the usual ways that happens and prints what it finds. It d
      kind of rigging a skeptic fears), and the checks are run on the broken copy. Each must FAIL. An unbroken copy
      must PASS. The original folder is never touched.
 
+Public mode (23 Oct 2026), for a copy without the data that may not be redistributed, such as the public repository
+(there the package is named infinity_gem, and PSA's FIES 2023 microdata files are not included: each user adds their
+own). It switches on by itself where the package is named infinity_gem, or with --public. Then:
+  C  the one step that reads the FIES files (households dropped, households in no SAM group) is reported NOT RUN,
+     with the reason, when those files are absent; the shocked solutions and the other data treatments run as always.
+  H  a check that reports NOT RUN (an input it needs is not in the copy) counts as neither passed nor failed: the
+     unbroken copy must pass every check that runs, and each break is judged on the checks that run. A break that no
+     running check can see (the checks that see it need the missing files) is reported NOT JUDGED, with the reason.
+The report says what could not run, and why. Without public mode nothing changes: a missing file stops the audit, and
+a check that reports NOT RUN counts as a failure.
+
 Run:   py rigging_audit.py                 (audits the Infinity GEM folder this file is in)
        py rigging_audit.py --root "<folder>"   (any copy, e.g. Infinity GEM 0.3)
        py rigging_audit.py --quick         (skips part H, which takes about two minutes)
+       py rigging_audit.py --public        (public mode, above; automatic where the package is named infinity_gem)
 Report: RIGGING_AUDIT_RUN_<date>.md next to this file, or in Documents\\Infinity GEM - my runs\\rigging_audit if this
 folder is read-only.
 """
@@ -42,6 +54,15 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 MODEL_DIRS = ("infinity_gem", "app", "scenarios")              # code that produces results
 CHECKS = "checks/run_all_checks.py"
+# Public mode (the first lines): the package's name in the public repository, and the licensed inputs that a copy may
+# lack, each with the names of the files in the package's paths module and what they are (as the validation suite's own
+# NOT RUN notes describe them).
+PUBLIC_PACKAGE = "infinity_gem"
+LICENSED = {
+    "FIES": (("FIES_PUF", "FIES_POVLINES"),
+             "PSA's FIES 2023 public-use file and poverty-line extract (licensed by PSA to each user, not distributed; "
+             "data/raw/fies/README.md says how to add them)"),
+}
 
 # Numbers that may appear both in model code and among the checks' expected values, because they are INPUTS (what is
 # put into the model), not outputs. Each with its source. Matching is on the number as written in the code.
@@ -157,6 +178,12 @@ def flatten(v):
             yield from flatten(x)
     elif isinstance(v, (int, float)):
         yield float(v)
+
+
+def missing_licensed(paths, key: str) -> str:
+    """Public mode: '' if the licensed input `key` (LICENSED) is in the audited copy, else what is missing."""
+    names, what = LICENSED[key]
+    return "" if all(Path(getattr(paths, n)).exists() for n in names) else what
 
 
 # ---------------------------------------------------------------------------------------- A: results written in code
@@ -287,8 +314,9 @@ def part_c_static(root: Path):
     return rows
 
 
-def part_c_runtime(root: Path):
-    """Solve a set of shocks in every closure and report the Walras slack and whether any safety clamp is binding."""
+def part_c_runtime(root: Path, public: bool = False):
+    """Solve a set of shocks in every closure and report the Walras slack and whether any safety clamp is binding.
+    Public mode: the FIES step at the end is reported NOT RUN (treat["fies_not_run"]) when the FIES files are absent."""
     sys.path[:0] = [str(root), str(root / "scenarios")]
     import numpy as np
     import warnings
@@ -331,6 +359,10 @@ def part_c_runtime(root: Path):
     treat = dict(reexports_bn=float(m.rex.sum()), reexport_goods=[c for c, x in zip(m.C, m.rex) if x > 0],
                  balancing_2018_max_cell=float(adj.values.max()), balancing_2018_total=float(adj.values.sum()) / 2,
                  sam_2018_total=float(raw18.values.sum()))
+    missing = missing_licensed(paths, "FIES") if public else ""
+    if missing:                                     # public mode: the microdata are not in this copy
+        treat["fies_not_run"] = missing
+        return rows, treat
     from infinity_gem.microsim import Microsim
     ms = Microsim()
     raw = __import__("pandas").read_csv(paths.FIES_POVLINES)
@@ -447,7 +479,11 @@ TAMPERS = [
     dict(name="A leak that shows only after a shock (import bill at pre-shock world prices)",
          why="an error invisible in the base year: the base-year SAM is still reproduced",
          file="infinity_gem/cge.py", old="fcu_out = (pwm * (QM + self.rex)).sum()",
-         new="fcu_out = (self.pwm * (QM + self.rex)).sum()", expect=["C4"]),
+         new="fcu_out = (self.pwm * (QM + self.rex)).sum()", expect=["C4"],
+         # 23 Oct 2026: with the peso's incomplete pass-through (0.3.13, opt-in) the import bill moved to its own line,
+         # imp_fcu, whose default branch is the same expression; the same break is made there ("alt": used only where
+         # the line above is not found)
+         alt=[("imp_fcu = (pwm * (QM + self.rex)).sum()", "imp_fcu = (self.pwm * (QM + self.rex)).sum()")]),
     dict(name="A hidden plug: 0.1% extra demand in every factor market",
          why="a plug term, like the archived R scripts' Missing_Demand_0",
          file="infinity_gem/cge.py", old="- self.QFS0[k] * sh[\"qfs_scale\"][k]) / self.QFS0[k])",
@@ -461,7 +497,12 @@ TAMPERS = [
     dict(name="Headline result rigged: Simulator's real GDP effect scaled by 0.9",
          why="a hard-coded adjustment to an answer",
          file="app/engines.py", old="\"Real GDP (%)\": pct(gs[\"real\"], gb[\"real\"]),",
-         new="\"Real GDP (%)\": pct(gs[\"real\"], gb[\"real\"]) * 0.9,", expect=["A1", "R0"]),
+         new="\"Real GDP (%)\": pct(gs[\"real\"], gb[\"real\"]) * 0.9,", expect=["A1", "R0"],
+         # public mode: judged only where check A1 runs (R0 sees this break only through its two Simulator results,
+         # which need the same files as A1)
+         needs=("A1", "the Simulator's engine computes poverty in every run, so it runs only with PSA's FIES 2023 files; "
+                      "without them check A1 is NOT RUN, check R0 leaves out its two Simulator results, and no check that "
+                      "runs reaches the broken line")),
     dict(name="A parameter quietly changed: Armington elasticity 2.0 -> 2.2",
          why="a parameter changed to move results; the model is still internally consistent",
          file="infinity_gem/cge.py", old="\"sigma_q\": 2.0,", new="\"sigma_q\": 2.2,", expect=["R0"]),
@@ -481,7 +522,8 @@ with contextlib.redirect_stdout(buf):
     import run_all_checks as R
     for n in sys.argv[2].split(","):
         getattr(R, n)()
-print(json.dumps([[c, bool(ok), ((d or "").splitlines() or ["(no detail)"])[0][:160]] for c, _, ok, d in R.results]))
+print(json.dumps([[c, None if ok is None else bool(ok), ((d or "").splitlines() or ["(no detail)"])[0][:600]]
+                  for c, _, ok, d in R.results]))
 '''
 
 
@@ -513,23 +555,26 @@ def edit_sam_cell(dst: Path):
     raise RuntimeError("no SAM cell found to edit")
 
 
-def run_checks(copy: Path, names):
+def run_checks(copy: Path, names, public: bool = False):
     env = dict(os.environ, PYTHONIOENCODING="utf-8")
     env.pop("INFINITY_GEM_MY_RUNS", None)
     r = subprocess.run([sys.executable, "-c", RUNNER, str(copy), ",".join(names)], capture_output=True, text=True,
                        encoding="utf-8", env=env, timeout=900)
     if r.returncode != 0 or not r.stdout.strip():
         return None, (r.stderr or r.stdout)[-600:]
-    return {c: (ok, d) for c, ok, d in json.loads(r.stdout.strip().splitlines()[-1])}, ""
+    # ok is True, False or None (NOT RUN: an input the check needs is not in the copy). Public mode keeps NOT RUN apart;
+    # otherwise it counts as a failure, as it always has.
+    return {c: (ok, d) if public else (bool(ok), d[:160])
+            for c, ok, d in json.loads(r.stdout.strip().splitlines()[-1])}, ""
 
 
-def part_h(root: Path):
+def part_h(root: Path, public: bool = False):
     out = []
     base = Path(tempfile.mkdtemp(prefix="infinity_gem_tamper_"))
     try:
         ctrl = base / "control"
         copy_for_tamper(root, ctrl)
-        res, err = run_checks(ctrl, RUN_ORDER)
+        res, err = run_checks(ctrl, RUN_ORDER, public)
         out.append(dict(name="Control: unbroken copy", expect=[], result=res, error=err, edit="none"))
         for t in TAMPERS:
             dst = base / re.sub(r"\W+", "_", t["name"])[:40]
@@ -539,19 +584,43 @@ def part_h(root: Path):
             else:
                 f = dst / t["file"]
                 s = f.read_text(encoding="utf-8")
-                for old, new in [(t["old"], t["new"])] + t.get("extra", []):
+                main = next((p for p in [(t["old"], t["new"])] + t.get("alt", []) if s.count(p[0]) == 1),
+                            (t["old"], t["new"]))                   # the line to break, or the same break where it moved
+                for old, new in [main] + t.get("extra", []):
                     if s.count(old) != 1:
                         raise RuntimeError(f"tamper '{t['name']}': the code to break was not found exactly once in "
                                            f"{t['file']} ({old!r}); the code has changed, so update this audit")
                     s = s.replace(old, new)
                 f.write_text(s, encoding="utf-8")
-                edit = f"{t['file']}: `{t['old']}` -> `{t['new']}`"
-            res, err = run_checks(dst, RUN_ORDER)
-            out.append(dict(name=t["name"], why=t["why"], expect=t["expect"], result=res, error=err, edit=edit))
+                edit = f"{t['file']}: `{main[0]}` -> `{main[1]}`"
+            res, err = run_checks(dst, RUN_ORDER, public)
+            out.append(dict(name=t["name"], why=t["why"], expect=t["expect"], result=res, error=err, edit=edit,
+                            needs=t.get("needs")))
             shutil.rmtree(dst, ignore_errors=True)
     finally:
         shutil.rmtree(base, ignore_errors=True)
     return out
+
+
+def judge_public(h):
+    """Public mode: the verdict on the unbroken copy or on one break, from the checks that ran. A check that reports NOT
+    RUN (an input it needs is not in the copy) is neither a pass nor a failure. Returns (ok, verdict): ok is True (passes,
+    or caught), False (fails, or not caught) or None (a break that cannot be judged in this copy)."""
+    res = h["result"] or {}
+    ran = {c: v for c, v in res.items() if v[0] is not None}
+    not_run = [c for c, v in res.items() if v[0] is None]
+    nr = f"; NOT RUN here: {', '.join(not_run)}" if not_run else ""
+    if h["name"].startswith("Control"):
+        ok = bool(ran) and all(v[0] for v in ran.values())
+        return ok, ("every check that runs PASSES (as it should)" if ok else "**PROBLEM: the unbroken copy does not pass**") + nr
+    failed = [c for c, v in ran.items() if v[0] is False]
+    if any(c in failed for c in h["expect"]):
+        return True, f"caught by {', '.join(failed)}" + nr
+    if h.get("needs") and h["needs"][0] in not_run:
+        return None, f"NOT JUDGED here: {h['needs'][1]}"
+    if res and all(c in not_run for c in h["expect"]):
+        return None, f"NOT JUDGED here: every check that should catch it is NOT RUN ({', '.join(h['expect'])})"
+    return False, "**NOT CAUGHT**" + nr
 
 
 # ------------------------------------------------------------------------------------------------ report
@@ -568,14 +637,26 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=str(HERE.parent.parent.parent))
     ap.add_argument("--quick", action="store_true")
+    ap.add_argument("--public", action="store_true",
+                    help="public mode (the first lines of this file); automatic where the package is named infinity_gem")
     a = ap.parse_args()
     root = Path(a.root).resolve()
+    public = a.public or MODEL_DIRS[0] == PUBLIC_PACKAGE
     stamp = dt.datetime.now()
     version = next((ln for ln in (root / "README.md").read_text(encoding="utf-8").splitlines() if "**Version" in ln), "")[:60] \
         if (root / "README.md").exists() else ""
+    init = root / MODEL_DIRS[0] / "__init__.py"
+    if public and not version and init.exists():       # the public README has no "**Version" line: the package's number
+        v = re.search(r'^__version__\s*=\s*"([^"]+)"', init.read_text(encoding="utf-8"), re.M)
+        version = f"**Version {v.group(1)}** (`{MODEL_DIRS[0]}.__version__`)" if v else ""
     L = [f"# Infinity GEM rigging audit: run of {stamp:%d %B %Y, %H:%M}", "",
          f"Folder audited: `{root}`  ", f"{version}  ",
          f"Script: `docs/verification/rigging_audit/rigging_audit.py` (what each part does: the script's first lines).", ""]
+    if public:
+        L[5:5] = ["", "**Public mode** (" + ("`--public`" if a.public else f"the package is named `{PUBLIC_PACKAGE}`") +
+                  "): a step that needs licensed data that are not in this copy is reported NOT RUN, with the reason, and in "
+                  "part H a check that reports NOT RUN counts as neither passed nor failed (the script's first lines)."]
+    n_head = len(L)
     summary = []
 
     print("A: result numbers in model code ...", flush=True)
@@ -599,13 +680,14 @@ def main():
 
     print("C: plugs, slack, clamps (runs the model) ...", flush=True)
     Cs = part_c_static(root)
-    Cr, treat = part_c_runtime(root)
+    Cr, treat = part_c_runtime(root, public)
     import math
     worst_w = max(r["walras"] for r in Cr)
     bad = [r for r in Cr if not r["solved"] or r["clamp_price"] or r["clamp_mps"] or r["negative_qty"] or r["walras"] > 1e-9]
     summary.append(("C", "Plugs, slack and clamps", f"{len(Cr)} shocked solutions: largest Walras slack "
                     f"{worst_w:.1e} of investment; solutions with a binding clamp, a negative quantity or no "
-                    f"convergence: {len(bad)}"))
+                    f"convergence: {len(bad)}" + ("; the FIES step NOT RUN (licensed microdata not in this copy)"
+                                                  if "fies_not_run" in treat else "")))
     for r in Cr:
         for k in ("residual", "walras", "gdp_gap", "min_price"):
             r[k] = f"{r[k]:.1e}"
@@ -625,7 +707,10 @@ def main():
           f"total change ₱{treat['balancing_2018_total']:,.1f} bn (the SAM's total is ₱{treat['sam_2018_total']:,.0f} bn). "
           "The 2023 SAM is used as published.",
           f"- FIES households dropped for missing values: {treat['fies_rows_dropped']}; households in no SAM group "
-          f"(would get no change): {treat['fies_unmapped_groups']}.", ""]
+          f"(would get no change): {treat['fies_unmapped_groups']}." if "fies_not_run" not in treat else
+          f"- FIES households dropped for missing values, and households in no SAM group: NOT RUN in this copy. This step "
+          f"reads the household microdata: it needs {treat['fies_not_run']}. The shocked solutions above do not use them.",
+          ""]
 
     print("D: test strength ...", flush=True)
     tols, always = part_d(root)
@@ -663,11 +748,13 @@ def main():
 
     if not a.quick:
         print("H: tamper tests (about two minutes) ...", flush=True)
-        H = part_h(root)
+        H = part_h(root, public)
         rows = []
         for h in H:
             res = h["result"] or {}
-            if h["name"].startswith("Control"):
+            if public:
+                ok, verdict = judge_public(h)
+            elif h["name"].startswith("Control"):
                 ok = bool(res) and all(v[0] for v in res.values())
                 verdict = "all PASS (as it should)" if ok else "**PROBLEM: the unbroken copy does not pass**"
             else:
@@ -678,20 +765,35 @@ def main():
             rows.append(dict(tamper=h["name"], why=h.get("why", ""), edit=h["edit"], expected=", ".join(h["expect"]),
                              result=verdict + (f" (error: {h['error'][:200]})" if h["error"] else "")))
             h["ok"] = ok
-        summary.append(("H", "Tamper tests", f"{sum(h['ok'] for h in H[1:])} of {len(H) - 1} deliberate breaks caught; "
-                        f"control copy passes: {H[0]['ok']}"))
+        if public:
+            judged = [h for h in H[1:] if h["ok"] is not None]
+            not_judged = len(H) - 1 - len(judged)
+            ctrl_nr = [c for c, v in (H[0]["result"] or {}).items() if v[0] is None]
+            summary.append(("H", "Tamper tests", f"{sum(h['ok'] is True for h in judged)} of {len(judged)} deliberate breaks "
+                            f"that can be judged in this copy caught" +
+                            (f"; NOT JUDGED here: {not_judged} of {len(H) - 1} (the checks that see them need licensed data "
+                             f"that are not in this copy)" if not_judged else "") +
+                            f"; control copy passes every check that runs: {H[0]['ok']}" +
+                            (f" (NOT RUN here: {', '.join(ctrl_nr)})" if ctrl_nr else "")))
+        else:
+            summary.append(("H", "Tamper tests", f"{sum(h['ok'] for h in H[1:])} of {len(H) - 1} deliberate breaks caught; "
+                            f"control copy passes: {H[0]['ok']}"))
         L += ["## H. Tamper tests", "",
               f"A copy of the model (in a temporary folder, deleted afterwards) is broken on purpose and checks "
-              f"{', '.join(c.upper() for c in RUN_ORDER)} are run on it. Each break must make at least one check FAIL.", "",
+              f"{', '.join(c.upper() for c in RUN_ORDER)} are run on it. Each break must make at least one check FAIL." +
+              (" Public mode: a check that reports NOT RUN (an input it needs is not in this copy) counts as neither passed "
+               "nor failed; the unbroken copy must pass every check that runs, and each break is judged on the checks that "
+               "run. A break that no running check can see is reported NOT JUDGED, with the reason, and is counted apart."
+               if public else ""), "",
               md_table(rows, ["tamper", "why", "edit", "expected", "result"])]
         for h in H:
             if h["result"]:
                 L += [f"<details><summary>{h['name']}: every check</summary>", "",
-                      md_table([dict(check=c, result="PASS" if v[0] else "FAIL", detail=v[1]) for c, v in h["result"].items()],
-                               ["check", "result", "detail"]), "</details>", ""]
+                      md_table([dict(check=c, result="NOT RUN" if v[0] is None else "PASS" if v[0] else "FAIL", detail=v[1])
+                                for c, v in h["result"].items()], ["check", "result", "detail"]), "</details>", ""]
 
     head = ["## Summary", "", md_table([dict(part=p, what=w, result=r) for p, w, r in summary], ["part", "what", "result"])]
-    L = L[:6] + head + L[6:]
+    L = L[:n_head] + head + L[n_head:]
     text = "\n".join(L) + "\n"
     name = f"RIGGING_AUDIT_RUN_{stamp:%Y%m%d_%H%M}.md"
     try:

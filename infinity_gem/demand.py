@@ -49,7 +49,8 @@ COMMODITY_GROUP = {
     "ccons": "Construction", "ctrad": "Trade", "ctran": "Transport & logistics", "chotl": "Food & accommodation",
     "ccomm": "Information & communications", "cfsrv": "Finance & real estate", "creal": "Finance & real estate",
     "cbsrv": "Professional & technical", "cpadm": "Public sector", "ceduc": "Public sector", "cheal": "Public sector",
-    "cosrv": "Other services"}
+    "cosrv": "Other services",
+    "ccoal": "Mining"}                 # Infinity GEM SAM v0.7 only (24 Oct 2026): coal, split from mining, keeps mining's group
 FOOD = ("cmaiz", "crice", "cocer", "cpuls", "coils", "croot", "cvege", "csugr", "cfrui", "ccoff", "cocrp", "ccatt",
         "cpoul", "coliv", "cfish", "cfood", "cbeve", "cmric")
 # 0.3.7: the rice-split SAM has milled rice and corn ('cmric', PSA 2018 sector 57) apart from other processed
@@ -112,7 +113,8 @@ COMMODITY_USDA = {
     "cnmet": "b:house", "cmetl": "b:house", "cmach": {"b:house": ["05.3"], "b:transport": ["07.1"]},
     "coman": "b:house", "celec": "b:housing", "cwatr": "b:housing", "ccons": "b:housing", "ctrad": "b:other",
     "ctran": "b:transport", "chotl": "b:other", "ccomm": "b:transport", "cfsrv": "b:other", "creal": "b:housing",
-    "cbsrv": "b:other", "cpadm": "b:other", "ceduc": "b:education", "cheal": "b:medical", "cosrv": "b:recreation"}
+    "cbsrv": "b:other", "cpadm": "b:other", "ceduc": "b:education", "cheal": "b:medical", "cosrv": "b:recreation",
+    "ccoal": "b:other"}                # Infinity GEM SAM v0.7 only: coal, split from mining, as cmine
 
 
 def _usda_tables():

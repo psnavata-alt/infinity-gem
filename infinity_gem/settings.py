@@ -59,6 +59,10 @@ SHORT_RUN_UNEMPLOYED = {"0.2 published": ("flab-n", "flab-p"),
 # rice=True (the petroleum-split SAM, e.g. the Simulator's) and runs with sam_year (2024/2025) still use IFPRI-based SAMs:
 # Infinity GEM's own SAM has the rice-split accounts and exists for 2023 only. "0.2 published" is unaffected (check R0).
 DEFAULT_SAM_VARIANT = "own"
+# 0.3.13 (23 Oct 2026): Infinity GEM's own 2023 SAM version 0.6 (tools/build_own_sam_2023.py; PSA's 2023 sector
+# accounts for the rest of the world, government and corporations; a review note (not included)) is a
+# research option reached only by naming it: sam_variant="own-0.6" (rice=True, 2023 only; check S7). The default stays v0.5.
+SAM_VARIANTS = (None, "ifpri", "psa", "own", "own-0.6")
 
 
 def short_run_closure(setting: str = DEFAULT) -> dict:
@@ -95,10 +99,12 @@ def cge_kwargs(setting: str = DEFAULT, rice: bool = False, sam_year: int | None 
     to 2023, PSA national accounts and FIES 2023 as controls; tools/build_own_sam_2023.py; now version 0.3, household consumption by purpose = PSA's). Both need
     rice=True. With sam_year, 'psa' gives the 2024 or 2025 SAM updated from the PSA-consistent one (tools/update_sam.py --base psa); 'own' is 2023 only.
     0.3.10 (18 Oct 2026): with rice=True and no sam_year, None now means DEFAULT_SAM_VARIANT ('own', Infinity GEM's own
-    SAM); 'ifpri' = IFPRI's SAM as published (rice-split, petroleum-split or updated), the default up to 0.3.9."""
+    SAM); 'ifpri' = IFPRI's SAM as published (rice-split, petroleum-split or updated), the default up to 0.3.9.
+    0.3.13 (23 Oct 2026): 'own-0.6' = Infinity GEM's own 2023 SAM version 0.6 (paths.sam_own("0.6"); research, opt-in; rice=True,
+    2023 only); 'own' (and the default) stay version 0.5."""
     _check(setting)
-    if sam_variant not in (None, "ifpri", "psa", "own"):
-        raise ValueError(f"Unknown sam_variant '{sam_variant}' (None, 'ifpri', 'psa' or 'own')")
+    if sam_variant not in SAM_VARIANTS:
+        raise ValueError(f"Unknown sam_variant '{sam_variant}' (None, 'ifpri', 'psa', 'own' or 'own-0.6')")
     if setting == "0.2 published":
         if rice or sam_year or sam_variant:
             raise ValueError("rice=True, sam_year and sam_variant are 0.3 options")
@@ -111,14 +117,15 @@ def cge_kwargs(setting: str = DEFAULT, rice: bool = False, sam_year: int | None 
         raise ValueError("sam_year needs rice=True (the updated SAMs are built from the rice-split SAM)")
     if sam_variant and not rice:
         raise ValueError("sam_variant needs rice=True (the variants have the rice-split SAM's accounts)")
-    if sam_variant == "own" and sam_year:
-        raise ValueError("sam_variant='own' is a 2023 SAM; the 2024 and 2025 SAMs are not built on it yet")
+    if sam_variant in ("own", "own-0.6") and sam_year:
+        raise ValueError(f"sam_variant='{sam_variant}' is a 2023 SAM; the 2024 and 2025 SAMs are not built on it yet")
     from .demand import les_briones2023
     from .elasticities import elasticity_set
     if sam_variant == "psa" and sam_year:                     #: 2024/2025 rebased on the PSA-consistent SAM
         path = paths.sam_updated(sam_year, base="psa")
     else:
-        path = {"psa": paths.SAM_2023_RICE_PSA, "own": paths.SAM_2023_OWN}[sam_variant] if sam_variant else (
+        path = {"psa": paths.SAM_2023_RICE_PSA, "own": paths.SAM_2023_OWN,
+                "own-0.6": paths.sam_own("0.6")}[sam_variant] if sam_variant else (   # 0.3.13: v0.6 by name only
             paths.sam_updated(sam_year) if sam_year else (paths.SAM_2023_RICE if rice else paths.SAM_2023_PETR))
     return dict(path=path, elasticities=elasticity_set("ph"),
                 les=les_briones2023(rice_split=rice), margins="split", wage="nominal")

@@ -25,9 +25,12 @@ Steps (14 Oct 2026):
    DynamicCGE.scenario runs it.
 
 What it does NOT do: forecast the level of growth (the baseline path stays the documented one); add uncertainty in
-domestic policy or disasters (draw those separately if needed); capture expectations (Stage 2).
+domestic policy (draw it separately if needed); capture expectations (Stage 2). Disasters: an OPT-IN separate draw of
+typhoon damage (23 Oct 2026; research, NOT FOR CITATION): StochasticCGE(..., disasters=
+DisasterDraw.from_data()); the default (disasters=None) leaves every result unchanged.
 Checks: run_all_checks.py X1 (zero variance gives the baseline exactly; a fixed path gives exactly the deterministic
 scenario; reproducible with a seed; the draws' shocks have the posterior covariance; Monte Carlo error reported).
+The disaster draw: validation/stochastic_disasters/test_disaster_draw.py (standalone).
 """
 from __future__ import annotations
 
@@ -121,6 +124,109 @@ def oil_history_pool(since: str = "1986-01", until=None) -> np.ndarray:
     return d - d.mean()
 
 
+# ---------------------------------------------------------------------------------------------- disasters
+DISASTER_FILE = "PAGASA_ARTC_typhoon_damage_events_and_seasons_2017-2023.csv"     # data/raw/disasters (sources inside)
+
+
+def gdp_nominal_annual() -> pd.Series:
+    """PSA nominal GDP by calendar year, ₱ bn (OpenSTAT 0012B5BEXQ1 in data/raw/macro; complete years only)."""
+    from . import paths
+    d = pd.read_csv(paths.DATA_RAW / "macro" / "PSA_OpenSTAT_GDP_by_expenditure_quarterly_2000-2026.csv", comment="#")
+    g = d[(d["valuation"] == "At Current Prices") & (d["expenditure"] == "Gross Domestic Product")]
+    nq = g.groupby("year")["quarter"].nunique()
+    return (g.groupby("year")["value_million_php"].sum() / 1000)[nq == 4]
+
+
+@dataclass
+class DisasterDraw:
+    """Typhoon damage as a separate random draw in the stochastic outlook (23 Oct 2026; research, NOT
+    FOR CITATION; OPT-IN: StochasticCGE(..., disasters=None), the default, leaves every result unchanged).
+
+    Each year's damage to agriculture and infrastructure, in % of GDP, is a compound Poisson sum, the usual frequency-
+    severity model of catastrophe losses (Klugman, Panjer and Willmot, Loss Models: to verify before citing):
+        D = background + S_1 + ... + S_N,   N ~ Poisson(lam),   ln S_j ~ Normal(mu, sigma^2).
+    from_data() calibrates it on data/raw/disasters/PAGASA_ARTC_typhoon_damage_events_and_seasons_2017-2023.csv (NDRRMC
+    figures published in PAGASA's annual tropical-cyclone reports; pages in the file):
+      lam         destructive tropical cyclones per season (names PAGASA decommissioned: at least 300 deaths or PHP 1 bn
+                  of damage): frequency='sample' (default) = the severity sample's own count, 11 in the 4 seasons
+                  2017-2020 (2.75); frequency='2001-2019' = 44 names in 19 seasons (2.32), the long run, when the nominal
+                  PHP 1 bn threshold was relatively higher. With 'sample' the model matches PAGASA's own rankings of
+                  2019-2022 (exceedance 0.75 / 0.18 / 0.11 / 0.44 against 0.71 / 0.23 / 0.11 / 0.43 from the ranks;
+                  validation/stochastic_disasters/test_disaster_draw.py);
+      mu, sigma   mean and standard deviation of the log damage of the 11 destructive cyclones of 2017-2020, each in % of
+                  that year's nominal GDP (PSA);
+      background  the rest of each 2017-2020 season's damage (cyclones below the threshold, monsoon surges), mean % of GDP;
+      agri_share  agriculture's share of the destructive cyclones' damage where the split is published (pooled).
+    centre: 'mean' (default) subtracts the expected season, because the baseline already assumes a normal year (preshock/typhoons_normal_year.py): the draws average zero and a quiet season is a gain; 'median' subtracts
+      the median season (its other normal year); 'none' keeps gross damage (a disaster-free baseline).
+    scale: multiplies the centred draws (a sensitivity: NDRRMC's agriculture and infrastructure damage leaves out housing and
+      other private assets; the World Bank puts average typhoon losses at PHP 133.2 bn a year from a catastrophe model,
+      Background Paper PH-11, 2023, p. 8, a reference copy (not distributed)).
+    How the damage enters the CGE: StochasticCGE.disaster_shocks (decided 17 Oct 2026)."""
+    lam: float
+    mu: float
+    sigma: float
+    background: float
+    agri_share: float
+    centre: str = "mean"
+    scale: float = 1.0
+    source: str = ""
+    _c: float = field(default=None, init=False, repr=False, compare=False)
+
+    def __post_init__(self):
+        if self.centre not in ("mean", "median", "none"):
+            raise ValueError("centre must be 'mean', 'median' or 'none'")
+        if not (self.lam >= 0 and self.sigma >= 0 and self.scale >= 0 and 0 <= self.agri_share <= 1):
+            raise ValueError("lam, sigma and scale must be non-negative and agri_share between 0 and 1")
+
+    @classmethod
+    def from_data(cls, centre: str = "mean", scale: float = 1.0, frequency: str = "sample", path=None) -> "DisasterDraw":
+        from pathlib import Path
+        from . import paths
+        if frequency not in ("sample", "2001-2019"):
+            raise ValueError("frequency must be 'sample' (2017-2020 events per season) or '2001-2019' (decommissioned names)")
+        f = Path(path) if path else paths.DATA_RAW / "disasters" / DISASTER_FILE
+        if not f.exists():                         # public version: the table is not in this repository
+            raise FileNotFoundError(f"{f.name} is not in this repository: it is compiled from PAGASA's Annual Reports on "
+                                    "Philippine Tropical Cyclones, whose terms ask for written permission to reproduce them; "
+                                    "data/raw/disasters/README.md says how to compile it")
+        d = pd.read_csv(f, comment="#")
+        gdp = gdp_nominal_annual()
+        ev = d[d["record"] == "event"].assign(season=lambda x: x["season"].astype(int))
+        x = np.log((ev["total_php_bn"] / ev["season"].map(gdp) * 100).to_numpy(float))
+        se = d[d["record"] == "season"].assign(season=lambda x: x["season"].astype(int)).set_index("season")["total_php_bn"]
+        bg = [(float(se[y]) - float(ev.loc[ev["season"] == y, "total_php_bn"].sum())) / gdp[y] * 100
+              for y in sorted(ev["season"].unique())]
+        fr = d[d["record"] == "frequency"].iloc[0]
+        lam = len(ev) / ev["season"].nunique() if frequency == "sample" else float(fr["count"]) / float(fr["seasons"])
+        sp = ev.dropna(subset=["agriculture_php_bn", "infrastructure_php_bn"])
+        return cls(lam=float(lam), mu=float(x.mean()), sigma=float(x.std(ddof=1)),
+                   background=float(np.mean(bg)), agri_share=float(sp["agriculture_php_bn"].sum() / sp["total_php_bn"].sum()),
+                   centre=centre, scale=scale, source=f.name)
+
+    def expected(self) -> float:
+        """Expected season damage, % of GDP (gross: before centring and scaling)."""
+        return self.background + self.lam * float(np.exp(self.mu + self.sigma ** 2 / 2))
+
+    def gross(self, rng, n: int) -> np.ndarray:
+        """n seasons of gross damage, % of GDP."""
+        N = rng.poisson(self.lam, size=n)
+        tot = np.zeros(n)
+        np.add.at(tot, np.repeat(np.arange(n), N), np.exp(rng.normal(self.mu, self.sigma, size=int(N.sum()))))
+        return self.background + tot
+
+    def centre_value(self) -> float:
+        if self._c is None:
+            self._c = (self.expected() if self.centre == "mean" else 0.0 if self.centre == "none"
+                       else float(np.median(self.gross(np.random.default_rng(20261023), 400_000))))   # median: fixed seed
+        return self._c
+
+    def draw(self, rng, years) -> dict:
+        """{year: damage in % of GDP, centred and scaled} for one path."""
+        g = self.gross(rng, len(years))
+        return {y: self.scale * (float(g[i]) - self.centre_value()) for i, y in enumerate(years)}
+
+
 def _simulate(B, Sig, Y_last, H, rng=None, pool=None, oil_path=None):
     """H months ahead from the last p observations Y_last (p x k). B: (k p + 1) x k (lags then constant).
     rng=None: no future shocks (a forecast). pool: None = normal shocks; an array from shock_pool = resampled
@@ -175,11 +281,16 @@ class StochasticResult:
 class StochasticCGE:
     """dyn: a DynamicCGE (its baseline is computed if needed). data: monthly levels (see external_data).
     years: model years that receive shocks (each must be fully after the last data month).
-    php_per_usd and gdp_bn convert FDI to the SAM's units by share of GDP (macrolink.cge_shocks)."""
+    php_per_usd and gdp_bn convert FDI to the SAM's units by share of GDP (macrolink.cge_shocks).
+    disasters (23 Oct 2026; OPT-IN): None (default) = no disaster draw, results exactly as before; a
+    DisasterDraw = each path also draws typhoon damage, from its own random stream (the external draws are unchanged)."""
 
     def __init__(self, dyn, data: pd.DataFrame, years=(2027, 2028, 2029, 2030), p: int = 3, lam: float = 0.2,
                  php_per_usd: float = 58.0, gdp_bn: float = 28009.93, investment_passthrough: float = 1.0,
-                 shocks: str = "normal", oil: str = "var"):
+                 shocks: str = "normal", oil: str = "var", disasters=None):
+        if disasters is not None and not isinstance(disasters, DisasterDraw):
+            raise TypeError("disasters must be None (off, the default) or a DisasterDraw, e.g. DisasterDraw.from_data()")
+        self.dis = disasters
         self.dyn, self.years = dyn, list(years)
         self.ext = external_data(data)
         self.bvar = svar.bvar_minnesota(self.ext, p, lam=lam, delta=PRIOR_MEAN)
@@ -200,6 +311,16 @@ class StochasticCGE:
         self.mean_path = _simulate(self._B(self.bvar.B_mean), None, self.Y_last, self.H, oil_path=self._flat_oil())
         if not hasattr(dyn, "base"):
             dyn.baseline()
+        if self.dis is not None:                         # (d): what the damage hits, from the model's own SAM
+            from .dynamic import PSA_INDUSTRIES
+            from .settings import PUBLIC_CAPITAL
+            m = dyn.m
+            self._agri = [a for a in PSA_INDUSTRIES["Agriculture, forestry, and fishing"] if a in m.A]
+            if not self._agri:
+                raise ValueError("disasters: the model's SAM has no agricultural activities")
+            self._agri_out_gdp = float(sum(m.QA0[m.A.index(a)] for a in self._agri)) / ML.sam_gdp(m)
+            self._pubcap = dyn.a.get("public_capital") is not None and getattr(dyn, "pc", None) is not None
+            self._pc_low = PUBLIC_CAPITAL["low"]         # phi, kg_gdp for the one-year stand-in when public capital is off
 
     def _flat_oil(self):
         return np.full(self.H, self.Y_last[-1, 0]) if self.oil_hist is not None else None
@@ -221,9 +342,69 @@ class StochasticCGE:
                                  investment_passthrough=self.theta)
                 for y, c in changes.items() if any(abs(v) > 0 for v in c.values())}
 
-    def run_path(self, changes: dict) -> dict:
-        """Run the dynamic model for one set of yearly changes; return GDP and consumption gaps."""
-        sim = self.dyn.scenario(self.spec(changes))
+    def disaster_shocks(self, damage: dict) -> tuple:
+        """CGE shocks from {year: damage, % of GDP (centred)}, entered as decided (17 Oct
+        2026): lost productivity at the average product of capital (Hallegatte and Vogt-Schilb 2016, WB WPS 7885), not lost
+        capital with capital-labour substitution; results are read as output, incomes and poverty, not job counts.
+          agriculture (agri_share of the damage): lost output capacity of the agricultural activities in the damage year,
+            tfp_scale = 1 - x, x = damage / their output (an industry that loses x% of its productive capacity loses x% of
+            its output; NDRRMC's agricultural damage is mostly the value of crops, livestock and fish destroyed);
+          infrastructure (the rest): public capital destroyed. With the public-capital option on (the '0.3 recommended'
+            dynamic settings with public_capital 'low' or 'high'), through the engine's own channel, public_capital
+            'kg_loss' (as scenarios/combined_2025_2030.py enters 2026's typhoon damage): productivity in every activity from
+            the next year, decaying with public-capital depreciation. With it off (the published 0.2 settings), a one-year
+            productivity loss in every activity of the same first-year size, (1 - d / kg_gdp) ** phi, with the 'low'
+            public-capital parameters (settings.PUBLIC_CAPITAL: Bom and Ligthart 2014; IMF ICSD).
+        Returns ({year: CGE spec}, {year: public capital destroyed, ₱ bn in the SAM's units})."""
+        specs, kg = {}, {}
+        m = self.dyn.m
+        for y, s in damage.items():
+            if s == 0:
+                continue
+            d = s / 100
+            x = self.dis.agri_share * d / self._agri_out_gdp
+            if x >= 1:
+                raise ValueError(f"disasters: {y} damage would destroy all agricultural output ({x:.0%})")
+            tfp = {a: 1.0 - x for a in self._agri}
+            infra = (1 - self.dis.agri_share) * d
+            if self._pubcap:
+                kg[y] = infra * float(self.dyn.base.table.loc[y, "real_gdp"])
+            else:
+                f = (1 - infra / self._pc_low["kg_gdp"]) ** self._pc_low["phi"]
+                tfp = {a: tfp.get(a, 1.0) * f for a in m.A}
+            specs[y] = {"tfp_scale": tfp}
+        return specs, kg
+
+    def _scenario(self, spec: dict, kg: dict):
+        """dyn.scenario(spec) with public capital destroyed in `kg` added to the model's own kg_loss for this run only."""
+        if not kg:
+            return self.dyn.scenario(spec)
+        pc = self.dyn.pc
+        had, old = "kg_loss" in pc, pc.get("kg_loss")
+        new = dict(old or {})
+        for y, v in kg.items():
+            new[y] = new.get(y, 0.0) + v
+        pc["kg_loss"] = new
+        try:
+            return self.dyn.scenario(spec)
+        finally:                                         # restore the model exactly as it was
+            if had:
+                pc["kg_loss"] = old
+            else:
+                pc.pop("kg_loss", None)
+
+    def run_path(self, changes: dict, disaster: dict | None = None) -> dict:
+        """Run the dynamic model for one set of yearly changes; return GDP and consumption gaps.
+        disaster (opt-in): {year: typhoon damage, % of GDP, centred}; None = none (as before)."""
+        spec, kg = self.spec(changes), {}
+        if disaster:
+            dspec, kg = self.disaster_shocks(disaster)
+            for y, s in dspec.items():
+                cur = spec.setdefault(y, {})
+                for k, v in s.items():                   # factors by activity multiply any external one
+                    cur[k] = ({a: cur[k].get(a, 1.0) * v.get(a, 1.0) for a in dict.fromkeys(list(cur[k]) + list(v))}
+                              if k in cur else v)
+        sim = self._scenario(spec, kg)
         cmp_ = self.dyn.compare(self.dyn.base, sim)
         row = {f"GDP gap % {y}": cmp_.loc[y, "gdp_gap_pct"] for y in self.years}
         row.update({f"consumption gap % {y}": cmp_.loc[y, "consumption_gap_pct"] for y in self.years})
@@ -234,6 +415,7 @@ class StochasticCGE:
         """n draws. zero_variance=True: mean coefficients and no future shocks in every draw (check X1: = baseline)."""
         rng = np.random.default_rng(seed + 1)            # future shocks: a stream separate from BVAR.draw's
         oil_rng = np.random.default_rng(seed + 2)        # 0.3.7: historical oil blocks (oil='history')
+        dis_rng = np.random.default_rng(seed + 3)        # (d): typhoon damage, its own stream (opt-in)
         if zero_variance:
             draws, self.dropped = [(self.bvar.B_mean, None)] * n, 0
         else:                                            # keep stable draws only; count the explosive ones
@@ -254,8 +436,10 @@ class StochasticCGE:
             oil_path = self._flat_oil() if zero_variance else self._oil_draw(oil_rng)
             path = _simulate(self._B(B), Sig, self.Y_last, self.H, None if zero_variance else rng, self.pool, oil_path)
             ch = yearly_changes(path, self.mean_path, self.start, self.years)
-            shocks += [dict(draw=d, year=y, **c) for y, c in ch.items()]
-            rows.append(dict(draw=d, **self.run_path(ch)))
+            dis = None if (self.dis is None or zero_variance) else self.dis.draw(dis_rng, self.years)
+            shocks += [dict(draw=d, year=y, **c, **({} if dis is None else {"typhoon_damage_pct_gdp": dis[y]}))
+                       for y, c in ch.items()]
+            rows.append(dict(draw=d, **self.run_path(ch, dis)))
         res = StochasticResult(pd.DataFrame(rows).set_index("draw"), pd.DataFrame(shocks).set_index(["draw", "year"]))
         res.summary = summarise(res.draws)
         cum = res.draws["cumulative GDP gap ₱ bn (SAM year prices)"]

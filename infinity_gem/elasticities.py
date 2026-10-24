@@ -22,12 +22,18 @@ from . import paths
 from .cge import DEFAULT_ELASTICITIES
 
 TABLE = paths.DATA_PROCESSED / "elasticities_ph_v1.csv"
+# Infinity GEM SAM v0.7 (24 Oct 2026): rows for coal split from mining (ccoal, acoal), with their sources, built by
+# tools/add_coal_split_elasticities.py; codes no other SAM has, so every other model's elasticities are unchanged
+TABLE_COAL = paths.DATA_PROCESSED / "elasticities_ph_v1_coal_split_v0.7.csv"
 
 
 def elasticity_set(name: str = "default") -> dict:
     if name == "default":
         return dict(DEFAULT_ELASTICITIES)
     t = pd.read_csv(TABLE)
+    if TABLE_COAL.exists():                      # Infinity GEM SAM v0.7 only: coal's rows (codes not in TABLE)
+        tc = pd.read_csv(TABLE_COAL)
+        t = pd.concat([t, tc[~tc["code"].isin(t["code"])]], ignore_index=True)
     com, act = t[t.kind == "commodity"].set_index("code"), t[t.kind == "activity"].set_index("code")
     va = act.sigma_va_gtap.dropna().to_dict()
     # 0.3.7: rows for the split SAMs' accounts (cpetr/apetr, cmric/amric) come from tools/add_split_elasticities.py;

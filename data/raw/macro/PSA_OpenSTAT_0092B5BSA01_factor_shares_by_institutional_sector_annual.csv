@@ -1,0 +1,107 @@
+# Source: PSA OpenSTAT table 0092B5BSA01, Sub-Account IA. Factor Shares by Institutional Sector, at Current Prices. https://openstat.psa.gov.ph/PXWeb/api/v1/en/DB/2B/CA/0092B5BSA01.px
+# Downloaded 2026-10-23 16:49 through PSA's PXWeb API (POST, every item, CSV) for Infinity GEM's own SAM v0.6. Raw PSA layout, unchanged; '.' or '..' = not available.
+"Year","Item","Total","Non Financial","Financial","General Government","Households Including NPISHs"
+"2000","..Compensation of employees",1280216,621158,37766,274967,346326
+"2000","..Gross operating surplus",2148253,1038605,67361,18568,1023719
+"2000","..Taxes less subsidies on production and imports",269087,143733,84397,6246,34712
+"2000","Gross Domestic Product",3697556,1803495,189524,299781,1404757
+"2001","..Compensation of employees",1360353,647256,40362,288002,384733
+"2001","..Gross operating surplus",2395050,1198432,85509,19983,1091125
+"2001","..Taxes less subsidies on production and imports",268996,140599,87047,6574,34776
+"2001","Gross Domestic Product",4024399,1986287,212919,314559,1510634
+"2002","..Compensation of employees",1463896,724425,43503,299142,396828
+"2002","..Gross operating surplus",2581514,1270057,87899,20621,1202936
+"2002","..Taxes less subsidies on production and imports",305150,160398,100100,7567,37085
+"2002","Gross Domestic Product",4350560,2154880,231502,327330,1636848
+"2003","..Compensation of employees",1542960,796943,38525,309979,397514
+"2003","..Gross operating surplus",2856591,1380039,110246,23707,1342599
+"2003","..Taxes less subsidies on production and imports",318258,165933,107092,7859,37374
+"2003","Gross Domestic Product",4717809,2342915,255862,341545,1777486
+"2004","..Compensation of employees",1659897,837132,43558,325123,454084
+"2004","..Gross operating surplus",3315056,1642565,131240,26822,1514428
+"2004","..Taxes less subsidies on production and imports",348951,174961,118045,9951,45995
+"2004","Gross Domestic Product",5323904,2654659,292843,361896,2014507
+"2005","..Compensation of employees",1839646,873262,54690,332370,579323
+"2005","..Gross operating surplus",3680905,1941962,154507,27478,1556958
+"2005","..Taxes less subsidies on production and imports",396731,179897,136795,13048,66992
+"2005","Gross Domestic Product",5917282,2995121,345992,372896,2203273
+"2006","..Compensation of employees",2087323,1019263,69027,362246,636788
+"2006","..Gross operating surplus",3950589,2084094,174700,30595,1661200
+"2006","..Taxes less subsidies on production and imports",512505,230005,165988,17491,99021
+"2006","Gross Domestic Product",6550417,3333362,409715,410332,2397009
+"2007","..Compensation of employees",2203717,1083047,86708,379172,654791
+"2007","..Gross operating surplus",4484812,2361403,224275,31463,1867670
+"2007","..Taxes less subsidies on production and imports",509716,230442,146992,18865,113418
+"2007","Gross Domestic Product",7198245,3674892,457974,429500,2635879
+"2008","..Compensation of employees",2412200,1191900,106969,402455,710876
+"2008","..Gross operating surplus",5054269,2638403,264196,33552,2118118
+"2008","..Taxes less subsidies on production and imports",583731,265015,134151,24501,160064
+"2008","Gross Domestic Product",8050201,4095318,505315,460509,2989058
+"2009","..Compensation of employees",2675563,1287793,125741,456617,805412
+"2009","..Gross operating surplus",5155314,2654408,302403,38182,2160321
+"2009","..Taxes less subsidies on production and imports",559544,241313,118338,25255,174638
+"2009","Gross Domestic Product",8390421,4183515,546482,520055,3140370
+"2010","..Compensation of employees",3015042,1376654,132770,503546,1002072
+"2010","..Gross operating surplus",5771142,3110707,351413,43379,2265642
+"2010","..Taxes less subsidies on production and imports",613267,299266,134687,27409,151905
+"2010","Gross Domestic Product",9399451,4786627,618871,574335,3419619
+"2011","..Compensation of employees",3329814,1693687,124670,550183,961274
+"2011","..Gross operating surplus",6133538,3076764,435711,46768,2574295
+"2011","..Taxes less subsidies on production and imports",681310,363820,111567,31151,174772
+"2011","Gross Domestic Product",10144661,5134271,671948,628102,3710341
+"2012","..Compensation of employees",3648634,1924244,133833,618516,972041
+"2012","..Gross operating surplus",6641159,3303121,493763,49470,2794804
+"2012","..Taxes less subsidies on production and imports",770796,416933,116991,35201,201671
+"2012","Gross Domestic Product",11060589,5644298,744587,703187,3968516
+"2013","..Compensation of employees",3936832,2063464,157212,682494,1033661
+"2013","..Gross operating surplus",7247519,3648214,568755,43175,2987374
+"2013","..Taxes less subsidies on production and imports",866241,463234,135976,37253,229778
+"2013","Gross Domestic Product",12050592,6174912,861944,762923,4250813
+"2014","..Compensation of employees",4319761,2285577,178164,710326,1145695
+"2014","..Gross operating surplus",7866633,4002350,629885,36645,3197753
+"2014","..Taxes less subsidies on production and imports",1020434,538663,161641,53076,267054
+"2014","Gross Domestic Product",13206828,6826589,969690,800047,4610502
+"2015","..Compensation of employees",4579149,2445345,203200,754483,1176121
+"2015","..Gross operating surplus",8284102,4258273,680479,40859,3304491
+"2015","..Taxes less subsidies on production and imports",1080907,600577,163389,52523,264417
+"2015","Gross Domestic Product",13944157,7304196,1047068,847865,4745028
+"2016","..Compensation of employees",5127324,2780896,222636,856441,1267352
+"2016","..Gross operating surplus",9049256,4665427,794731,52698,3536399
+"2016","..Taxes less subsidies on production and imports",955801,527622,129825,48036,250318
+"2016","Gross Domestic Product",15132381,7973945,1147192,957176,5054069
+"2017","..Compensation of employees",5605915,2963921,294631,971122,1376241
+"2017","..Gross operating surplus",9864549,5134955,849235,58510,3821848
+"2017","..Taxes less subsidies on production and imports",1086187,613605,128693,58517,285373
+"2017","Gross Domestic Product",16556651,8712481,1272558,1088149,5483462
+"2018","..Compensation of employees",6297084,3309770,327986,1160942,1498385
+"2018","..Gross operating surplus",10583751,5461373,931547,73231,4117600
+"2018","..Taxes less subsidies on production and imports",1384356,847074,174443,64306,298532
+"2018","Gross Domestic Product",18265190,9618217,1433976,1298479,5914517
+"2019","..Compensation of employees",6718910,3604282,341265,1333794,1439569
+"2019","..Gross operating surplus",11298212,5831332,947318,44205,4475357
+"2019","..Taxes less subsidies on production and imports",1500741,779448,323415,83604,314274
+"2019","Gross Domestic Product",19517863,10215062,1611998,1461603,6229200
+"2020","..Compensation of employees",6243450,3076657,358117,1420733,1387942
+"2020","..Gross operating surplus",10522462,4936763,1108481,43536,4433682
+"2020","..Taxes less subsidies on production and imports",1185661,559184,283329,96967,246181
+"2020","Gross Domestic Product",17951574,8572604,1749927,1561237,6067805
+"2021","..Compensation of employees",7119311,3581320,412884,1587415,1537692
+"2021","..Gross operating surplus",10790004,4948792,1146513,41093,4653606
+"2021","..Taxes less subsidies on production and imports",1501299,796099,323681,89527,291993
+"2021","Gross Domestic Product",19410614,9326211,1883077,1718035,6483292
+"2022","..Compensation of employees",8021849,4135941,455650,1725638,1704620
+"2022","..Gross operating surplus",12319952,5814457,1304859,69304,5131333
+"2022","..Taxes less subsidies on production and imports",1686475,880970,372724,91388,341394
+"2022","Gross Domestic Product",22028276,10831368,2133232,1886329,7177347
+"2023","..Compensation of employees",8626643,4424833,499822,1851673,1850314
+"2023","..Gross operating surplus",13955665,6528643,1531097,88417,5807508
+"2023","..Taxes less subsidies on production and imports",1731256,881655,430251,85007,334343
+"2023","Gross Domestic Product",24313563,11835130,2461170,2025097,7992166
+"2024","..Compensation of employees",9259750,4679411,566261,2002247,2011832
+"2024","..Gross operating surplus",15206850,7123473,1721652,75387,6286339
+"2024","..Taxes less subsidies on production and imports",1982842,992417,484950,113828,391647
+"2024","Gross Domestic Product",26449443,12795302,2772863,2191462,8689817
+"2025","..Compensation of employees",9922149,4925006,635410,2237867,2123866
+"2025","..Gross operating surplus",15891613,7369469,1809813,83118,6629212
+"2025","..Taxes less subsidies on production and imports",2196172,1115106,538114,122297,420655
+"2025","Gross Domestic Product",28009935,13409582,2983337,2443282,9173733

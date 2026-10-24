@@ -1,0 +1,3 @@
+kind,code,gtap,sigma_q_gtap,sigma_q_ph,sigma_q_ph_source,omega_t_gtap,omega_t_pcgem,sigma_va_gtap
+commodity,ccoal,COA,3.05,0.65,"Kapuscinski-Warr 1999 ECM (commodity [11], Crude oil, coal and natural gas; significant)",3.05,1.5,
+activity,acoal,COA,,,,,,0.2

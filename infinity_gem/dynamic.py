@@ -46,6 +46,73 @@ a design note (not included), sections 3b, 6 and 7)
   need MPSADJ by household in cge.py (the design note's later refinement). Prototype: the 'smooth' hook of
   a development script (not in this repository), whose numbers this reproduces. Check CS1.
 
+Incomplete pass-through of the peso to import prices in the short run (0.3.13, 23 Oct 2026, opt-in: DynamicCGE(sr_erpt=phi);
+P2(b) of a design note (not included), section 7)
+  In the hybrid closure's short-run years the peso is held at the baseline's and moves only by a scenario's 'exr_scale' (check
+  EX1). With sr_erpt = phi, the import price of every commodity except oil (refined petroleum and crude, inside mining:
+  ERPT_FULL, priced in US$ at Singapore benchmark prices and Dubai) moves by phi times the peso's move against the baseline year's peso EXR_b:
+  PM = pwm x EXR_b x (EXR / EXR_b) ** phi x (1 + tm) (cge.py shock keys 'erpt' and 'exr_ref'); the foreign supplier absorbs the
+  rest (pricing to market), so the current account pays the lower US$ price; re-exports keep the world price. phi may also be
+  {commodity: share} (commodities not listed: 1). None (default) = full pass-through, as before; phi = 1 gives the same
+  results. Long-run years are unchanged (the peso is determined there). Needs hybrid=True and sr_fx="fixed"; a scenario may not
+  set 'erpt' or 'exr_ref' itself. Evidence: BSP DP 2025-16 (Parmanand, Platitas, Castanares and Dacio, Dec 2025, Table 5):
+  pass-through of a depreciation to inflation 0.10 within a year, 0.75 in the long run; the project's inflation VAR
+  (outputs/inflation_var_20261016_passthrough.csv): a 1% weaker peso raises consumer prices 0.02% after 12 months (90% band
+  -0.07 to 0.11). Check ER1.
+
+A markup pass-through that depends on the output gap (0.3.13, 23 Oct 2026, opt-in with sr_pricing="markup":
+DynamicCGE(sr_markup_gap=s); P6 of the same note, section 7)
+  With markup pricing a short-run year's markup is charged on the share sr_markup_pass (lam) of a change in unit variable cost.
+  With sr_markup_gap = s that share becomes lam + s x g, g = the year's output gap in percent (real GDP against the baseline
+  year's, cge.py shock keys 'mk_gap' and 'mk_gdp'): in a slump (g < 0) margins absorb more of a cost rise, in a boom they pass
+  more of it on; with costs at the baseline's the margin is the baseline's whatever the gap, so a pure demand shock moves
+  markup prices only through costs, as before. 0 (default) = the constant share, results unchanged. The design note's reason:
+  with demand at the data (P1) and pay not falling, option (c)'s 2026 inflation was about 1 point too high; a constant negative
+  mk_pass (-0.5) fitted it, and this is the state-dependent version (procyclical margins: Nekarda and Ramey 2020, Journal of
+  Money, Credit and Banking 52(S2)). s is not estimated: it is fitted to the 2026 targets and tested on the 2022 episode.
+  Check MG1.
+
+Slack at the start of short-run years (0.3.13, 23 Oct 2026, opt-in: DynamicCGE(sr_labour_slack=...); step 1 of a design note (not included), section 3)
+  The employment cap (employment_cap) holds each fixed-wage labour type's employment at most at its labour supply, and the
+  supply is the baseline's employment, the long-run closure's full employment: a short-run year therefore starts AT the cap, and
+  any boom (a 1% weaker peso: GDP +0.2%) meets it at once, raising pay (check ER1's diagnostic: two-thirds of the CGE's 0.42-0.50%
+  consumer-price response to a 1% depreciation). With sr_labour_slack the cap of short-run year t is the labour force less the
+  natural rate of unemployment instead,
+      cap_t = LF_t x (1 - u_n) = baseline employment_t x (1 + s_t),   s_t = max(0, (1 - u_n) / (1 - u_t) - 1),
+  u_t the baseline's unemployment rate (LF_t = baseline employment / (1 - u_t)). s_t may be one share for every short-run year or
+  {year: share} (years not listed: 0); the same share for every fixed-wage labour type (a natural rate by skill needs PSA's
+  unemployed by highest grade completed, not on file). The cap also bounds paid hoarding's slack (cge.py). Below the cap employment
+  can rise without pay rising (the wage curve is one-sided); the employment gap carried into later long-run years is measured
+  against the baseline's employment, so a boom within the slack carries forward as a gap of the other sign. lfs_labour_slack()
+  builds s_t from PSA's LFS: lfs_natural_rate() (an HP trend with quarter effects on the four full-sample quarterly rounds,
+  COVID quarters left out, data to 2025) and lfs_baseline_unemployment() (the baseline's u_t on the same basis). None (default)
+  = the cap at the baseline's employment, results unchanged; s = 0 gives the same results. Refused: s < 0 (the cap would bind
+  at a zero shock), s >= 0.25, hybrid=False, employment_cap=False. Check SL1.
+
+An employment cap that settles (0.3.13, 23 Oct 2026, opt-in: DynamicCGE(employment_cap="smooth"); step 2 of the same note)
+  employment_cap=True (default) switches a type that would exceed its supply to market clearing and re-solves, with a cycle
+  fallback (_cap_employment); with the BSP rule inside the path under option (c) the regimes did not settle ("Year 2026: the
+  employment cap did not settle", 23 Oct 2026). With "smooth" the short-run model carries the cap itself as one smooth
+  complementarity condition per fixed-wage type (cge.py labour_cap: E <= S, wage premium >= 0, one binding; Fischer-Burmeister,
+  as capital='vintage'), so the wage curve and the consumption rule are solved as before (_wage_curve, _sr_fixed_point) with the
+  cap holding in every evaluation: one root, no switching. Where the cap does not bind the results equal employment_cap=True to
+  the solver's tolerance; where it binds, the regime solution (the type at full employment with a market wage). Needs
+  hybrid=True and sr_fx="fixed". Check EC1.
+
+Slower pass-through of world oil prices within the year (0.3.13, 23 Oct 2026, opt-in: DynamicCGE(sr_oil_pass=omega); next step 1 in a review note (not included))
+  In the hybrid closure's short-run years the import prices of oil and crude (OIL_PASS: refined petroleum, and mining, whose imports
+  are two-thirds crude) take only the share omega of the move of their world price in pesos against the baseline year's:
+  PM = R x (pwm x EXR / R) ** omega x (1 + tm), R = pwm_b x EXR_b (cge.py shock keys 'oil_pass' and 'oil_ref'), so a world price rise
+  and a weaker peso both reach fuel buyers by the share omega within the year. The country pays the world price; the government
+  absorbs the rest at the border (cge.py: the import tax falls by (pwm x EXR - domestic price) x QM, reported as OILSUB). It stands
+  for what keeps retail fuel prices from rising in proportion to world prices within the year: mainly the excise, a fixed peso amount
+  per litre where the model's sales tax is ad valorem, and lags. Calibration (scenarios/row83_oil_passthrough.py): PSA's retail fuel
+  CPI (LPG, kerosene and vehicle fuels on PSA's 2018 weights; OpenSTAT 0012M4ACP22) against the world price in pesos (2026: the fuel-products index of the 2026 scenarios, preshock/shock_paths.py, times the BIS peso, January-September against the pre-conflict January-
+  February; 2022: the World Bank Pink Sheet's Dubai times the BIS peso, the year against 2021), a ratio of log changes, set against
+  the model's own ratio for the same world shock, omega solved so the two are equal. None (default) = the world price in full,
+  results unchanged; omega = 1 gives the same results. Long-run years are unchanged. Refused: omega outside [0, 1]; hybrid=False; a
+  commodity that also carries an sr_erpt share; a scenario's own 'oil_pass' or 'oil_ref'. Check OP1.
+
 Public capital (0.3, opt-in: DynamicCGE(public_capital={...}))
   Lost roads and bridges lower the productivity of every industry, not only the capital stock. In a scenario,
   the change in construction investment relative to the baseline is treated as public investment (true for the
@@ -221,7 +288,10 @@ DEFAULT_ASSUMPTIONS = dict(
     land="mobile",                # 0.3.7: "fixed" = in the hybrid's short-run years each crop keeps its baseline
                                   # land of that year, and a scenario's 'lscale' {activity: factor} cuts it (e.g. drought)
     employment_cap=True,          # 0.3.7: in the hybrid's short-run years a labour type whose demand would exceed
-                                  # its supply is fully employed and its wage rises instead (complementarity); False = old rule
+                                  # its supply is fully employed and its wage rises instead (complementarity); False = old rule;
+                                  # 0.3.13 (23 Oct 2026): "smooth" = the same cap as one smooth complementarity condition inside
+                                  # the short-run model (cge.py labour_cap), solved jointly with the wage curve and the consumption
+                                  # rule, with no switching between models (module notes; check EC1)
     wage_curve=None,              # 0.3.7 (16 Oct, ~1 AM): beta of a wage curve in the hybrid's short-run years; None = fixed
                                   # wage (as before). Each fixed-wage labour type's wage anchor becomes
                                   # wbar x min(1, EMP/EMP_baseline) ** beta, solved to a fixed point: when work falls, pay gives
@@ -260,6 +330,9 @@ DEFAULT_ASSUMPTIONS = dict(
     sr_markup_pass=1.0,           # 0.3.13: with sr_pricing="markup", the CGE shock key 'mk_pass': the share of a change in unit
                                   # variable cost on which the markup is charged (1 = proportional markup, the design note's
                                   # equation; 0 = margin per unit fixed in pesos, the input-output cost push); a share or {activity: share}
+    sr_markup_gap=0.0,            # 0.3.13 (23 Oct 2026, P6): with sr_pricing="markup", the change of that share per percent of the
+                                  # year's output gap against the baseline year's real GDP (cge.py 'mk_gap', 'mk_gdp'); 0 = the
+                                  # constant share (default, results unchanged). Check MG1.
     hoarding=0.0,                 # 0.3.11: paid labour hoarding in the hybrid's short-run years: the share of an
                                   # activity's fall in labour demand (below the baseline year's labour) that stays employed and
                                   # paid out of profits (CGE 'hoarding'). 0 = none (default, results unchanged)
@@ -278,13 +351,33 @@ DEFAULT_ASSUMPTIONS = dict(
                                   # saving rates) x disposable income + (1 - lam) x baseline spending x CPI / baseline CPI, met by
                                   # the year's saving-rate adjustment MPSADJ, solved jointly with the wage curve (module notes,
                                   # _sr_fixed_point). None = saving rates at the baseline's (default, results unchanged). Check CS1.
+    sr_erpt=None,                 # 0.3.13 (23 Oct 2026, P2(b) of the same note): in the hybrid's short-run years the share phi
+                                  # (0 <= phi <= 1) of the peso's move against the baseline's passed into the import prices of
+                                  # every commodity but oil (ERPT_FULL); the foreign supplier absorbs the rest (cge.py 'erpt',
+                                  # 'exr_ref'); or {commodity: phi}. None = full pass-through (default, results unchanged). Check ER1.
+    sr_labour_slack=None,         # 0.3.13 (23 Oct 2026): in the hybrid's short-run years the employment cap at the
+                                  # baseline's employment x (1 + s): the labour force less the natural rate of unemployment, s >= 0 one
+                                  # share or {year: s} (lfs_labour_slack(): PSA LFS). None = the cap at the baseline's employment
+                                  # (default, results unchanged). Check SL1.
+    sr_oil_pass=None,             # 0.3.13 (23 Oct 2026): in the hybrid's short-run years the share omega (0 <= omega <=
+                                  # 1) of a move of the world price in pesos (pwm x EXR) of oil and crude (OIL_PASS) against the baseline
+                                  # year's that reaches domestic prices within the year; the government absorbs the rest at the border
+                                  # (cge.py 'oil_pass', 'oil_ref'); or {commodity: omega}. None = in full (default, results unchanged).
+                                  # Check OP1.
 )
+# 0.3.13 (sr_erpt): commodities whose import prices take the peso's move in full (priced in US$ on world markets: refined
+# petroleum at Singapore benchmark prices, crude oil inside mining at Dubai), as in the design note's P2(b). ccoal: Infinity GEM SAM v0.7 only (coal split
+# from mining, 24 Oct 2026): coal is priced in US$ on world markets too, and inside mining it took the peso in full
+ERPT_FULL = ("cpetr", "cmine", "ccoal")
+# 0.3.13 (sr_oil_pass): the imports whose world price reaches domestic prices only by the share omega within a
+# short-run year: refined petroleum, and mining (crude inside it), the commodities the oil shock moves (infinity_gem.oil.cge_oil_shock)
+OIL_PASS = ("cpetr", "cmine")              # coal (ccoal, Infinity GEM SAM v0.7) is not oil: its world price passes in full
 
 # PSA GVA industries (OpenSTAT 0052B5BPRA1) -> activities of the IFPRI 2023 SAM
 PSA_INDUSTRIES = {
     "Agriculture, forestry, and fishing": ["amaiz", "arice", "apuls", "aoils", "aroot", "avege", "asugr", "atoba", "acott",
                                            "afrui", "acoff", "aocrp", "acatt", "apoul", "aoliv", "afore", "afish"],
-    "Mining and quarrying": ["amine"],
+    "Mining and quarrying": ["amine", "acoal"],                        # acoal: Infinity GEM SAM v0.7 only (coal split from mining)
     "Manufacturing": ["afood", "abeve", "atext", "awood", "achem", "apetr", "anmet", "ametl", "amach", "aoman", "amric"],   # apetr, amric: split SAMs only
     "Electricity, steam, water and waste management": ["aelec", "awatr"],
     "Construction": ["acons"],
@@ -368,6 +461,106 @@ def documented_baseline(labour="psa", labour_2026="observed") -> dict:
     elif labour != "placeholder":
         raise ValueError("labour must be 'psa' or 'placeholder'")
     return d
+# 0.3.13 (23 Oct 2026, sr_labour_slack): PSA LFS unemployment rates (OpenSTAT 0021B3FKEI2, Rates of Key Employment Indicators,
+# April 2005 on; the 2005 definition of unemployment throughout) and the four full-sample quarterly rounds
+LFS_RATES_FILE = "PSA_OpenSTAT_0021B3FKEI2_LFS_key_employment_rates_2005-2026.csv"
+LFS_ROUNDS = {"January": 1, "April": 2, "July": 3, "October": 4}
+
+
+def lfs_unemployment_rounds() -> pd.DataFrame:
+    """0.3.13: PSA LFS unemployment rate (%, both sexes) of the four full-sample quarterly rounds (January, April, July,
+    October), April 2005 to the latest round on file (data/raw/lfs, OpenSTAT 0021B3FKEI2). Since 2021 PSA also runs smaller monthly
+    surveys between the rounds and its annual rate averages all twelve months, which in 2023-2025 ran 0.2-0.5 points below the
+    four rounds' mean; the rounds alone are one consistent series from 2005. Columns: year, quarter, t (year + (quarter - 1) / 4),
+    u (%)."""
+    from . import paths
+    d = pd.read_csv(paths.DATA_RAW / "lfs" / LFS_RATES_FILE, comment="#", na_values=".")
+    q = d[d["Month"].isin(list(LFS_ROUNDS))].dropna(subset=["Unemployment Rate Both sexes"])
+    out = pd.DataFrame({"year": q["Year"].astype(int).to_numpy(), "quarter": q["Month"].map(LFS_ROUNDS).astype(int).to_numpy(),
+                        "u": q["Unemployment Rate Both sexes"].astype(float).to_numpy()})
+    out["t"] = out["year"] + (out["quarter"] - 1) / 4
+    return out.sort_values("t").reset_index(drop=True)
+
+
+def lfs_natural_rate(lam: float = 1600.0, end: int = 2025, covid=(2020.25, 2021.75)) -> dict:
+    """0.3.13 (23 Oct 2026; sr_labour_slack): the natural rate of unemployment from PSA's LFS, a statistical trend: the
+    Hodrick-Prescott trend (smoothing lam, 1600 for quarterly data) of the four quarterly rounds' unemployment rate (%), with fixed
+    quarter effects (summing to zero) estimated jointly, by penalised least squares, the COVID quarters (default 2020Q2-2021Q4)
+    left out of the fit (their trend is interpolated; the pandemic spike, 17.6% in April 2020, raised BSP's Kalman-filter NAIRU
+    from 5.0-5.2% to 7.4-7.5%), data to the last round of `end` (2025: before the 2026 shocks the model simulates). The natural
+    rate is the trend at the last quarter. Check: on the same data the trend at 2019Q4 is 5.2%, inside the NAIRU of BSP DP 2024-11
+    (Espano, Lemence, Tabin and Armas, June 2024, Table 2: Phillips curve with a time-varying NAIRU by the Kalman filter, 1990Q3-
+    2019Q4, NAIRU 5.02-5.19% across four inflation measures); BSP's HP trends put the unemployment gap below zero from 2022Q1.
+    Returns {'rate': natural rate (share), 'trend': pd.Series (%, by t), 'seasonal': {quarter: effect, pp}, 'lam', 'end', 'covid',
+    'last': the last quarter used}. scenarios/natural_rate_lfs.py reports the variants (lam, the COVID window, the sample end)."""
+    q = lfs_unemployment_rounds()
+    q = q[q["year"] <= int(end)].reset_index(drop=True)
+    T = len(q)
+    if T < 12 or float(lam) <= 0:
+        raise ValueError("lfs_natural_rate needs lam > 0 and at least three years of quarterly rounds")
+    y = q["u"].to_numpy(float)
+    obs = np.ones(T, bool) if covid is None else ~((q["t"] >= covid[0]) & (q["t"] <= covid[1])).to_numpy()
+    D = np.zeros((T - 2, T))
+    for i in range(T - 2):
+        D[i, i:i + 3] = (1.0, -2.0, 1.0)
+    S = np.zeros((T, 3))                                     # quarter effects of quarters 2-4; quarter 1's = -(their sum)
+    for i, k in enumerate(q["quarter"].to_numpy(int)):
+        if k == 1:
+            S[i, :] = -1.0
+        else:
+            S[i, k - 2] = 1.0
+    W = np.diag(obs.astype(float))
+    A = np.block([[W + float(lam) * D.T @ D, W @ S], [S.T @ W, S.T @ W @ S]])
+    b = np.concatenate([W @ np.where(obs, y, 0.0), S.T @ W @ np.where(obs, y, 0.0)])
+    z = np.linalg.solve(A, b)
+    tau, s3 = z[:T], z[T:]
+    seas = {1: float(-s3.sum()), 2: float(s3[0]), 3: float(s3[1]), 4: float(s3[2])}
+    return {"rate": float(tau[-1]) / 100.0, "trend": pd.Series(tau, index=q["t"].to_numpy()), "seasonal": seas,
+            "lam": float(lam), "end": int(end), "covid": covid, "last": float(q["t"].iloc[-1])}
+
+
+def lfs_baseline_unemployment(y2026: str = "observed", first_year: int = 2023, last_year: int = 2030, seasonal=None) -> dict:
+    """0.3.13 (sr_labour_slack): {year: unemployment rate (share)} of the dynamic baseline's labour force, on the basis of
+    lfs_natural_rate (the four quarterly rounds), built as psa_labour_growth builds the baseline's employment: 2023-2025 the mean
+    of the year's four rounds; 2026 with y2026="observed" (documented_baseline's default: the baseline carries the 2026 employment
+    on file) the mean of the 2026 rounds on file less their quarter effects (lfs_natural_rate's, or `seasonal`), with "trend" the
+    2025 rate (2026 employment by the projection rule); later years the last rate (employment grows with the population 15+ at a
+    constant employment rate)."""
+    if y2026 not in ("observed", "trend"):
+        raise ValueError("y2026 must be 'observed' or 'trend'")
+    q = lfs_unemployment_rounds()
+    seas = seasonal if seasonal is not None else lfs_natural_rate()["seasonal"]
+    out = {}
+    for y in range(first_year, 2026):
+        r = q[q["year"] == y]
+        if len(r) != 4:
+            raise ValueError(f"lfs_baseline_unemployment: {y} has {len(r)} quarterly rounds on file, not 4")
+        out[y] = float(r["u"].mean()) / 100.0
+    r26 = q[q["year"] == 2026]
+    if y2026 == "observed" and len(r26):
+        out[2026] = float((r26["u"] - r26["quarter"].map(seas)).mean()) / 100.0
+    else:
+        out[2026] = out[2025]
+    for y in range(2027, last_year + 1):
+        out[y] = out[y - 1]
+    return out
+
+
+def lfs_labour_slack(natural_rate=None, y2026: str = "observed", first_year: int = 2023, last_year: int = 2030) -> dict:
+    """0.3.13 (23 Oct 2026): {year: s_t} for DynamicCGE(sr_labour_slack=...), the employment cap of a
+    short-run year as the labour force less the natural rate: s_t = max(0, (1 - u_n) / (1 - u_t) - 1), u_t from
+    lfs_baseline_unemployment(y2026) and u_n = natural_rate (a share) or, by default, lfs_natural_rate()['rate'] (4.51% on the
+    LFS file of 14 Oct 2026). A year whose labour market was tighter than the natural rate (u_t < u_n, as 2024) gets 0: the cap
+    stays at the baseline's employment, since a cap below it would bind with no shock at all. Use the y2026 of the baseline's
+    labour path (documented_baseline(labour_2026=...))."""
+    est = lfs_natural_rate()
+    u_n = est["rate"] if natural_rate is None else float(natural_rate)
+    if not 0.0 <= u_n < 0.5:
+        raise ValueError("natural_rate must be a share in [0, 0.5)")
+    ub = lfs_baseline_unemployment(y2026, first_year, last_year, seasonal=est["seasonal"])
+    return {y: max(0.0, (1.0 - u_n) / (1.0 - u) - 1.0) for y, u in ub.items()}
+
+
 PUBLIC_CAPITAL_DEFAULTS = dict(delta_g=0.0352, e=0.77)
 
 
@@ -433,6 +626,11 @@ class DynamicCGE:
         if a["capital_allocation"] not in ("mobile", "putty-clay", "vintage"):
             raise ValueError("capital_allocation must be 'mobile', 'putty-clay' or 'vintage'")
         self._check_sr_consumption(a)                # 0.3.13: checked here, before any model is built
+        self._check_sr_erpt(a)                       # 0.3.13 (P2(b)): the same (the commodities again once the model is built)
+        self._check_sr_markup_gap(a)                 # 0.3.13 (P6): the same
+        self._check_employment_cap(a)                # 0.3.13: True, False or "smooth"
+        self._check_sr_labour_slack(a)               # 0.3.13
+        self._check_sr_oil_pass(a)                   # 0.3.13 (the commodities again once the model is built)
         kw = dict(closure=a["closure"], unemployed=a["unemployed"],
                   capital="fixed" if self.putty else ("vintage" if self.vintage else a["capital"]),
                   les=a["les"], elasticities=a["elasticities"], margins=a["margins"], wage=a["wage"])
@@ -493,6 +691,8 @@ class DynamicCGE:
             self._sam_sr, self._kw_sr = sam, kw_sr
             self._ms_cache = {tuple(self.ms.unemployed): self.ms}
         m = self.m
+        self._check_sr_erpt(a, m.C)                  # 0.3.13 (P2(b)): commodities named in sr_erpt must be the SAM's
+        self._check_sr_oil_pass(a, m.C)              # 0.3.13: the same for sr_oil_pass
         self.kc = m.F.index("fcap")
         self.K0 = m.QFS0[self.kc]
         self.K0a = m.QF0[self.kc].copy()             # capital by activity (capital-income units, base rental 1)
@@ -614,15 +814,98 @@ class DynamicCGE:
         self._calib_x = state["x"]                    # a solution near the calibrated point (restart for the final solve)
         return unpack(out.x)
 
-    def _ms_for(self, unemployed):
-        """The short-run model with a given set of labour types on fixed wages, built once and kept."""
+    def _ms_for(self, unemployed, smooth=False):
+        """The short-run model with a given set of labour types on fixed wages, built once and kept. 0.3.13:
+        smooth=True, the same model with the employment cap as a complementarity condition (employment_cap="smooth")."""
         key = tuple(unemployed)
-        if key not in self._ms_cache:
+        ckey = ("labour_cap",) + key if smooth else key  # 0.3.13 (employment_cap="smooth"): its own entry in the cache
+        if ckey not in self._ms_cache:
             kw = dict(self._kw_sr, unemployed=key)
+            if smooth:                                   # the cap inside the model as a complementarity condition (cge.py)
+                kw["labour_cap"] = True
             if kw.get("fx") == "flexible" and not key:   # 0.3.8: every labour type at full employment leaves no peso
                 kw["fx"] = "fixed"                       # wage to anchor prices: the peso goes back to its baseline (numeraire)
-            self._ms_cache[key] = CGE(self._sam_sr, **kw) if self._sam_sr is not None else CGE.from_sam(**kw)
-        return self._ms_cache[key]
+            self._ms_cache[ckey] = CGE(self._sam_sr, **kw) if self._sam_sr is not None else CGE.from_sam(**kw)
+        return self._ms_cache[ckey]
+
+    def _sr_model(self):
+        """0.3.13: the short-run model of a short-run year: self.ms, or with employment_cap="smooth" the same model with the
+        employment cap inside it as one complementarity condition per fixed-wage type (cge.py labour_cap; built once and kept)."""
+        if self.a["employment_cap"] == "smooth":
+            return self._ms_for(self.ms.unemployed, smooth=True)
+        return self.ms
+
+    def _sr_slack(self, t) -> float:
+        """0.3.13 (sr_labour_slack): the share s_t by which the employment cap of short-run year t exceeds the baseline's
+        employment (0 when the option is off or the year is not listed)."""
+        s = self.a.get("sr_labour_slack")
+        if s is None:
+            return 0.0
+        return float(s.get(t, 0.0)) if isinstance(s, dict) else float(s)
+
+    @staticmethod
+    def _check_employment_cap(a):
+        """0.3.13 (check EC1): employment_cap is True, False or "smooth"; "smooth" needs the hybrid closure
+        (short-run years) and the fixed peso (cge.py labour_cap: with a flexible peso and every type at its cap no peso wage would
+        anchor prices). Checked at construction and before each scenario path."""
+        ec = a["employment_cap"]
+        if isinstance(ec, str) and ec != "smooth":
+            raise ValueError("employment_cap must be True, False or 'smooth'")
+        if ec == "smooth" and (not a["hybrid"] or a["sr_fx"] != "fixed"):
+            raise ValueError("employment_cap='smooth' is an option of the hybrid closure's short-run years with the fixed peso "
+                             "(hybrid=True, sr_fx='fixed')")
+        return ec
+
+    @staticmethod
+    def _check_sr_labour_slack(a):
+        """0.3.13 (check SL1): None, a share s with 0 <= s < 0.25, or {year: s}; needs the hybrid closure and an
+        employment cap to move. A negative s (a cap below the baseline's employment) would bind with no shock at all, so a zero shock
+        would not reproduce the baseline; s >= 0.25 is no natural-rate slack. Checked at construction and before each path."""
+        s = a.get("sr_labour_slack")
+        if s is None:
+            return None
+        vals = list(s.values()) if isinstance(s, dict) else [s]
+        bad_key = isinstance(s, dict) and any(isinstance(k, bool) or not isinstance(k, numbers.Integral) for k in s)
+        if not vals or bad_key or any(isinstance(v, bool) or not isinstance(v, numbers.Real) or not np.isfinite(float(v))
+                                      or not 0.0 <= float(v) < 0.25 for v in vals):
+            raise ValueError("sr_labour_slack must be None, a share s with 0 <= s < 0.25 (the employment cap at the baseline's "
+                             "employment x (1 + s)) or {year: s}; see lfs_labour_slack()")
+        if not a["hybrid"]:
+            raise ValueError("sr_labour_slack is an option of the hybrid closure's short-run years (hybrid=True)")
+        if not a["employment_cap"]:
+            raise ValueError("sr_labour_slack moves the employment cap: it needs employment_cap=True or 'smooth'")
+        return s
+
+    @staticmethod
+    def _check_sr_oil_pass(a, commodities=None):
+        """0.3.13 (23 Oct 2026; check OP1): None, a share omega with 0 <= omega <= 1 (for OIL_PASS), or
+        {commodity: share}; needs the hybrid closure (short-run years); no commodity may also carry an sr_erpt share other than 1 (the
+        peso's pass-through, the foreign supplier absorbing the rest, against the world price's, the government absorbing it). Checked
+        at construction (the commodities once the model is built) and before each scenario path."""
+        o = a.get("sr_oil_pass")
+        if o is None:
+            return None
+        vals = list(o.values()) if isinstance(o, dict) else [o]
+        if not vals or any(isinstance(v, bool) or not isinstance(v, numbers.Real) or not np.isfinite(float(v))
+                           or not 0.0 <= float(v) <= 1.0 for v in vals):
+            raise ValueError("sr_oil_pass must be None, a share omega with 0 <= omega <= 1 (the share of a move of the world price of oil "
+                             "and crude in pesos that reaches domestic prices within the year) or {commodity: share}")
+        if not a["hybrid"]:
+            raise ValueError("sr_oil_pass is an option of the hybrid closure's short-run years (hybrid=True)")
+        names = list(o) if isinstance(o, dict) else list(OIL_PASS)
+        if commodities is not None:
+            bad = [c for c in names if c not in commodities]
+            if bad:
+                raise ValueError(f"sr_oil_pass: not commodities of this SAM: {bad}" + ("" if isinstance(o, dict) else
+                                 " (one share needs the petroleum-split SAM: refined petroleum 'cpetr' and mining 'cmine')"))
+        om = {c for c, v in (o.items() if isinstance(o, dict) else ((c, o) for c in OIL_PASS)) if float(v) != 1.0}
+        e = a.get("sr_erpt")
+        if e is not None:
+            er = ({c for c, v in e.items() if float(v) != 1.0} if isinstance(e, dict)
+                  else ({c for c in (commodities if commodities is not None else om) if c not in ERPT_FULL} if float(e) != 1.0 else set()))
+            if om & er:
+                raise ValueError(f"sr_oil_pass and sr_erpt may not both apply to a commodity: {sorted(om & er)}")
+        return o
 
     def _wage_curve(self, sol, model, spec, t, K):
         """0.3.7 (16 Oct 2026): in a short-run year, each fixed-wage labour type's wage anchor is lowered to
@@ -681,6 +964,57 @@ class DynamicCGE:
                              "it every year is solved in a long-run closure, where the saving rate is not free (it clears "
                              "savings and investment, or is held at the baseline's)")
         return float(lam)
+
+    @staticmethod
+    def _check_sr_erpt(a, commodities=None):
+        """0.3.13 (23 Oct 2026, P2(b); check ER1): refuse an sr_erpt assumption the option is not defined for (at construction
+        and again before a scenario path, as _check_sr_consumption). None, or a share phi in [0, 1], or {commodity: share}; needs the
+        hybrid closure (short-run years) with the fixed peso (sr_fx='fixed'), where the peso is an anchor that a scenario moves."""
+        e = a.get("sr_erpt")
+        if e is None:
+            return None
+        vals = list(e.values()) if isinstance(e, dict) else [e]
+        if not vals or any(isinstance(v, bool) or not isinstance(v, numbers.Real) or not np.isfinite(float(v))
+                           or not 0.0 <= float(v) <= 1.0 for v in vals):
+            raise ValueError("sr_erpt must be None, a share phi with 0 <= phi <= 1 (the share of the peso's move passed into non-oil "
+                             "import prices within the year) or {commodity: share}")
+        if not a["hybrid"] or a["sr_fx"] != "fixed":
+            raise ValueError("sr_erpt is an option of the hybrid closure's short-run years with the fixed peso (hybrid=True, "
+                             "sr_fx='fixed'): elsewhere the peso is determined by the model")
+        if isinstance(e, dict) and commodities is not None:
+            bad = [c for c in e if c not in commodities]
+            if bad:
+                raise ValueError(f"sr_erpt: not commodities of this SAM: {bad}")
+        return e
+
+    @staticmethod
+    def _check_sr_markup_gap(a):
+        """0.3.13 (23 Oct 2026, P6; check MG1): refuse an sr_markup_gap the option is not defined for (at construction and again
+        before a scenario path): a finite number; other than 0 only with markup pricing in the hybrid closure's short-run years."""
+        s = a.get("sr_markup_gap", 0.0)
+        if isinstance(s, bool) or not isinstance(s, numbers.Real) or not np.isfinite(float(s)):
+            raise ValueError("sr_markup_gap must be a finite number: the change of the markup pass-through (sr_markup_pass) per "
+                             "percent of output gap")
+        if float(s) != 0.0 and (not a["hybrid"] or a["sr_pricing"] != "markup"):
+            raise ValueError("sr_markup_gap is an option of markup pricing in the hybrid closure's short-run years (hybrid=True, "
+                             "sr_pricing='markup')")
+        return float(s)
+
+    def _sr_erpt_spec(self, ms):
+        """0.3.13 (P2(b)): the CGE shock key 'erpt' of a short-run year: {commodity: phi} for every commodity but ERPT_FULL
+        (one share), or the assumption's own dict."""
+        e = self.a["sr_erpt"]
+        if isinstance(e, dict):
+            return {c: float(v) for c, v in e.items()}
+        return {c: float(e) for c in ms.C if c not in ERPT_FULL}
+
+    def _sr_oil_pass_spec(self, ms):
+        """0.3.13: the CGE shock key 'oil_pass' of a short-run year: {commodity: omega} for OIL_PASS (one
+        share), or the assumption's own dict."""
+        o = self.a["sr_oil_pass"]
+        if isinstance(o, dict):
+            return {c: float(v) for c, v in o.items()}
+        return {c: float(o) for c in OIL_PASS if c in ms.C}
 
     def _sr_consumption_ref(self, t, model):
         """0.3.13 (22 Oct 2026; sr_consumption): the consumption rule's reference in short-run year t, from the baseline
@@ -782,6 +1116,9 @@ class DynamicCGE:
             [f.startswith("flab") for f in m.F], L_index, 1.0)
         supply = m.QFS0 * Lv
         allu = list(self.a["short_run_unemployed"])
+        sl = self._sr_slack(t)                           # 0.3.13 (sr_labour_slack): the cap at the baseline's employment x (1 + s_t)
+        if sl:
+            supply = supply * np.array([1.0 + sl if f in allu else 1.0 for f in m.F])
         idx = float(b["CPI"]) if self.ms.wage == "real" else 1.0
         wbar = {f: float(b["WF"][m.F.index(f)] / idx) for f in allu}
         joint, seen = False, {tuple(sorted(model.unemployed))}
@@ -816,6 +1153,10 @@ class DynamicCGE:
         kshare = np.where(ms.QF0[kc] > 0, bsol["QF"][kc] / np.where(ms.QF0[kc] > 0, ms.QF0[kc], 1), 1.0)
         spec = dict(spec)
         spec["qfs_scale"] = dict(spec["qfs_scale"], fcap=1.0)
+        sl = self._sr_slack(t)                   # 0.3.13 (sr_labour_slack): the fixed-wage types' cap, and paid hoarding's slack, at
+        if sl:                                   # the labour force less the natural rate, the baseline's employment x (1 + s_t)
+            sru = set(self.a["short_run_unemployed"])
+            spec["qfs_scale"] = {f: (float(v) * (1.0 + sl) if f in sru else v) for f, v in spec["qfs_scale"].items()}
         if self.vintage:                         # 0.3.12: in a short-run year the year's new capital is
             # placed where the baseline placed it (investment plans made before the shock); the scenario's capital path enters
             # as its deviation from the baseline's old capital and pool; no pool is re-allocated within the year, and installed
@@ -839,6 +1180,17 @@ class DynamicCGE:
         if ms.fx == "flexible" and abs(exr_scale - 1.0) > 1e-12:
             raise ValueError(f"Year {t}: 'exr_scale' (a peso shock) needs the fixed peso of sr_fx='fixed'")
         spec["exr"] = float(bsol["EXR"]) * exr_scale                   # 0.3.7: peso shock (check EX1)
+        if "erpt" in spec or "exr_ref" in spec:  # 0.3.13 (P2(b)): pass-through is the assumption sr_erpt, anchored to the baseline
+            raise ValueError(f"Year {t}: 'erpt' and 'exr_ref' are set by DynamicCGE(sr_erpt=...), not by a scenario")
+        if self.a["sr_erpt"] is not None:        # the share phi of the peso's move against the baseline year's peso reaches import
+            spec["erpt"] = self._sr_erpt_spec(ms)    # prices (oil and crude in full); the foreign supplier absorbs the rest
+            spec["exr_ref"] = float(bsol["EXR"])
+        if "oil_pass" in spec or "oil_ref" in spec:  # 0.3.13: set by DynamicCGE(sr_oil_pass=...), anchored to the
+            raise ValueError(f"Year {t}: 'oil_pass' and 'oil_ref' are set by DynamicCGE(sr_oil_pass=...), not by a scenario")   # baseline
+        if self.a.get("sr_oil_pass") is not None:    # only the share omega of the move of the world price of oil and crude in pesos
+            spec["oil_pass"] = self._sr_oil_pass_spec(ms)    # against the baseline year's reaches domestic prices within the year; the
+            pw_b, ex_b = np.asarray(bsol["pwm"], float), float(bsol["EXR"])   # government absorbs the rest at the border
+            spec["oil_ref"] = {c: float(pw_b[ms.C.index(c)]) * ex_b for c in spec["oil_pass"]}
         if ms.pricing == "sticky":               # 0.3.8 (review D2): prices anchored to the baseline year's, rigid downward
             spec["pa_anchor"] = {x: float(bsol["UNITREV"][i]) for i, x in enumerate(ms.A)}
             s_ = self.a["sr_stickiness"]
@@ -848,6 +1200,9 @@ class DynamicCGE:
             s_, p_ = self.a["sr_stickiness"], self.a["sr_markup_pass"]
             spec["stickiness"] = dict(s_) if isinstance(s_, dict) else float(s_)
             spec["mk_pass"] = dict(p_) if isinstance(p_, dict) else float(p_)
+            if float(self.a.get("sr_markup_gap", 0.0)) != 0.0:     # 0.3.13 (P6): the pass-through moves with the output gap
+                spec["mk_gap"] = float(self.a["sr_markup_gap"])  # against the baseline year's real GDP (zero shock = baseline)
+                spec["mk_gdp"] = float(self.base.table.loc[t, "real_gdp"])
         if ms.en is not None:                    # 0.3.11: installed technology centred on the baseline year
             spec["en_shares"] = ms.energy_shares_at(bsol["PQ"], bsol["PVA"], bsol["QA"], self.m)
         if ms.hoarding > 0:                      # 0.3.11: hoarding relative to the baseline year's labour by activity
@@ -914,6 +1269,16 @@ class DynamicCGE:
         self._mps_override = {}                      # 0.3.13: the consumption rule's saving-rate adjustments, this path only
         if shocks is not None and not calibrate and self.a["sr_consumption"] is not None:
             self._check_sr_consumption(self.a)       # 0.3.13: also when set after construction
+        if shocks is not None and not calibrate and self.a.get("sr_erpt") is not None:
+            self._check_sr_erpt(self.a, m.C)         # 0.3.13 (P2(b)): also when set after construction
+        if shocks is not None and not calibrate and self.a.get("sr_markup_gap", 0.0) != 0.0:
+            self._check_sr_markup_gap(self.a)        # 0.3.13 (P6): also when set after construction
+        if shocks is not None and not calibrate and self.a.get("sr_oil_pass") is not None:
+            self._check_sr_oil_pass(self.a, m.C)     # 0.3.13: also when set after construction
+        if shocks is not None and not calibrate and (isinstance(self.a["employment_cap"], str)
+                                                     or self.a.get("sr_labour_slack") is not None):
+            self._check_employment_cap(self.a)       # 0.3.13: also when set after construction
+            self._check_sr_labour_slack(self.a)
         icons = m.C.index("ccons")
         sols, tfps, caps, rows, dems = {}, {}, {}, [], {}
         K = self.K0a.copy() if self.by_act else self.K0
@@ -989,8 +1354,8 @@ class DynamicCGE:
             spec = self._spec(t, K, L_index, Y_index, tf_used, extra, dem)
             short = hybrid and t in shocks and (self.a["short_run_years"] is None or t in self.a["short_run_years"])
             if short:
-                model = self.ms
-                sol = model.solve(self._short_run_spec(spec, t, K), x_start=self._short_run_start(t))
+                model = self._sr_model()                 # 0.3.13: self.ms, or with employment_cap="smooth" the model with the cap inside
+                sol = model.solve(self._short_run_spec(spec, t, K, model), x_start=self._short_run_start(t, model))
             else:
                 model = self.mL if sav_lr else m
                 if abs(float(spec.pop("exr_scale", 1.0)) - 1.0) > 1e-12:
@@ -1013,11 +1378,11 @@ class DynamicCGE:
                 # 0.3.7: very large shocks, solved in steps (25%, 50%, 75%, 100% of the year's shock),
                 # each step starting from the last solution (continuation). The final step is the full shock, solved to
                 # the usual tolerance, so the result is the same equilibrium, only reached more safely.
-                xs = self._short_run_start(t) if short else (self._lr_start(t) if sav_lr else self.base.solutions[t].x)
+                xs = self._short_run_start(t, model) if short else (self._lr_start(t) if sav_lr else self.base.solutions[t].x)
                 for lam in (0.25, 0.5, 0.75, 1.0):
                     sp = self._spec(t, K, L_index, Y_index, tf_used, _scale_shock(extra, lam), dem)
                     if short:
-                        sp = self._short_run_spec(sp, t, K)
+                        sp = self._short_run_spec(sp, t, K, model)
                     else:
                         sp.pop("exr_scale", None)             # already refused above if it was not 1
                         if sav_lr:
@@ -1035,7 +1400,9 @@ class DynamicCGE:
                 sol, model = self._sr_fixed_point(sol, model, spec, t, K)   # curve as one root (check CS1)
             elif short and self.a["wage_curve"]:         # 0.3.7 (16 Oct): pay gives a little when work falls (check WC1)
                 sol, model = self._wage_curve(sol, model, spec, t, K)
-            if short and self.a["employment_cap"]:      # 0.3.7: employment at most the labour supply
+            if short and self.a["employment_cap"] == "smooth":   # 0.3.13: the cap held inside every solve above
+                capped = [model.F[k] for k in model.iU if float(sol["LPREM"][k]) > 1e-8]   # (cge.py labour_cap): types at their cap
+            elif short and self.a["employment_cap"]:    # 0.3.7: employment at most the labour supply
                 sol, model, capped = self._cap_employment(sol, model, spec, t, K, L_index)
                 if capped and self.a["wage_curve"]:     # 0.3.9 (review D4): not solved jointly; flag it
                     import warnings
@@ -1175,7 +1542,7 @@ class DynamicCGE:
 
     def monetary_scenario(self, shocks: dict, rule: dict = None, theta: float = 1.5, fx_per_pp: float = 0.0,
                           expectations: str = "adaptive", path: dict = None, years=None, tol: float = 0.01,
-                          max_iter: int = 15, accelerate: bool = True, relax: float = 0.5) -> Path:
+                          max_iter: int = 15, accelerate: bool = True, relax: float = 0.5, start: dict = None) -> Path:
         """The money block (0.3.12, 20 Oct 2026): the path with a BSP policy rule inside the model, solved as a fixed point over the
         whole path (each iteration is one scenario run; the rule's feedback on the gaps is weak, so two to four iterations
         usually suffice). Opt-in; with no rule the model is as before.
@@ -1199,6 +1566,10 @@ class DynamicCGE:
         - years: the years the rule acts in; None = every year from the first year that carries a shock (an empty placeholder
           year before the shocks is left alone, so the rule cannot anticipate them; only the shock years themselves when the
           hybrid closure's short_run_years is None, so that the rule creates no new short-run year).
+        - start: {"i": {year: policy-rate gap}, "pi_e": {year: expected inflation gap}} (0.3.13, 23 Oct 2026, opt-in): the first
+          iteration runs the path at this rate path (a warm start, e.g. the converged path of a nearby setting in a re-fit) instead of
+          the path without the rule; years not listed get zero. None (default) = as before. The fixed point is the same; only the
+          number of iterations changes.
         - relax, accelerate, tol: the path used in the next iteration is a damped step towards the rule's rate (relax 0.5; the plain
           map can diverge in the 2026 scenarios' setting, where the years are coupled through expectations), replaced after two iterations by
           a secant step on the residual, year by year, where the last two paths differ by at least ten times tol (the slope is
@@ -1234,7 +1605,13 @@ class DynamicCGE:
         rule_rate = dict(rate)                       # the rate the rule gives (the path is run with `rate`, extrapolated when accelerated)
         prev = None                                  # (path used, rate the rule gave) of the previous iteration, for the secant step
         scale, fxs = {t: 1.0 for t in years}, {t: 1.0 for t in years}
-        sim = self._run(shocks=shocks, tfp_path=self.base.tfp)      # the path without the rule
+        if start is None:
+            sim = self._run(shocks=shocks, tfp_path=self.base.tfp)  # the path without the rule
+        else:                                        # 0.3.13: a warm start, the path run at the given rate path first
+            rate = {t: float((start.get("i") or {}).get(t, 0.0)) for t in years}
+            pie = {t: float((start.get("pi_e") or {}).get(t, 0.0)) for t in years}
+            sim = self._run(shocks=self._monetary_shocks(shocks, years, rate, pie, theta, fx_per_pp, inv, hybrid, srfix, scale, fxs),
+                            tfp_path=self.base.tfp)
         g = self.monetary_gaps(sim)
         deltas, converged, it = [], False, 0
         for it in range(1, max_iter + 1):

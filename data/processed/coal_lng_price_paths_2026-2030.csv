@@ -1,0 +1,13 @@
+# World coal and LNG price changes by calendar year, % against the January-February 2026 level (the pre-conflict level),
+# for the opt-in coal and LNG part of the oil shock on Infinity GEM SAM v0.7 (infinity_gem.oil.coal_lng_paths, coal_lng_shock).
+# Source: World Bank Pink Sheet monthly prices (WorldBank_PinkSheet_coal_lng_monthly.csv: coal = 'Coal, Australian', Newcastle 6,000 kcal/kg f.o.b., US$/mt; LNG = 'Liquefied natural gas, Japan', import price c.i.f., US$/mmbtu). Latest month on disk: 2026-09.
+# Rule: preshock/shock_paths.py (calendar-year average of actual and forecast months against the pre-conflict level).
+# Forecast: no change from the latest month (as the 2026 scenarios do for rice and urea).
+# World Bank Pink Sheet (CC BY 4.0).
+# Written 2026-10-24 02:18 by research/coal_lng_prices/coal_lng_paths.py. RESEARCH, NOT FOR CITATION.
+year,coal,lng,basis
+2026,18.945369558866474,17.39734034780067,"World Bank coal and LNG, 9 actual months, the rest no change"
+2027,28.921998247151603,24.945199473914936,"World Bank coal and LNG, 0 actual months, the rest no change"
+2028,28.921998247151603,24.945199473914936,"World Bank coal and LNG, 0 actual months, the rest no change"
+2029,28.921998247151603,24.945199473914936,"World Bank coal and LNG, 0 actual months, the rest no change"
+2030,28.921998247151603,24.945199473914936,"World Bank coal and LNG, 0 actual months, the rest no change"

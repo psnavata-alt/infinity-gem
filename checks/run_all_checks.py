@@ -200,6 +200,81 @@ Checks
       homogeneity: the year's nominal anchors (peso, peso wage anchors, world prices in pesos, the rule's baseline spending and
       price reference) +10% give every price +10% with quantities and later years unchanged, also with the rule's reference held
       at its real value; a tampered rule (CPI term dropped) is caught; the guards refuse what the rule is not defined for.
+  ER1 Incomplete pass-through of the peso to import prices (0.3.13, 23 Oct 2026, P2(b) of docs/design/MARKUP_DEMAND_SIDE_
+      PROPOSAL_22Oct2026.md; cge.py shock keys 'erpt' and 'exr_ref', dynamic.py sr_erpt): in the static short-run model (flexible
+      and markup prices) and in the dynamic hybrid (Infinity GEM's own SAM, the 2026 scenarios' engine), phi 1 reproduces the option off and a zero
+      shock the baseline; after a depreciation with an oil shock every import price equals pwm x exr_ref x (EXR / exr_ref) ** phi
+      x (1 + tm) (recomputed here; oil and crude at phi 1) and the current account pays the suppliers' US$ price for imports sold
+      here and the world price for re-exports; Walras' law, the GDP identity and the rebuilt SAM hold; consumer prices rise less
+      than with full pass-through, and phi 0 leaves non-oil import prices where they were; homogeneity (every nominal anchor,
+      the reference peso among them, +10%: prices +10%, quantities unchanged; in the dynamic model via the baseline year solved
+      at a 10% higher price level); a tampered rule (suppliers anchored to the benchmark peso, not the year's) is caught; the
+      guards refuse what the option is not defined for.
+  MG1 A markup pass-through that depends on the output gap (0.3.13, 23 Oct 2026, P6 of the same note; cge.py shock keys
+      'mk_gap' and 'mk_gdp', dynamic.py sr_markup_gap): in the static short-run model with markup pricing, slope 0 is the option
+      off, the reference real GDP is the benchmark's (as gdp()), the rule with slope s at its solved output gap equals the constant
+      pass-through mk_pass + s x gap (the same solution), and after an oil shock every markup home price equals AVC + mu x (A /
+      (1 + mu) + (mk_pass + s x gap) x (AVC - A / (1 + mu))) (recomputed here, unit variable cost too); consumer prices rise less
+      and GDP falls less than with slope 0; Walras' law, the GDP identity, the rebuilt SAM and homogeneity hold. In the dynamic
+      hybrid (option (c): markup with stickiness by sector, mk_pass 0, the 2026 scenarios' engine) a zero shock with every new option on
+      (the consumption rule, partial pass-through of the peso, this rule) reproduces the baseline; the rule holds in the solved
+      year against the baseline year's real GDP; homogeneity with every option on; a tampered rule (the gap measured against the
+      benchmark's GDP, not the year's baseline) is caught; the guards refuse what the option is not defined for.
+  SL1 Slack at the start of short-run years (0.3.13, 23 Oct 2026, step 1 of a design note (not included),
+      section 3; dynamic.py sr_labour_slack, lfs_natural_rate, lfs_labour_slack): the natural rate of unemployment (the HP trend
+      with quarter effects of PSA's four quarterly LFS rounds, COVID quarters out, to 2025Q4) recomputed here as one stacked
+      least-squares problem, and its regression value 4.510% (the 2019Q4 trend at the top of BSP DP 2024-11's NAIRU band); the
+      baseline's unemployment and the slack by year recomputed; in the dynamic hybrid (Infinity GEM's own SAM, the 2026 scenarios' engine) slack 0 is
+      the option off exactly and a zero shock with the slack reproduces the baseline; after a demand boom every capped labour type
+      is employed at the baseline's employment x (1 + s), none above; a 1% weaker peso raises consumer prices less and GDP more
+      than with the cap at the baseline's employment; homogeneity; a tampered engine that ignores the slack is caught; the guards
+      refuse what the option is not defined for.
+  EC1 An employment cap that settles (0.3.13, 23 Oct 2026, step 2 of the same note; cge.py labour_cap, dynamic.py
+      employment_cap='smooth'): in the static short-run model (Infinity GEM's own SAM, all skills on fixed wages) the benchmark is reproduced
+      with no premium; below the cap the model equals the model without the option; after a demand boom every capped type's
+      productive employment equals its supply, the wage premium is positive, and the solution equals the market-clearing model
+      (those types off fixed wages; exact without paid hoarding, within hoarding's smoothing, eps / 2 of supply, with it);
+      complementarity, Walras' law, the GDP identity and homogeneity hold. In the dynamic hybrid (the 2026 scenarios' engine) a zero shock
+      reproduces the baseline and the smooth cap equals the switching cap after a slump and a boom, also with the consumption rule
+      (whose rule still holds with the cap binding); homogeneity; under option (c) with the consumption rule the BSP rule inside
+      the path converges (monetary_scenario); a tampered cap (left at the benchmark's labour supply, not the year's) is caught; the
+      guards refuse what the option is not defined for.
+  OP1 A within-year share of the world oil price reaching domestic prices (0.3.13, 23 Oct 2026, next step 1 in a review note (not included); cge.py shock keys 'oil_pass' and 'oil_ref', dynamic.py sr_oil_pass): in
+      the static short-run model (Infinity GEM's own SAM, flexible and markup prices) and in the dynamic hybrid (the 2026 scenarios' engine), omega 1
+      reproduces the option off exactly and a zero shock the baseline (in the dynamic model also with sr_erpt on); after an oil
+      shock with a weaker peso the import prices of oil and crude equal R x (pwm x EXR / R) ** omega x (1 + tm) plus the margin
+      (recomputed here; R the benchmark's world price in pesos, in the dynamic model the baseline year's), every other import price is
+      the world price, the government's absorption equals (pwm x EXR - domestic price) x QM and the import tax the tariff on the
+      domestic price less it, and the current account pays world prices; Walras' law, the GDP identity and the rebuilt SAM hold; the
+      fuel price rises less and government saving falls; omega 0 holds the domestic price at R; homogeneity (every nominal anchor, R
+      among them, +10%; in the dynamic model via the baseline year solved at a 10% higher price level); a tampered reference (the
+      benchmark's world price instead of the baseline year's) is caught; the guards refuse what the option is not defined for.
+  S7  Infinity GEM's own 2023 SAM, version 0.6 (0.3.13, 23 Oct 2026; research, opt-in: settings sam_variant=
+      'own-0.6' or paths.sam_own("0.6"); a review note (not included), section 3): runs
+      checks/test_own_sam_v06.py (20 checks: the builder rebuilds the file, it balances, every balancing control is met, PSA's
+      GDP, spending items, value added, labour and sector accounts, FIES group shares and consumption by purpose hold, saving
+      positive in every group, the CGE calibrates and reproduces it, a short-run construction cut lowers GDP; v0.5 still the
+      default).
+  S10 Infinity GEM's own 2023 SAM, version 0.7 (0.3.13, 24 Oct 2026; research, opt-in: paths.sam_own("0.7"), reached only by naming it):
+      v0.5e with coal split out of mining into its own activity and commodity (acoal, ccoal), so the oil shock no longer moves coal
+      at crude's share; runs checks/test_own_sam_v07.py (every Infinity GEM SAM file the builder makes rebuilds exactly and the older files
+      keep their sha256; v0.7 balances and gives v0.5e back when coal is added to mining; PSA's totals, value added and labour by
+      industry, FIES shares and consumption by purpose hold on it; the coal account; the CGE calibrates and reproduces it and the
+      dynamic model's zero shock reproduces its baseline; the engine's coal entries (oil shock, elasticities, LES, MicroLink,
+      dynamic lists) leave every other SAM's numbers as they were; the opt-in coal and LNG prices and their refusals; v0.5 still
+      the default).
+  S11 Infinity GEM's own 2023 SAM, version 0.7b (0.3.13, 24 Oct 2026; research, opt-in: paths.sam_own("0.7b"), reached only by naming
+      it): v0.7 without its coal double count (basic metals' coal at IEA volumes; coal imports lower and refined-oil imports
+      higher by the same amount, that oil to its other users; value added by activity as v0.5e's); runs checks/test_own_sam_v07b.py
+      (every Infinity GEM SAM file the builder makes, v0.7 included, rebuilds exactly and keeps its sha256; v0.7b rebuilds, balances and
+      gives its own v0.5e-level table back when coal is added to mining; every control, PSA's totals, value added and labour by
+      industry, FIES shares and purposes hold; the double count's targets; the CGE calibrates and reproduces it, the dynamic
+      model's zero shock; the World Bank coal and LNG paths and their shock; the v0.5 coal-and-LNG equivalent; v0.5 still the
+      default).
+  SD1 Stochastic outlook, opt-in typhoon draw (0.3.13, 23 Oct 2026 (d); infinity_gem/stochastic.py
+      DisasterDraw; a review note (not included), section 2): runs
+      validation/stochastic_disasters/test_disaster_draw.py (9 tests: off by default, calibration recomputed from the PAGASA
+      file, tail check against PAGASA's rankings, zero variance = baseline, one typhoon year = the hand-built scenario, refusals).
   X2  (18 Oct 2026: also the Keynesian year of Build 2 against cge.py's Keynesian closure, with a tamper test, and Build 1's
       foreign-saving bridge: 2023 borrows the SAM's temporary excess of foreign saving, the debt stays bounded.)
   X2  Forward-looking CGE (0.3.9, the forward-looking CGE; research/intertemporal/, not used by any Infinity GEM result): the
@@ -264,11 +339,24 @@ _UNDISTRIBUTED = {
                "an earlier decile table and PSA retail prices used as references (not distributed)"),
     "REF-V6": ([lambda: ROOT / "validation" / "var_task1" / "reproduce_task1_var.py"],
                "an earlier VAR estimate used as a regression reference (not distributed)"),
+    "ELEC-FUEL": ([lambda: paths.DATA_PROCESSED / "electricity_fuel_mix_inputs_2014-2023.csv"],
+                  "the electricity fuel-mix inputs of own SAM v0.6e and later (they include GTAP 10A energy volumes, which the "
+                  "GTAP licence does not allow us to distribute; research/electricity_fuel_mix/fuel_mix_evidence.py writes them)"),
+    "SAM-TESTS": ([lambda v=v: ROOT / "checks" / f"test_own_sam_v{v}.py" for v in ("05e", "06", "06e", "07", "07b")],
+                  "the own SAM's standalone rebuild tests (not in this repository: they rebuild the SAM files from the "
+                  "licensed FIES and FIES-LFS aggregates; the SAM files themselves are in data/processed)"),
+    "PAGASA": ([lambda: paths.DATA_RAW / "disasters" / "PAGASA_ARTC_typhoon_damage_events_and_seasons_2017-2023.csv"],
+               "a table of typhoon damage compiled from PAGASA's Annual Reports on Philippine Tropical Cyclones (PAGASA's terms "
+               "ask for written permission to reproduce them; data/raw/disasters/README.md)"),
 }
 _NEEDS = {"P1": ["FIES"], "V1": ["MACRO-Q"], "I1": ["IO80"], "I2": ["IO80", "LFS-IND"], "A1": ["FIES"],
           "I3": ["IO80"], "I4": ["IO80"], "I5": ["IO80", "IO16", "LFS-IND"], "S1": ["IO240"], "H2": ["FIES", "REF-H2"],
           "H3": ["FIES", "FIES-LFS"], "A2": ["FIES"], "V6": ["REF-V6"], "X1": ["MACRO-M"], "ML1": ["FIES"],
-          "S3": ["IO240", "MACRO-Q"], "S5": ["IO16", "IO80"], "S6": ["FIES", "FIES-LFS", "IO16"], "ML2": ["FIES"], "PC1": ["FIES"]}
+          "S3": ["IO240", "MACRO-Q"], "S5": ["IO16", "IO80"], "S6": ["FIES", "FIES-LFS", "IO16"], "ML2": ["FIES"], "PC1": ["FIES"],
+          # 24 Oct 2026 (0.3.13.dev3): the own SAM v0.6-v0.7b tests rebuild the SAM files (FIES and FIES-LFS aggregates;
+          # from v0.6e the electricity fuel-mix inputs); the typhoon draw is calibrated on the PAGASA-based table
+          "S7": ["FIES", "FIES-LFS", "IO240", "SAM-TESTS"], "S10": ["FIES", "FIES-LFS", "IO240", "ELEC-FUEL", "SAM-TESTS"],
+          "S11": ["FIES", "FIES-LFS", "IO240", "ELEC-FUEL", "SAM-TESTS"], "SD1": ["PAGASA"]}
 
 
 def _missing_inputs(code):
@@ -2325,6 +2413,302 @@ def cs1():
                 f"real reference {hq_t:.1e} (caught); refused {refused}/9")
 
 
+@check("ER1", "incomplete pass-through of the peso to import prices (0.3.13, P2(b)): phi 1 = the option off; zero shock = "
+              "baseline; the import-price equation and the current account; accounts close; homogeneity; tamper caught; guards")
+def er1():
+    from infinity_gem.cge import CGE
+    from infinity_gem.dynamic import DynamicCGE, ERPT_FULL
+    from infinity_gem.oil import cge_oil_shock
+    from infinity_gem.settings import cge_kwargs, dynamic_kwargs, short_run_closure
+    phi = 0.3
+    rd = lambda a_, b_: float(np.max(np.abs(np.asarray(a_, float) - np.asarray(b_, float))
+                                     / np.maximum(np.abs(np.asarray(b_, float)), 1e-9)))
+
+    def pm_rule(m, s_, e_, ref):                 # the import-price equation, written here independently of cge.py: the suppliers'
+        sh = m.make_shocks(s_.shocks)            # US$ price and the peso price (with IFPRI-style margins on top, as 'split')
+        home = m.pwm * sh["pwm_scale"] * (float(s_["EXR"]) / ref) ** (e_ - 1.0)
+        return home, home * float(s_["EXR"]) * (1 + m.tm * sh["tm_scale"]) + m.icx * float(s_["PTRC"]), sh
+
+    # (A) the static short-run model: Infinity GEM's own SAM, the 2026 scenarios' short-run closure, flexible prices and markup pricing; a 5%
+    # depreciation with world oil +30%, phi 0.3 on every import but oil and crude
+    kw = cge_kwargs("0.3 recommended", rice=True)
+    path = kw.pop("path")
+    base = dict(**short_run_closure("0.3 recommended"), land="fixed", **kw)
+    out, ok = [], True
+    for pricing in ("flex", "markup"):
+        m = CGE.from_sam(path, **base, pricing=pricing)
+        non = {c: phi for c in m.C if c not in ERPT_FULL}
+        e_ = np.array([non.get(c, 1.0) for c in m.C])
+        sh0 = {**cge_oil_shock(m, 0.30), "exr": 1.05}
+        b, s_off, s_1, s_p = m.solve(), m.solve(sh0), m.solve({**sh0, "erpt": 1.0}), m.solve({**sh0, "erpt": non})
+        nest = max(rd(s_1[k], s_off[k]) for k in ("QA", "QH", "QE", "QM", "PQ", "PM", "EH", "WF"))
+        home, pm, sh = pm_rule(m, s_p, e_, 1.0)
+        pm_gap = float(np.max(np.abs(np.asarray(s_p["PM"], float)[m.hasM] / pm[m.hasM] - 1)))
+        v = s_p.v
+        fcu = float((home * np.asarray(v["QM"], float)).sum() + (m.pwm * sh["pwm_scale"] * m.rex).sum() + m.frow_out.sum()
+                    + m.erow_out + m.hrow_out.sum() + m.grow_out + sh["grow_out_add"])
+        ca = abs(fcu - float(v["fcu_out"])) / float(m.QM0.sum())
+        walras = abs(float(v["WALRAS"])) / float(m.qinv.sum())
+        gid = abs(m.gdp(s_p)["nominal_expenditure"] - m.gdp(s_p)["nominal_income"])
+        S = m.rebuild_sam(s_p)
+        keep = [c for c in S.index if c not in ("s-i", "row")]          # rebuild_sam leaves the Keynesian closure's foreign saving out
+        imb = float(np.abs((S.sum(axis=1) - S.sum(axis=0)).loc[keep]).max()) / float(S.values.sum())
+        # homogeneity: the peso, its reference, the peso wage anchors (and the markup anchor) +10%
+        sp2 = {**sh0, "erpt": non, "exr": 1.05 * 1.1, "exr_ref": 1.1, "wbar": {f: 1.1 for f in m.unemployed}}
+        if pricing == "markup":
+            sp2["pa_anchor"] = {a: 1.1 * (1 - m.ta[i]) for i, a in enumerate(m.A)}
+        s2 = m.solve(sp2)
+        hq = max(rd(s2[k], s_p[k]) for k in ("QA", "QE", "QM", "QH"))
+        hp = max(rd(np.asarray(s2[k], float)[i_] / 1.1, np.asarray(s_p[k], float)[i_])
+                 for k, i_ in (("PQ", m.iQ), ("PDS", m.iD), ("PM", m.hasM)))
+        # direction: consumer prices rise less than with full pass-through; phi 0: non-oil import prices (before margins) unchanged
+        s_0 = m.solve({**sh0, "erpt": {c: 0.0 for c in non}})
+        home0 = np.asarray(s_0["pwm_home"], float) * float(s_0["EXR"])
+        i_non = np.array([c in non for c in m.C]) & m.hasM
+        flat = float(np.max(np.abs(home0[i_non] / (m.pwm * m.make_shocks(s_0.shocks)["pwm_scale"])[i_non] - 1)))
+        cpi_off, cpi_p = float(s_off["CPI"]) / float(b["CPI"]) - 1, float(s_p["CPI"]) / float(b["CPI"]) - 1
+        dirn = 0 < cpi_p < cpi_off
+        good = (all(x.ok for x in (b, s_off, s_1, s_p, s2, s_0)) and nest < 1e-9 and pm_gap < 1e-12 and ca < 1e-12 and walras < 1e-9
+                and gid < 1e-6 and imb < 1e-9 and hq < 1e-9 and hp < 1e-9 and dirn and flat < 1e-12)
+        ok &= good
+        out.append(f"static {pricing}: phi 1 vs off {nest:.1e}; PM rule {pm_gap:.1e}; current account {ca:.1e}; Walras {walras:.1e}, "
+                   f"GDP identity {gid:.1e}, SAM {imb:.1e}; homogeneity q {hq:.1e} p {hp:.1e}; CPI {cpi_p:+.2%} vs {cpi_off:+.2%} at "
+                   f"full pass-through; phi 0: non-oil import prices {flat:.1e}")
+    refused = 0
+    for bad in ({"erpt": 1.2}, {"erpt": -0.1}, {"erpt": float("nan")}, {"erpt": True}, {"erpt": {"cxxx": 0.5}}, {"exr_ref": 0.0},
+                {"exr_ref": True}):
+        try:
+            m.solve(bad)
+        except ValueError:
+            refused += 1
+    for model in (CGE.from_sam(path, **kw), CGE.from_sam(path, **dict(base, fx="flexible"))):   # the peso is the model's there
+        try:
+            model.solve({"erpt": 0.5})
+        except ValueError:
+            refused += 1
+    # (B) the dynamic hybrid: Infinity GEM's own SAM, the 2026 scenarios' engine (wage curve 10.5, hoarding 0.85), 2026 short run; world oil +30%,
+    # construction investment -15% and the peso 2% weaker in 2026
+    kwd = dynamic_kwargs("0.3 recommended", rice=True, land="fixed")
+    kwd.update(wage_curve=10.5, hoarding=0.85, short_run_years=(2026,))
+    d = DynamicCGE(**kwd)
+    bl = d.baseline()
+    t = 2026
+    shock = {t: {**cge_oil_shock(d.m, 0.30), "qinv_scale": {"ccons": 0.85}, "exr_scale": 1.02}}
+    keys = ("QA", "QH", "QE", "QM", "QINV", "EMP", "PQ", "WF", "EH", "DY", "YH")
+    qkeys = ("QA", "QH", "QE", "QM", "QINV", "QG", "EMP")
+    lab = [k for k, f in enumerate(d.m.F) if f.startswith("flab")]
+    prices = lambda s_: [np.asarray(s_["PQ"], float)[d.ms.iQ], np.asarray(s_["PDS"], float)[d.ms.iD], np.asarray(s_["WF"], float)[lab],
+                         np.asarray(s_["PM"], float)[d.ms.hasM], np.asarray(s_["EH"], float), np.array([float(s_["CPI"]), float(s_["EXR"])])]
+    hom = lambda p_, q_: (max(rd(p_.solutions[t][k], q_.solutions[t][k]) for k in qkeys),
+                          max(rd(x_ / 1.1, y_) for x_, y_ in zip(prices(p_.solutions[t]), prices(q_.solutions[t]))),
+                          max(rd(p_.solutions[y][k], q_.solutions[y][k]) for y in d.years if y > t for k in keys))
+
+    def run(e, sh=shock):
+        d.a["sr_erpt"] = e
+        return d.scenario(sh)
+
+    bs = bl.solutions[t]
+    try:
+        p_off, p_1, p_c = run(None), run(1.0), run(phi)
+        z = run(phi, {t: {}})
+        nest_d = max(rd(p_1.solutions[y][k], p_off.solutions[y][k]) for y in d.years for k in keys)
+        zd = max(float((z.table.real_gdp / bl.table.real_gdp - 1).abs().max()), float((z.table.cpi / bl.table.cpi - 1).abs().max()))
+        s = p_c.solutions[t]
+        e_d = np.array([0.3 if c not in ERPT_FULL else 1.0 for c in d.ms.C])
+        _, pm_d, _ = pm_rule(d.ms, s, e_d, float(bs["EXR"]))
+        pm_gap_d = float(np.max(np.abs(np.asarray(s["PM"], float)[d.ms.hasM] / pm_d[d.ms.hasM] - 1)))
+        cpi_dir = float(s["CPI"]) < float(p_off.solutions[t]["CPI"])
+        # homogeneity, as check CS1: the baseline year solved at a consumer price level 10% higher carries every nominal anchor
+        # of the short-run year +10% (the peso and the suppliers' reference peso, the peso wage anchors and the wage curve's)
+        x11 = bs.x.copy()
+        for k_ in ("PDS", "PQ", "WF", "RK", "RL", "RN", "EXR"):
+            x11[d.m.slices[k_]] *= 1.1
+        b11 = d.m.solve({**bs.shocks, "cpi": 1.1}, x_start=x11)
+        d.base.solutions[t] = b11
+        p_h = run(phi)
+        # tamper: the suppliers anchored to the benchmark peso instead of the year's (the reference dropped from the rule)
+        for mdl in d._ms_cache.values():
+            mdl._ptm = lambda pwm, EXR, sh_: pwm * EXR ** (sh_["erpt"] - 1.0)
+        p_t = run(phi)
+    finally:
+        d.base.solutions[t] = bs
+        for mdl in d._ms_cache.values():
+            mdl.__dict__.pop("_ptm", None)
+        d.a["sr_erpt"] = None
+    h_d, h_t = hom(p_h, p_c), hom(p_t, p_c)
+    # guards: phi outside [0, 1] or not a number, an unknown commodity, no hybrid closure, a flexible peso, a scenario's own key,
+    # and the option set after construction without the hybrid closure
+    for bad in ({"sr_erpt": 1.5}, {"sr_erpt": True}, {"sr_erpt": float("nan")}, {"sr_erpt": {"cxxx": 0.3}},
+                {"sr_erpt": phi, "hybrid": False}, {"sr_erpt": phi, "sr_fx": "flexible"}):
+        try:
+            DynamicCGE(**dict(kwd, **bad))
+        except ValueError:
+            refused += 1
+    try:
+        run(phi, {t: {**shock[t], "erpt": {"cfood": 0.2}}})
+    except ValueError:
+        refused += 1
+    d.a["hybrid"] = False
+    try:
+        run(phi)
+    except ValueError:
+        refused += 1
+    finally:
+        d.a["hybrid"], d.a["sr_erpt"] = True, None
+    ok &= (nest_d < 1e-9 and zd < 1e-9 and pm_gap_d < 1e-12 and cpi_dir and b11.ok and max(h_d) < 1e-9 and h_t[0] > 1e-6
+           and refused == 17)
+    out.append(f"dynamic (Infinity GEM SAM, beta 10.5, hoarding 0.85; 2026 oil +30%, construction -15%, peso +2%): phi 1 vs off {nest_d:.1e} "
+               f"(all years); zero shock {zd:.1e}; PM rule {pm_gap_d:.1e}; CPI 2026 {float(s['CPI']) / float(bs['CPI']) - 1:+.2%} vs "
+               f"{float(p_off.solutions[t]['CPI']) / float(bs['CPI']) - 1:+.2%} at full pass-through; homogeneity: quantities "
+               f"{h_d[0]:.1e}, prices {h_d[1]:.1e}, later years {h_d[2]:.1e}; tamper (reference dropped): quantities {h_t[0]:.1e} "
+               f"(caught); refused {refused}/17")
+    return ok, "; ".join(out)
+
+
+@check("MG1", "a markup pass-through that depends on the output gap (0.3.13, P6): slope 0 = the option off; the rule at its gap "
+              "= the constant pass-through; the price rule recomputed; accounts close; homogeneity; zero shock = baseline with every "
+              "new option on; tamper caught; guards")
+def mg1():
+    from infinity_gem import stickiness as STK
+    from infinity_gem.cge import CGE
+    from infinity_gem.dynamic import DynamicCGE
+    from infinity_gem.oil import cge_oil_shock
+    from infinity_gem.settings import cge_kwargs, dynamic_kwargs, short_run_closure
+    s_ = 0.1                                      # test value: the pass-through changes by 0.1 per percent of output gap
+    rd = lambda a_, b_: float(np.max(np.abs(np.asarray(a_, float) - np.asarray(b_, float))
+                                     / np.maximum(np.abs(np.asarray(b_, float)), 1e-9)))
+
+    def rule_gap(m, sol, s, yref, lam0=None):      # the home price rule, written here independently of cge.py: unit variable cost
+        sh = m.make_shocks(sol.shocks)            # rebuilt from wages, the installed technology and composite prices; the gap
+        coef = m.mk_coef0 if sh["mk_coef"] is None else np.asarray(sh["mk_coef"], float)   # from gdp()'s real GDP
+        tfp = m.tfp * sh["tfp_scale"]
+        W, PQ = np.asarray(sol["W"], float), np.asarray(sol["PQ"], float)
+        avc = (W[m.mk_lab] * coef[m.mk_lab]).sum(axis=0) / tfp + m.ica.T @ PQ
+        g = 100.0 * (m.gdp(sol)["real"] / yref - 1.0)
+        mu, A = sh["markup"], sh["pa_anchor"]
+        lam_e = (sh["mk_pass"] if lam0 is None else lam0) + s * g
+        cm = avc + mu * (A / (1 + mu) + lam_e * (avc - A / (1 + mu)))
+        z = (A - cm) / A
+        fz = np.where(z <= 0, 0.0, np.where(z < 1e-4, z * z / 2e-4, z - 0.5e-4))
+        price = cm + np.where(m.isST, np.asarray(sh["stickiness"], float) * A * fz, 0.0)
+        urd = np.asarray(sol["PDS"], float)[m.mk_com] * (1 - m.ta)
+        return float(np.max(np.abs(urd[m.isMK] / price[m.isMK] - 1))), g
+
+    # (A) static: Infinity GEM's own SAM, the 2026 scenarios' short-run closure, markup pricing with mk_pass 0; world oil +30%
+    kw = cge_kwargs("0.3 recommended", rice=True)
+    path = kw.pop("path")
+    base = dict(**short_run_closure("0.3 recommended"), land="fixed", **kw)
+    m = CGE.from_sam(path, **base, pricing="markup")
+    b = m.solve()
+    ref0 = abs(m.real_gdp0 / m.gdp(b)["real"] - 1)
+    oil = {**cge_oil_shock(m, 0.30), "mk_pass": 0.0}
+    s0, s00, s1 = m.solve(oil), m.solve({**oil, "mk_gap": 0.0}), m.solve({**oil, "mk_gap": s_})
+    nest = max(rd(s00[k], s0[k]) for k in ("QA", "QH", "QE", "QM", "PQ", "PDS", "EH", "WF"))
+    res0 = float(np.abs(m.evaluate(m.x0(), m.make_shocks({"mk_gap": s_}))[0]).max())
+    gap1, g1 = rule_gap(m, s1, s_, m.real_gdp0)
+    s_c = m.solve({**oil, "mk_pass": s_ * g1})                       # the constant pass-through at the solved gap: same solution
+    fixed = max(rd(s_c[k], s1[k]) for k in ("QA", "QH", "QE", "QM", "PQ", "PDS", "EH", "WF"))
+    walras = abs(float(s1["WALRAS"])) / float(m.qinv.sum())
+    gid = abs(m.gdp(s1)["nominal_expenditure"] - m.gdp(s1)["nominal_income"])
+    S = m.rebuild_sam(s1)
+    keep = [c for c in S.index if c not in ("s-i", "row")]
+    imb = float(np.abs((S.sum(axis=1) - S.sum(axis=0)).loc[keep]).max()) / float(S.values.sum())
+    s2 = m.solve({**oil, "mk_gap": s_, "exr": 1.1, "wbar": {f: 1.1 for f in m.unemployed},
+                  "pa_anchor": {a: 1.1 * (1 - m.ta[i]) for i, a in enumerate(m.A)}})
+    hq = max(rd(s2[k], s1[k]) for k in ("QA", "QE", "QM", "QH"))
+    hp = max(rd(np.asarray(s2[k], float)[i_] / 1.1, np.asarray(s1[k], float)[i_]) for k, i_ in (("PQ", m.iQ), ("PDS", m.iD)))
+    gb = m.gdp(b)["real"]
+    dirn = float(s1["CPI"]) < float(s0["CPI"]) and m.gdp(s1)["real"] > m.gdp(s0)["real"] and g1 < 0
+    refused = 0
+    for bad in ({"mk_gap": float("nan")}, {"mk_gap": True}, {"mk_gdp": -1.0}, {"mk_gdp": True}):
+        try:
+            m.solve(bad)
+        except ValueError:
+            refused += 1
+    try:
+        CGE.from_sam(path, **base).solve({"mk_gap": s_})
+    except ValueError:
+        refused += 1
+    ok = (all(x.ok for x in (b, s0, s00, s1, s_c, s2)) and ref0 < 1e-12 and nest == 0.0 and res0 < 1e-7 and gap1 < 1e-9
+          and fixed < 1e-8 and walras < 1e-9 and gid < 1e-6 and imb < 1e-9 and hq < 1e-9 and hp < 1e-9 and dirn)
+    out = [f"static (oil +30%, mk_pass 0, slope {s_}): reference GDP = benchmark {ref0:.1e}; slope 0 vs off {nest:.1e}; zero shock "
+           f"{res0:.1e}; price rule {gap1:.1e} (gap {g1:+.2f}%); = constant pass-through at that gap {fixed:.1e}; CPI "
+           f"{float(s1['CPI']) - 1:+.2%} vs {float(s0['CPI']) - 1:+.2%} at slope 0, GDP {m.gdp(s1)['real'] / gb - 1:+.2%} vs "
+           f"{m.gdp(s0)['real'] / gb - 1:+.2%}; Walras {walras:.1e}, GDP identity {gid:.1e}, SAM {imb:.1e}; homogeneity q {hq:.1e} "
+           f"p {hp:.1e}"]
+    # (B) dynamic: option (c) with the 2026 scenarios' engine (Infinity GEM's own SAM, wage curve 10.5, hoarding 0.85), 2026 short run; world oil +30%,
+    # construction investment -15%, the peso 2% weaker
+    kwd = dynamic_kwargs("0.3 recommended", rice=True, land="fixed")
+    kwd.update(wage_curve=10.5, hoarding=0.85, short_run_years=(2026,), sr_pricing="markup", sr_markup_pass=0.0)
+    d = DynamicCGE(**kwd)
+    d.a["sr_stickiness"] = STK.sectoral([a for i, a in enumerate(d.ms.A) if d.ms.isMK[i]])
+    bl = d.baseline()
+    t = 2026
+    shock = {t: {**cge_oil_shock(d.m, 0.30), "qinv_scale": {"ccons": 0.85}, "exr_scale": 1.02}}
+    keys = ("QA", "QH", "QE", "QM", "QINV", "EMP", "PQ", "WF", "EH", "DY", "YH")
+    qkeys = ("QA", "QH", "QE", "QM", "QINV", "QG", "EMP")
+    lab = [k for k, f in enumerate(d.m.F) if f.startswith("flab")]
+    prices = lambda x_: [np.asarray(x_["PQ"], float)[d.ms.iQ], np.asarray(x_["PDS"], float)[d.ms.iD], np.asarray(x_["WF"], float)[lab],
+                         np.asarray(x_["EH"], float), np.array([float(x_["CPI"]), float(x_["EXR"])])]
+    hom = lambda p_, q_: (max(rd(p_.solutions[t][k], q_.solutions[t][k]) for k in qkeys),
+                          max(rd(x_ / 1.1, y_) for x_, y_ in zip(prices(p_.solutions[t]), prices(q_.solutions[t]))),
+                          max(rd(p_.solutions[y][k], q_.solutions[y][k]) for y in d.years if y > t for k in keys))
+
+    def run(s, allon=False, sh=shock):
+        d.a["sr_markup_gap"] = s
+        d.a["sr_consumption"], d.a["sr_erpt"] = ({"htm": 0.62}, 0.3) if allon else (None, None)
+        return d.scenario(sh)
+
+    bs = bl.solutions[t]
+    try:
+        p_off, p_s, p_a = run(0.0), run(s_), run(s_, True)
+        z = run(s_, True, {t: {}})
+        zd = max(float((z.table.real_gdp / bl.table.real_gdp - 1).abs().max()), float((z.table.cpi / bl.table.cpi - 1).abs().max()))
+        gap_d, g_d = rule_gap(d.ms, p_s.solutions[t], s_, float(bl.table.loc[t, "real_gdp"]))
+        gap_a, _ = rule_gap(d.ms, p_a.solutions[t], s_, float(bl.table.loc[t, "real_gdp"]))
+        cpi_dir = float(p_s.solutions[t]["CPI"]) < float(p_off.solutions[t]["CPI"]) and g_d < 0
+        x11 = bs.x.copy()
+        for k_ in ("PDS", "PQ", "WF", "RK", "RL", "RN", "EXR"):
+            x11[d.m.slices[k_]] *= 1.1
+        b11 = d.m.solve({**bs.shocks, "cpi": 1.1}, x_start=x11)
+        d.base.solutions[t] = b11
+        p_h = run(s_, True)
+        d.base.solutions[t] = bs
+        # tamper: the output gap measured against the benchmark's real GDP instead of the year's baseline (a zero shock cannot show
+        # it, the margin being the reference margin whatever the gap when costs are at the reference: the price rule does)
+        for mdl in d._ms_cache.values():
+            mdl._output_gap = lambda Y, sh_, mdl=mdl: 100.0 * (Y / mdl.real_gdp0 - 1.0)
+        zt = run(s_)
+        zt_d, _ = rule_gap(d.ms, zt.solutions[t], s_, float(bl.table.loc[t, "real_gdp"]))
+    finally:
+        d.base.solutions[t] = bs
+        for mdl in d._ms_cache.values():
+            mdl.__dict__.pop("_output_gap", None)
+        d.a["sr_markup_gap"], d.a["sr_consumption"], d.a["sr_erpt"] = 0.0, None, None
+    h_a = hom(p_h, p_a)
+    for bad in ({"sr_markup_gap": float("nan")}, {"sr_markup_gap": True}, {"sr_markup_gap": s_, "sr_pricing": "flex"},
+                {"sr_markup_gap": s_, "hybrid": False}):
+        try:
+            DynamicCGE(**dict(kwd, **bad))
+        except ValueError:
+            refused += 1
+    d.a["sr_pricing"] = "flex"                    # set after construction: refused before the path
+    try:
+        run(s_)
+    except ValueError:
+        refused += 1
+    finally:
+        d.a["sr_pricing"], d.a["sr_markup_gap"] = "markup", 0.0
+    ok &= (zd < 1e-9 and gap_d < 1e-9 and gap_a < 1e-9 and cpi_dir and b11.ok and max(h_a) < 1e-9 and zt_d > 1e-6 and refused == 10)
+    out.append(f"dynamic, option (c) (2026 oil +30%, construction -15%, peso +2%): zero shock with every new option on (consumption "
+               f"rule 0.62, pass-through 0.3, slope {s_}) {zd:.1e}; price rule {gap_d:.1e} (gap {g_d:+.2f}%), with every option on "
+               f"{gap_a:.1e}; CPI 2026 {float(p_s.solutions[t]['CPI']) / float(bs['CPI']) - 1:+.2%} vs "
+               f"{float(p_off.solutions[t]['CPI']) / float(bs['CPI']) - 1:+.2%} at slope 0; homogeneity (every option on): quantities "
+               f"{h_a[0]:.1e}, prices {h_a[1]:.1e}, later years {h_a[2]:.1e}; tamper (gap against the benchmark's GDP): price rule "
+               f"{zt_d:.1e} (caught); refused {refused}/10")
+    return ok, "; ".join(out)
+
+
 @check("LG1", "no-shock 2026 labour path option (0.3.9)")
 def lg1():
     import pandas as pd
@@ -2423,7 +2807,532 @@ def x2():
     return ok, "; ".join(out)
 
 
-EXTRA = [i3, i4, c8, y2, y3, v2, v3, e1, y4, y5, l1, h1, s1, v4, i5, v5, s2, h2, h3, a2, w1, v6, v7, m2, d3, w2, x1, ml1, lp1, sh1, cr1, s3, y6, pk1, sr1, wc1, ex1, vd1, ic1, ps1, s4, lg1, e2, x2, s5, s6, ml2, pc1, hd1, x3, en1, en2, st1, ir1, vn1, mp1, mk1, cs1]    # checks added in 0.3 (CS1: 0.3.13, the short-run consumption rule; MK1: 0.3.13; MP1: 0.3.12; VN1: 0.3.12; IR1: 0.3.11; ST1: 0.3.11, sectoral stickiness; EN1, EN2: 0.3.11; HD1, X3: 0.3.11; S5, S6, ML2: 0.3.9; E2, X2: 0.3.9; LG1: 0.3.9; IC1, PS1, S4: 0.3.8; S3, Y6, PK1, SR1, WC1, EX1, VD1: 0.3.7; CR1: 0.3.6; ML1, LP1, SH1: 0.3.5; V4, I5, V5, S2, H2, H3: 0.3.1; W1: 0.3.2; D3: 0.3.3; W2: 0.3.4)
+@check("SL1", "slack at the start of short-run years (0.3.13): the LFS natural rate and slack recomputed; slack 0 = the "
+              "option off; zero shock = baseline; the cap at the labour force less the natural rate; homogeneity; tamper caught; guards")
+def sl1():
+    import pandas as pd
+    from infinity_gem import dynamic as D
+    from infinity_gem.dynamic import DynamicCGE
+    from infinity_gem.settings import dynamic_kwargs
+    out, ok = [], True
+    # (1) the natural rate, recomputed independently: the same penalised least squares written as one stacked least-squares problem
+    # (numpy lstsq; the engine solves its normal equations, with quarter 1's effect eliminated, here quarter 4's), from the file read here
+    raw = pd.read_csv(paths.DATA_RAW / "lfs" / "PSA_OpenSTAT_0021B3FKEI2_LFS_key_employment_rates_2005-2026.csv", comment="#",
+                      na_values=".")
+    qm = {"January": 1, "April": 2, "July": 3, "October": 4}
+    r = raw[raw["Month"].isin(list(qm))].dropna(subset=["Unemployment Rate Both sexes"]).copy()
+    r["q"] = r["Month"].map(qm)
+    r["t"] = r["Year"] + (r["q"] - 1) / 4
+    r = r.sort_values("t")
+    s25 = r[r["Year"] <= 2025]
+    T, lam = len(s25), 1600.0
+    y, tq, qq = s25["Unemployment Rate Both sexes"].to_numpy(float), s25["t"].to_numpy(), s25["q"].to_numpy(int)
+    keep = ~((tq >= 2020.25) & (tq <= 2021.75))
+    G = np.zeros((T, 3))                                   # quarter effects g1, g2, g3; g4 = -(g1 + g2 + g3)
+    for i, k in enumerate(qq):
+        G[i] = -1.0 if k == 4 else np.eye(3)[k - 1]
+    Xd = np.hstack([np.eye(T), G])[keep]
+    Xs = np.zeros((T - 2, T + 3))
+    for i in range(T - 2):
+        Xs[i, i:i + 3] = np.sqrt(lam) * np.array([1.0, -2.0, 1.0])
+    z = np.linalg.lstsq(np.vstack([Xd, Xs]), np.concatenate([y[keep], np.zeros(T - 2)]), rcond=None)[0]
+    un_c, g = float(z[T - 1]) / 100, {1: z[T], 2: z[T + 1], 3: z[T + 2], 4: -(z[T] + z[T + 1] + z[T + 2])}
+    est = D.lfs_natural_rate()
+    nr_gap = max(abs(un_c - est["rate"]), max(abs(g[k] - est["seasonal"][k]) for k in g) / 100,
+                 float(np.max(np.abs(z[:T] - est["trend"].to_numpy()))) / 100)
+    t19 = float(z[list(tq).index(2019.75)])
+    reg = abs(est["rate"] * 100 - 4.5104) < 5e-4            # regression value on the file of 14 Oct 2026 (check D1 guards the file)
+    # (2) the baseline's unemployment and the slack by year: 2023-2025 the year's four rounds, 2026 the rounds on file less their quarter
+    # effects, later years held; s = max(0, (1 - u_n) / (1 - u_t) - 1)
+    ub = {yy: float(r[r["Year"] == yy]["Unemployment Rate Both sexes"].mean()) / 100 for yy in (2023, 2024, 2025)}
+    r26 = r[r["Year"] == 2026]
+    ub[2026] = float((r26["Unemployment Rate Both sexes"] - r26["q"].map(g)).mean()) / 100
+    for yy in range(2027, 2031):
+        ub[yy] = ub[2026]
+    sl_c = {yy: max(0.0, (1 - un_c) / (1 - u) - 1) for yy, u in ub.items()}
+    sl = D.lfs_labour_slack()
+    sl_gap = max(abs(sl[yy] - sl_c[yy]) for yy in sl_c)
+    trend26 = D.lfs_labour_slack(y2026="trend")
+    ok &= nr_gap < 1e-9 and reg and sl_gap < 1e-9 and 5.0 <= t19 <= 5.25 and sl[2024] == 0.0 and trend26[2026] == trend26[2025]
+    out.append(f"natural rate {est['rate']:.4%} (recomputed: gap {nr_gap:.1e}; 2019Q4 trend {t19:.2f}%, BSP DP 2024-11 NAIRU 5.02-5.19%); "
+               f"slack 2025 {sl[2025]:.3%}, 2026 {sl[2026]:.3%} (recomputed: gap {sl_gap:.1e}; 2024 {sl[2024]:.1%}: tighter than the "
+               f"natural rate)")
+    # (3) the dynamic hybrid: Infinity GEM's own SAM v0.5, the 2026 scenarios' engine (wage curve 10.5, hoarding 0.85), 2026 short run
+    kw = dynamic_kwargs("0.3 recommended", rice=True, land="fixed")
+    kw.update(wage_curve=10.5, hoarding=0.85, short_run_years=(2026,))
+    d = DynamicCGE(**kw)
+    b = d.baseline()
+    t, s = 2026, float(sl[2026])
+    F = d.m.F
+    lab = [k for k, f in enumerate(F) if f.startswith("flab")]
+    keys = ("QA", "QH", "QE", "QM", "QINV", "EMP", "PQ", "WF", "EH", "DY", "YH")
+    rd = lambda a_, b_: float(np.max(np.abs(np.asarray(a_, float) - np.asarray(b_, float))
+                                     / np.maximum(np.abs(np.asarray(b_, float)), 1e-9)))
+    boom = {t: {"qinv_scale": {"ccons": 1.3}, "trg_h_add": {"hhd-r1": 60.0, "hhd-u1": 60.0}}}
+    slump = {t: {"qinv_scale": {"ccons": 0.85}}}
+    peso = {t: {"exr_scale": 1.01}}
+
+    def run(sl_, sh):
+        d.a["sr_labour_slack"] = sl_
+        return d.scenario(sh)
+
+    try:
+        p_off, p_0, p_s = run(None, boom), run(0.0, boom), run(s, boom)
+        q_off, q_0 = run(None, slump), run({t: 0.0}, slump)
+        z_s = run(s, {t: {}})
+        e_off, e_s = run(None, peso), run(sl, peso)
+        nest = max(max(rd(x_.solutions[yy][k], y_.solutions[yy][k]) for yy in d.years for k in keys)
+                   for x_, y_ in ((p_0, p_off), (q_0, q_off)))
+        zd = max(float((z_s.table.real_gdp / b.table.real_gdp - 1).abs().max()), float((z_s.table.cpi / b.table.cpi - 1).abs().max()))
+        cap_s = str(p_s.table.loc[t, "employment_capped"]).split(",")
+        sup = {k: float(b.solutions[t]["EMP"][k]) * (1 + s) for k in lab}          # the cap: the baseline's employment x (1 + s)
+        at_cap = max(abs(float(p_s.solutions[t]["EMP"][k]) / sup[k] - 1) for k in lab if F[k] in cap_s)
+        above = max(float(p_s.solutions[t]["EMP"][k]) / sup[k] - 1 for k in lab)
+        rise = min(float(p_s.solutions[t]["EMP"][k] / p_off.solutions[t]["EMP"][k]) - 1 for k in lab if F[k] in cap_s)
+        cpi = lambda p_: float(p_.solutions[t]["CPI"]) / float(b.solutions[t]["CPI"]) - 1
+        gdp = lambda p_: float(p_.table.real_gdp[t] / b.table.real_gdp[t]) - 1
+        dirn = cpi(e_s) < cpi(e_off) and gdp(e_s) > gdp(e_off)
+        # homogeneity, as CS1: the baseline year solved at a consumer price level 10% higher carries every nominal anchor +10%
+        bs = b.solutions[t]
+        x11 = bs.x.copy()
+        for k_ in ("PDS", "PQ", "WF", "RK", "RL", "RN", "EXR"):
+            x11[d.m.slices[k_]] *= 1.1
+        b11 = d.m.solve({**bs.shocks, "cpi": 1.1}, x_start=x11)
+        d.base.solutions[t] = b11
+        p_h = run(s, boom)
+        d.base.solutions[t] = bs
+        hq = max(rd(p_h.solutions[t][k], p_s.solutions[t][k]) for k in ("QA", "QH", "QE", "QM", "QINV", "EMP"))
+        hp = max(rd(np.asarray(p_h.solutions[t][k], float)[i_] / 1.1, np.asarray(p_s.solutions[t][k], float)[i_])
+                 for k, i_ in (("PQ", d.ms.iQ), ("PDS", d.ms.iD), ("WF", lab)))
+        # tamper: an engine that ignores the option (the cap left at the baseline's employment)
+        d._sr_slack = lambda t_: 0.0
+        p_t = run(s, boom)
+        at_cap_t = max(abs(float(p_t.solutions[t]["EMP"][k]) / sup[k] - 1) for k in lab if F[k] in cap_s)
+    finally:
+        d.base.solutions[t] = b.solutions[t]
+        d.__dict__.pop("_sr_slack", None)
+        d.a["sr_labour_slack"] = None
+    # guards: a negative share, 0.25 or more, NaN, a bool, a year that is not an integer, a negative share by year, no hybrid closure,
+    # no employment cap (at construction), and the option set afterwards with the cap off
+    refused = 0
+    for bad in ({"sr_labour_slack": -0.01}, {"sr_labour_slack": 0.3}, {"sr_labour_slack": float("nan")}, {"sr_labour_slack": True},
+                {"sr_labour_slack": {"2026": 0.01}}, {"sr_labour_slack": {2026: -0.01}}, {"sr_labour_slack": s, "hybrid": False},
+                {"sr_labour_slack": s, "employment_cap": False}):
+        try:
+            DynamicCGE(**dict(kw, **bad))
+        except ValueError:
+            refused += 1
+    d.a.update(employment_cap=False, sr_labour_slack=s)
+    try:
+        d.scenario(slump)
+    except ValueError:
+        refused += 1
+    finally:
+        d.a.update(employment_cap=True, sr_labour_slack=None)
+    ok &= (nest == 0.0 and zd < 1e-9 and at_cap < 1e-8 and above < 1e-8 and rise > 0.5 * s and dirn and b11.ok and hq < 1e-9
+           and hp < 1e-9 and at_cap_t > 0.5 * s and refused == 9)
+    out.append(f"dynamic (Infinity GEM SAM, beta 10.5, hoarding 0.85; 2026 slack {s:.3%}): slack 0 vs off {nest:.1e} (boom and slump, all years); "
+               f"zero shock {zd:.1e}; boom: capped ({','.join(cap_s)}) at the baseline's employment x (1 + s) to {at_cap:.1e}, none above "
+               f"({above:+.1e}), {rise:+.3%} more jobs than with the cap at the baseline's employment; peso 1% weaker: CPI {cpi(e_s):+.3%} vs "
+               f"{cpi(e_off):+.3%}, GDP {gdp(e_s):+.3%} vs {gdp(e_off):+.3%}; homogeneity: quantities {hq:.1e}, prices {hp:.1e}; tamper "
+               f"(slack ignored): cap missed by {at_cap_t:.2%} (caught); refused {refused}/9")
+    return ok, "; ".join(out)
+
+
+@check("EC1", "an employment cap that settles (0.3.13): below the cap = the model without it, at the cap = the market-"
+              "clearing model; complementarity; homogeneity; smooth = switching cap in the dynamic model; the BSP rule settles under "
+              "option (c); tamper caught; guards")
+def ec1():
+    from infinity_gem import stickiness as STK
+    from infinity_gem.cge import CGE
+    from infinity_gem.dynamic import DynamicCGE
+    from infinity_gem.monetary import rule as bsp_rule
+    from infinity_gem.oil import cge_oil_shock
+    from infinity_gem.settings import cge_kwargs, dynamic_kwargs, short_run_closure
+    rd = lambda a_, b_: float(np.max(np.abs(np.asarray(a_, float) - np.asarray(b_, float))
+                                     / np.maximum(np.abs(np.asarray(b_, float)), 1e-9)))
+    qk, pk = ("QA", "QH", "QE", "QM", "QINV", "EMP", "QD"), ("PQ", "PDS", "WF", "PA", "EH", "DY")
+    out, ok = [], True
+    # (A) the static short-run model: Infinity GEM's own SAM v0.5, the 2026 scenarios' short-run closure (all skills on fixed wages), fixed land
+    kw = cge_kwargs("0.3 recommended", rice=True)
+    path = kw.pop("path")
+    base = dict(**short_run_closure("0.3 recommended"), land="fixed", **kw)
+    slump, boom = {"qinv_scale": {"ccons": 0.9}}, {"qinv_scale": {"ccons": 1.3}, "trg_h_add": {"hhd-r1": 60.0, "hhd-u1": 60.0}}
+    for h in (0.0, 0.85):
+        m0 = CGE.from_sam(path, **base, hoarding=h)
+        mc = CGE.from_sam(path, **base, hoarding=h, labour_cap=True)
+        ku = mc.iU
+        ref = {"hoard_ref": np.asarray(m0.QF0, float)} if h else {}
+        bc = mc.solve(ref or None)
+        bench = max(float(bc.residual_max), float(np.max(np.abs(bc["LPREM"]))))
+        s0, sc = m0.solve({**slump, **ref}), mc.solve({**slump, **ref})
+        below = max(rd(sc[k], s0[k]) for k in qk + pk)
+        sb = mc.solve({**boom, **ref})
+        capped = [mc.F[k] for k in ku if float(sb["LPREM"][k]) > 1e-8]
+        prod = np.asarray(sb["QF"], float).sum(axis=1)
+        at_cap = max(abs(prod[k] / mc.QFS0[k] - 1) for k in ku if mc.F[k] in capped)
+        a_ = (mc.QFS0[ku] - prod[ku]) / mc.QFS0[ku]
+        comp = max(float(np.max(-a_)), float(np.max(-np.asarray(sb["LPREM"], float)[ku])),
+                   float(np.max(np.abs(a_ * np.asarray(sb["LPREM"], float)[ku]))))
+        mr = CGE.from_sam(path, **dict(base, unemployed=tuple(f for f in mc.unemployed if f not in capped)), hoarding=h)
+        sr = mr.solve({**boom, **ref})
+        regime = max(rd(sb[k], sr[k]) for k in qk + ("PQ", "PDS", "WF", "PA"))
+        walras = abs(float(sb["WALRAS"])) / float(mc.qinv.sum())
+        gid = abs(mc.gdp(sb)["nominal_expenditure"] - mc.gdp(sb)["nominal_income"])
+        s2 = mc.solve({**boom, **ref, "exr": 1.1, "wbar": {f: 1.1 for f in mc.unemployed}})      # every nominal anchor +10%
+        hq = max(rd(s2[k], sb[k]) for k in qk)
+        hp = max(max(rd(np.asarray(s2[k], float)[i_] / 1.1, np.asarray(sb[k], float)[i_]) for k, i_ in (("PQ", mc.iQ), ("PDS", mc.iD))),
+                 rd(np.asarray(s2["WF"], float)[ku] / 1.1, np.asarray(sb["WF"], float)[ku]), rd(s2["LPREM"][ku], sb["LPREM"][ku]))
+        tol_r = 1e-9 if h == 0 else 2e-4                    # with hoarding: its C1 smoothing of min(desired, slack), at most eps / 2
+        good = (all(x.ok for x in (bc, s0, sc, sb, sr, s2)) and bench < 1e-8 and below < 1e-9 and len(capped) == len(ku)
+                and at_cap < 1e-9 and comp < 1e-12 and regime < tol_r and walras < 1e-9 and gid < 1e-6 and hq < 1e-9 and hp < 1e-9)
+        ok &= good
+        out.append(f"static, hoarding {h:g}: benchmark {bench:.1e}; slump vs no cap {below:.1e}; boom: capped {','.join(capped)} at supply "
+                   f"{at_cap:.1e}, premia {', '.join(f'{float(sb['LPREM'][k]):.1%}' for k in ku)}, complementarity {comp:.1e}, vs the "
+                   f"market-clearing model {regime:.1e}; Walras {walras:.1e}, GDP identity {gid:.1e}; homogeneity q {hq:.1e} p {hp:.1e}")
+    refused = 0
+    for bad in (dict(kw, closure="investment"), dict(base, unemployed=()), dict(base, fx="flexible")):   # not the Keynesian closure;
+        try:                                                                   # no fixed-wage type; a flexible peso
+            CGE.from_sam(path, **bad, labour_cap=True)
+        except ValueError:
+            refused += 1
+    # (B) the dynamic hybrid: Infinity GEM's own SAM, the 2026 scenarios' engine (wage curve 10.5, hoarding 0.85), 2026 short run
+    kwd = dynamic_kwargs("0.3 recommended", rice=True, land="fixed")
+    kwd.update(wage_curve=10.5, hoarding=0.85, short_run_years=(2026,))
+    d = DynamicCGE(**kwd)
+    b = d.baseline()
+    t = 2026
+    keys = ("QA", "QH", "QE", "QM", "QINV", "EMP", "PQ", "WF", "EH", "DY", "YH")
+    shocks = {"slump": {t: {**cge_oil_shock(d.m, 0.30), "qinv_scale": {"ccons": 0.85}}},
+              "boom": {t: {"qinv_scale": {"ccons": 1.3}, "trg_h_add": {"hhd-r1": 60.0, "hhd-u1": 60.0}}}}
+
+    def run(cap, sh, lam=None):
+        d.a["employment_cap"], d.a["sr_consumption"] = cap, (None if lam is None else {"htm": lam})
+        return d.scenario(sh)
+
+    gaps, capped_b = {}, ""
+    try:
+        z = run("smooth", {t: {}})
+        zd = max(float((z.table.real_gdp / b.table.real_gdp - 1).abs().max()), float((z.table.cpi / b.table.cpi - 1).abs().max()))
+        for lam in (None, 0.62):
+            for nm, sh in shocks.items():
+                p_r, p_s = run(True, sh, lam), run("smooth", sh, lam)
+                gaps[(nm, lam)] = max(rd(p_s.solutions[yy][k], p_r.solutions[yy][k]) for yy in d.years for k in keys)
+                if nm == "boom":
+                    capped_b = str(p_s.table.loc[t, "employment_capped"])
+                    if lam is not None:                  # the rule still holds with the cap binding (as CS1 computes it)
+                        s_, ref_ = p_s.solutions[t], b.solutions[t]
+                        mb = np.clip(np.asarray(d.ms.mps, float) * (1 + float(ref_["MPSADJ"])), -1.0, 1.0)
+                        tgt = (lam * float(((1 - mb) * np.asarray(s_["DY"], float)).sum())
+                               + (1 - lam) * float(np.sum(ref_["EH"])) * float(s_["CPI"]) / float(ref_["CPI"]))
+                        rule_gap = abs(float(np.sum(s_["EH"])) - tgt) / tgt
+                        p_boom = p_s
+        # homogeneity with the cap binding (the boom, the consumption rule on), as CS1: the baseline year at a 10% higher price level
+        bs = b.solutions[t]
+        x11 = bs.x.copy()
+        for k_ in ("PDS", "PQ", "WF", "RK", "RL", "RN", "EXR"):
+            x11[d.m.slices[k_]] *= 1.1
+        b11 = d.m.solve({**bs.shocks, "cpi": 1.1}, x_start=x11)
+        d.base.solutions[t] = b11
+        p_h = run("smooth", shocks["boom"], 0.62)
+        d.base.solutions[t] = bs
+        lab = [k for k, f in enumerate(d.m.F) if f.startswith("flab")]
+        hq = max(rd(p_h.solutions[t][k], p_boom.solutions[t][k]) for k in ("QA", "QH", "QE", "QM", "QINV", "EMP"))
+        hp = max(max(rd(np.asarray(p_h.solutions[t][k], float)[i_] / 1.1, np.asarray(p_boom.solutions[t][k], float)[i_])
+                     for k, i_ in (("PQ", d.ms.iQ), ("PDS", d.ms.iD), ("WF", lab))),
+                 rd(p_h.solutions[t]["LPREM"][lab], p_boom.solutions[t]["LPREM"][lab]))
+        # tamper: the cap left at the benchmark's labour supply (the labour supply path of the year dropped from the short-run spec)
+        orig_spec = d._short_run_spec
+
+        def tampered(spec, t_, K, ms=None):
+            sp = orig_spec(spec, t_, K, ms)
+            sp["qfs_scale"] = {f: (1.0 if f.startswith("flab") else v) for f, v in sp["qfs_scale"].items()}
+            return sp
+        d._short_run_spec = tampered
+        try:
+            z_t = run("smooth", {t: {}})
+            zt = float((z_t.table.real_gdp / b.table.real_gdp - 1).abs().max())
+        except RuntimeError:                                 # a tampered model that no longer solves counts as caught
+            zt = float("inf")
+    finally:
+        d.base.solutions[t] = b.solutions[t]
+        d.__dict__.pop("_short_run_spec", None)
+        d.a["employment_cap"], d.a["sr_consumption"] = True, None
+    tol_d = 2e-4                                             # hoarding 0.85: its smoothing at the cap (static test above: exact without)
+    for bad in ({"employment_cap": "soft"}, {"employment_cap": "smooth", "hybrid": False},
+                {"employment_cap": "smooth", "sr_fx": "flexible"}):
+        try:
+            DynamicCGE(**dict(kwd, **bad))
+        except ValueError:
+            refused += 1
+    d.a["employment_cap"] = "soft"
+    try:
+        d.scenario(shocks["slump"])
+    except ValueError:
+        refused += 1
+    finally:
+        d.a["employment_cap"] = True
+    ok &= (zd < 1e-9 and gaps[("slump", None)] < 1e-8 and gaps[("slump", 0.62)] < 1e-8 and gaps[("boom", None)] < tol_d
+           and gaps[("boom", 0.62)] < tol_d and bool(capped_b) and rule_gap < 1e-8 and b11.ok and hq < 1e-9 and hp < 1e-9
+           and zt > 1e-4 and refused == 7)
+    out.append(f"dynamic (Infinity GEM SAM, beta 10.5, hoarding 0.85): zero shock {zd:.1e}; smooth vs switching cap: slump {gaps[('slump', None)]:.1e} "
+               f"({gaps[('slump', 0.62)]:.1e} with the consumption rule), boom ({capped_b}) {gaps[('boom', None)]:.1e} "
+               f"({gaps[('boom', 0.62)]:.1e}); the rule at the cap {rule_gap:.1e}; homogeneity q {hq:.1e} p {hp:.1e}; tamper (cap at the "
+               f"benchmark's supply): zero shock off by {zt:.2%} (caught); refused {refused}/7")
+    # (C) the BSP rule inside the path under option (c) (markup prices with stickiness by sector, mk_pass 0, the consumption rule
+    # lam 0.7, wage curve 2.4): the 2026 oil and construction shock, PAMPh's rule, theta 1.5; it must converge with the smooth cap
+    kwc = dict(kwd, wage_curve=2.4, sr_pricing="markup", sr_markup_pass=0.0, sr_consumption={"htm": 0.7}, employment_cap="smooth",
+               sr_labour_slack=0.00891)
+    dc = DynamicCGE(**kwc)
+    dc.a["sr_stickiness"] = STK.sectoral([a for i, a in enumerate(dc.ms.A) if dc.ms.isMK[i]])
+    dc.baseline()
+    rl = bsp_rule("pamph")
+    pm = dc.monetary_scenario(shocks["slump"], rule=rl, theta=1.5)
+    mo = pm.monetary
+    conv, i26 = bool(mo.attrs["converged"]), float(mo.loc[t, "policy_rate_gap_pp"])
+    # the fixed point, recomputed here: the rule's rate from the path's own gaps (quarterly partial adjustment within each year),
+    # adaptive expectations (last year's inflation gap), and the investment scale the path was run with, exp(-theta r / 100), within
+    # 0.05 pp of real rate (theta x 0.05 / 100 of the scale): the rule's tolerance on the rate, 0.01 pp, plus the change of expected
+    # inflation between the last two iterations (the last path ran with the expectations of the one before)
+    i_end, fp_rate, fp_pie, fp_scale, prev_pi = 0.0, 0.0, 0.0, 0.0, None
+    for yy in mo.index:
+        tg = (float(rl["phi_pi"]) * float(mo.loc[yy, "inflation_gap_pp"]) + float(rl["phi_x"]) * float(mo.loc[yy, "output_gap_pct"])
+              + float(rl.get("phi_e", 0.0)) * float(mo.loc[yy, "depreciation_gap_pp"]))
+        rho = float(rl["rho"])
+        i_avg = tg + (i_end - tg) * rho * (1 - rho ** 4) / (4 * (1 - rho))
+        i_end = tg + (i_end - tg) * rho ** 4
+        pie = 0.0 if prev_pi is None else prev_pi
+        prev_pi = float(mo.loc[yy, "inflation_gap_pp"])
+        fp_rate = max(fp_rate, abs(i_avg - float(mo.loc[yy, "policy_rate_gap_pp"])))
+        fp_pie = max(fp_pie, abs(pie - float(mo.loc[yy, "expected_inflation_gap_pp"])))
+        fp_scale = max(fp_scale, abs(float(mo.loc[yy, "investment_scale"]) - float(np.exp(-1.5 * (i_avg - pie) / 100))))
+    ok &= conv and fp_rate < 1e-9 and fp_pie < 1e-9 and fp_scale < 1.5 * 0.05 / 100
+    out.append(f"option (c) with the consumption rule and the BSP rule (PAMPh, theta 1.5; world oil +30% and construction -15% in 2026): "
+               f"converged {conv} in {mo.attrs['iterations']} iterations; policy-rate gap 2026 {i26:+.2f} pp (inflation gap "
+               f"{float(mo.loc[t, 'inflation_gap_pp']):+.2f} pp, output gap {float(mo.loc[t, 'output_gap_pct']):+.2f}%), investment scale "
+               f"{float(mo.loc[t, 'investment_scale']):.4f}; the rule recomputed on the path's own gaps: rate {fp_rate:.1e}, expectations "
+               f"{fp_pie:.1e}, the investment scale applied {fp_scale:.1e} (tolerance {1.5 * 0.05 / 100:.1e})")
+    return ok, "; ".join(out)
+
+
+@check("OP1", "a within-year share of the world oil price reaching domestic prices (0.3.13): omega 1 = the option "
+              "off; zero shock = baseline; the import-price equation, the government's absorption, the current account; accounts close; "
+              "homogeneity; tamper caught; guards")
+def op1():
+    from infinity_gem.cge import CGE
+    from infinity_gem.dynamic import DynamicCGE, OIL_PASS
+    from infinity_gem.oil import cge_oil_shock
+    from infinity_gem.settings import cge_kwargs, dynamic_kwargs, short_run_closure
+    om = 0.6                                      # test value (the calibrated share: scenarios/row83_oil_passthrough.py)
+    rd = lambda a_, b_: float(np.max(np.abs(np.asarray(a_, float) - np.asarray(b_, float))
+                                     / np.maximum(np.abs(np.asarray(b_, float)), 1e-9)))
+
+    def pm_rule(m, s_, o_, ref):                  # the import-price equation, written here independently of cge.py: the world price in
+        sh = m.make_shocks(s_.shocks)             # pesos, the domestic price before the tariff (R x (W / R) ** omega; omega 1 elsewhere),
+        W = m.pwm * sh["pwm_scale"] * float(s_["EXR"])    # the import price with the tariff and the margin ('split' margins)
+        dom = np.where(o_ != 1.0, ref * (W / ref) ** o_, W)
+        return W, dom, dom * (1 + m.tm * sh["tm_scale"]) + m.icx * float(s_["PTRC"]), sh
+
+    def border(m, s_, W, dom, sh):                 # the government's absorption, the import tax and the current account, recomputed
+        QM, v = np.asarray(s_["QM"], float), s_.v
+        sub = (W - dom) * QM
+        scale = float(m.QM0.sum())
+        g_sub = float(np.max(np.abs(np.asarray(v.get("OILSUB", np.zeros_like(QM)), float) - sub))) / scale
+        g_mtax = float(np.max(np.abs(np.asarray(v["MTAX"], float) - (m.tm * sh["tm_scale"] * dom * QM - sub)))) / scale
+        fcu = float((m.pwm * sh["pwm_scale"] * (QM + m.rex)).sum() + m.frow_out.sum() + m.erow_out + m.hrow_out.sum() + m.grow_out
+                    + sh["grow_out_add"])
+        return g_sub, g_mtax, abs(fcu - float(v["fcu_out"])) / scale, float(sub.sum())
+
+    # (A) the static short-run model: Infinity GEM's own SAM, the 2026 scenarios' short-run closure, flexible prices and markup pricing; world oil
+    # +30% and the peso 5% weaker; omega 0.6 on oil and crude
+    kw = cge_kwargs("0.3 recommended", rice=True)
+    path = kw.pop("path")
+    base = dict(**short_run_closure("0.3 recommended"), land="fixed", **kw)
+    out, ok = [], True
+    qk, pk = ("QA", "QH", "QE", "QM", "QD", "QINV", "EMP"), ("PQ", "PDS", "PM", "WF", "EH", "MTAX", "GSAV")
+    for pricing in ("flex", "markup"):
+        m = CGE.from_sam(path, **base, pricing=pricing)
+        oil = {c: om for c in OIL_PASS}
+        o_ = np.array([oil.get(c, 1.0) for c in m.C])
+        sh0 = {**cge_oil_shock(m, 0.30), "exr": 1.05}
+        b, s_off, s_1, s_p = (m.solve(), m.solve(sh0), m.solve({**sh0, "oil_pass": {c: 1.0 for c in OIL_PASS}}),
+                              m.solve({**sh0, "oil_pass": oil}))
+        nest = max(rd(s_1[k], s_off[k]) for k in qk + pk)
+        z0 = m.solve({"oil_pass": oil})          # no world price change: the reference price, the benchmark
+        zres = max(rd(z0[k], b[k]) for k in qk + pk)
+        W, dom, pm, sh = pm_rule(m, s_p, o_, 1.0)
+        pm_gap = float(np.max(np.abs(np.asarray(s_p["PM"], float)[m.hasM] / pm[m.hasM] - 1)))
+        g_sub, g_mtax, ca, sub = border(m, s_p, W, dom, sh)
+        walras = abs(float(s_p["WALRAS"])) / float(m.qinv.sum())
+        gid = abs(m.gdp(s_p)["nominal_expenditure"] - m.gdp(s_p)["nominal_income"])
+        S = m.rebuild_sam(s_p)
+        keep = [c for c in S.index if c not in ("s-i", "row")]           # rebuild_sam leaves the Keynesian closure's foreign saving out
+        imb = float(np.abs((S.sum(axis=1) - S.sum(axis=0)).loc[keep]).max()) / float(S.values.sum())
+        i = m.C.index("cpetr")
+        fuel_off, fuel_p = float(s_off["PQ"][i] / b["PQ"][i] - 1), float(s_p["PQ"][i] / b["PQ"][i] - 1)
+        dirn = 0 < fuel_p < fuel_off and float(s_p["GSAV"]) < float(s_off["GSAV"]) and sub > 0
+        s_0 = m.solve({**sh0, "oil_pass": {c: 0.0 for c in OIL_PASS}})  # omega 0: the domestic price stays at the reference (1)
+        lst = o_ != 1.0
+        held = float(np.max(np.abs(np.asarray(s_0["PM_dom"], float)[lst] - 1.0)))
+        # homogeneity: every nominal anchor +10% (the peso, the reference world price in pesos, the peso wage anchors; the markup anchor)
+        sp2 = {**sh0, "oil_pass": oil, "exr": 1.05 * 1.1, "oil_ref": 1.1, "wbar": {f: 1.1 for f in m.unemployed}}
+        if pricing == "markup":
+            sp2["pa_anchor"] = {a: 1.1 * (1 - m.ta[j]) for j, a in enumerate(m.A)}
+        s2 = m.solve(sp2)
+        hq = max(rd(s2[k], s_p[k]) for k in qk)
+        hp = max(max(rd(np.asarray(s2[k], float)[i_] / 1.1, np.asarray(s_p[k], float)[i_])
+                     for k, i_ in (("PQ", m.iQ), ("PDS", m.iD), ("PM", m.hasM))), rd(np.asarray(s2["OILSUB"], float)[lst] / 1.1,
+                                                                                 np.asarray(s_p["OILSUB"], float)[lst]))
+        good = (all(x.ok for x in (b, s_off, s_1, s_p, z0, s_0, s2)) and nest == 0.0 and zres < 1e-9 and pm_gap < 1e-12
+                and g_sub < 1e-12 and g_mtax < 1e-12 and ca < 1e-12 and walras < 1e-9 and gid < 1e-6 and imb < 1e-9 and dirn
+                and held < 1e-12 and hq < 1e-9 and hp < 1e-9)
+        ok &= good
+        out.append(f"static {pricing}: omega 1 vs off {nest:.1e}; zero shock {zres:.1e}; PM rule {pm_gap:.1e}; absorption {g_sub:.1e}, "
+                   f"import tax {g_mtax:.1e}, current account {ca:.1e}; Walras {walras:.1e}, GDP identity {gid:.1e}, SAM {imb:.1e}; fuel "
+                   f"{fuel_p:+.2%} vs {fuel_off:+.2%} in full, the government absorbs {sub:.1f} bn; omega 0 holds the price {held:.1e}; "
+                   f"homogeneity q {hq:.1e} p {hp:.1e}")
+    refused = 0
+    for bad in ({"oil_pass": 1.2}, {"oil_pass": -0.1}, {"oil_pass": float("nan")}, {"oil_pass": True}, {"oil_pass": {"cxxx": 0.5}},
+                {"oil_ref": 0.0}, {"oil_ref": True}, {"oil_pass": {"cfood": 0.5}, "erpt": {"cfood": 0.5}}):
+        try:
+            m.solve(bad)
+        except ValueError:
+            refused += 1
+    try:                                          # the long-run closure: world prices pass through in full there
+        CGE.from_sam(path, **kw).solve({"oil_pass": 0.5})
+    except ValueError:
+        refused += 1
+    # (B) the dynamic hybrid: Infinity GEM's own SAM, the 2026 scenarios' engine (wage curve 10.5, hoarding 0.85), 2026 short run; world oil +30%,
+    # construction investment -15% and the peso 2% weaker in 2026
+    kwd = dynamic_kwargs("0.3 recommended", rice=True, land="fixed")
+    kwd.update(wage_curve=10.5, hoarding=0.85, short_run_years=(2026,))
+    d = DynamicCGE(**kwd)
+    bl = d.baseline()
+    t = 2026
+    shock = {t: {**cge_oil_shock(d.m, 0.30), "qinv_scale": {"ccons": 0.85}, "exr_scale": 1.02}}
+    keys = ("QA", "QH", "QE", "QM", "QINV", "EMP", "PQ", "WF", "EH", "DY", "YH")
+    qkeys = ("QA", "QH", "QE", "QM", "QINV", "QG", "EMP")
+    lab = [k for k, f in enumerate(d.m.F) if f.startswith("flab")]
+    prices = lambda s_: [np.asarray(s_["PQ"], float)[d.ms.iQ], np.asarray(s_["PDS"], float)[d.ms.iD], np.asarray(s_["WF"], float)[lab],
+                         np.asarray(s_["PM"], float)[d.ms.hasM], np.asarray(s_["EH"], float), np.array([float(s_["CPI"]), float(s_["EXR"])])]
+    hom = lambda p_, q_: (max(rd(p_.solutions[t][k], q_.solutions[t][k]) for k in qkeys),
+                          max(rd(x_ / 1.1, y_) for x_, y_ in zip(prices(p_.solutions[t]), prices(q_.solutions[t]))),
+                          max(rd(p_.solutions[y][k], q_.solutions[y][k]) for y in d.years if y > t for k in keys))
+
+    def run(o, sh=shock, erpt=None):
+        d.a["sr_oil_pass"], d.a["sr_erpt"] = o, erpt
+        return d.scenario(sh)
+
+    bs = bl.solutions[t]
+    orig_spec = d._short_run_spec
+    try:
+        p_off, p_1, p_c = run(None), run(1.0), run(om)
+        z = run(om, {t: {}}, erpt=0.3)            # zero shock with the peso's partial pass-through (non-oil imports) on as well
+        nest_d = max(rd(p_1.solutions[y][k], p_off.solutions[y][k]) for y in d.years for k in keys)
+        zd = max(float((z.table.real_gdp / bl.table.real_gdp - 1).abs().max()), float((z.table.cpi / bl.table.cpi - 1).abs().max()))
+        s = p_c.solutions[t]
+        o_d = np.array([om if c in OIL_PASS else 1.0 for c in d.ms.C])
+        ref_d = np.asarray(bs["pwm"], float) * float(bs["EXR"])         # the baseline year's world price in pesos
+        W, dom, pm_d, sh = pm_rule(d.ms, s, o_d, ref_d)
+        pm_gap_d = float(np.max(np.abs(np.asarray(s["PM"], float)[d.ms.hasM] / pm_d[d.ms.hasM] - 1)))
+        g_sub_d, g_mtax_d, ca_d, sub_d = border(d.ms, s, W, dom, sh)
+        i = d.ms.C.index("cpetr")
+        fuel_dir = float(s["PQ"][i]) < float(p_off.solutions[t]["PQ"][i]) and float(s["GSAV"]) < float(p_off.solutions[t]["GSAV"])
+        # homogeneity, as check ER1: the baseline year solved at a consumer price level 10% higher carries every nominal anchor of the
+        # short-run year +10% (the peso and with it the reference world price in pesos, the peso wage anchors and the wage curve's)
+        x11 = bs.x.copy()
+        for k_ in ("PDS", "PQ", "WF", "RK", "RL", "RN", "EXR"):
+            x11[d.m.slices[k_]] *= 1.1
+        b11 = d.m.solve({**bs.shocks, "cpi": 1.1}, x_start=x11)
+        d.base.solutions[t] = b11
+        p_h = run(om)
+        # tamper: the reference held at the benchmark's world price in pesos (1), not the baseline year's
+
+        def tampered(spec, t_, K, ms=None):
+            sp = orig_spec(spec, t_, K, ms)
+            if "oil_ref" in sp:
+                sp["oil_ref"] = {c: 1.0 for c in sp["oil_ref"]}
+            return sp
+        d._short_run_spec = tampered
+        p_t = run(om)
+    finally:
+        d.base.solutions[t] = bs
+        d.__dict__.pop("_short_run_spec", None)
+        d.a["sr_oil_pass"], d.a["sr_erpt"] = None, None
+    h_d, h_t = hom(p_h, p_c), hom(p_t, p_c)
+    # guards: omega outside [0, 1] or not a number, an unknown commodity, no hybrid closure, a commodity that also carries an sr_erpt
+    # share (a one-share sr_erpt covers every commodity but oil and crude), a scenario's own key, and the option set afterwards without
+    # the hybrid closure
+    for bad in ({"sr_oil_pass": 1.5}, {"sr_oil_pass": True}, {"sr_oil_pass": float("nan")}, {"sr_oil_pass": {"cxxx": 0.3}},
+                {"sr_oil_pass": om, "hybrid": False}, {"sr_oil_pass": om, "sr_erpt": {"cpetr": 0.5}},
+                {"sr_oil_pass": {"cfood": 0.5}, "sr_erpt": 0.3}):
+        try:
+            DynamicCGE(**dict(kwd, **bad))
+        except ValueError:
+            refused += 1
+    try:
+        run(om, {t: {**shock[t], "oil_pass": {"cpetr": 0.2}}})
+    except ValueError:
+        refused += 1
+    d.a["hybrid"] = False
+    try:
+        run(om)
+    except ValueError:
+        refused += 1
+    finally:
+        d.a["hybrid"], d.a["sr_oil_pass"], d.a["sr_erpt"] = True, None, None
+    ok &= (nest_d == 0.0 and zd < 1e-9 and pm_gap_d < 1e-12 and g_sub_d < 1e-12 and g_mtax_d < 1e-12 and ca_d < 1e-12 and fuel_dir
+           and b11.ok and max(h_d) < 1e-9 and h_t[0] > 1e-6 and refused == 18)
+    out.append(f"dynamic (Infinity GEM SAM, beta 10.5, hoarding 0.85; 2026 oil +30%, construction -15%, peso +2%): omega 1 vs off {nest_d:.1e} "
+               f"(all years); zero shock (with sr_erpt 0.3) {zd:.1e}; PM rule against the baseline year's world price in pesos "
+               f"{pm_gap_d:.1e}; absorption {g_sub_d:.1e}, import tax {g_mtax_d:.1e}, current account {ca_d:.1e}; fuel 2026 "
+               f"{float(s['PQ'][i]) / float(bs['PQ'][i]) - 1:+.2%} vs {float(p_off.solutions[t]['PQ'][i]) / float(bs['PQ'][i]) - 1:+.2%} in full, "
+               f"the government absorbs {sub_d:.1f} bn; homogeneity: quantities {h_d[0]:.1e}, prices {h_d[1]:.1e}, later years "
+               f"{h_d[2]:.1e}; tamper (reference at the benchmark's world price): quantities {h_t[0]:.1e} (caught); refused {refused}/18")
+    return ok, "; ".join(out)
+
+
+@check("S7", "Infinity GEM's own 2023 SAM v0.6 (research, opt-in): rebuild, PSA sector accounts, FIES shares, CGE reproduces it; v0.5 still default")
+def s7():
+    import os
+    import subprocess                                      # 0.3.13 (23 Oct 2026): the standalone test, as check X3 runs its tests
+    r = subprocess.run([sys.executable, str(ROOT / "checks" / "test_own_sam_v06.py")], capture_output=True, text=True, encoding="utf-8",
+                       errors="replace", cwd=str(ROOT), timeout=1800, env={**os.environ, "PYTHONIOENCODING": "utf-8"})
+    lines = [l for l in r.stdout.splitlines() if l.strip()]
+    return r.returncode == 0, (lines[-1] if lines else "no output")
+
+
+@check("S10", "Infinity GEM's own 2023 SAM v0.7 (research, opt-in): coal split from mining; rebuilds, v0.5e back, coal account, CGE, other SAMs unchanged")
+def s10():
+    import os
+    import subprocess                                      # 0.3.13 (24 Oct 2026): the standalone test, in S7's pattern
+    r = subprocess.run([sys.executable, str(ROOT / "checks" / "test_own_sam_v07.py")], capture_output=True, text=True, encoding="utf-8",
+                       errors="replace", cwd=str(ROOT), timeout=1800, env={**os.environ, "PYTHONIOENCODING": "utf-8"})
+    lines = [l for l in r.stdout.splitlines() if l.strip()]
+    return r.returncode == 0, (lines[-1] if lines else "no output")
+
+
+@check("S11", "Infinity GEM's own 2023 SAM v0.7b (research, opt-in): v0.7 without the coal double count; rebuilds, targets, controls, CGE")
+def s11():
+    import os
+    import subprocess                                      # 0.3.13 (24 Oct 2026): the standalone test, in S10's pattern
+    r = subprocess.run([sys.executable, str(ROOT / "checks" / "test_own_sam_v07b.py")], capture_output=True, text=True, encoding="utf-8",
+                       errors="replace", cwd=str(ROOT), timeout=1800, env={**os.environ, "PYTHONIOENCODING": "utf-8"})
+    lines = [l for l in r.stdout.splitlines() if l.strip()]
+    return r.returncode == 0, (lines[-1] if lines else "no output")
+
+
+@check("SD1", "stochastic outlook: opt-in typhoon draw: off by default, calibration, mapping, refusals")
+def sd1():
+    import subprocess                                      # 0.3.13 (23 Oct 2026): the standalone test, as check X3 runs its tests
+    p = subprocess.run([sys.executable, str(ROOT / "validation" / "stochastic_disasters" / "test_disaster_draw.py")],
+                       capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1800)
+    res = [l for l in p.stdout.splitlines() if l.startswith(("[PASS]", "[FAIL]"))]
+    ok = p.returncode == 0 and len(res) == 9 and all(l.startswith("[PASS]") for l in res)
+    return ok, f"{sum(l.startswith('[PASS]') for l in res)} of 9 pass; " + "; ".join(l[:70] for l in res if l.startswith("[FAIL]"))
+
+
+EXTRA = [i3, i4, c8, y2, y3, v2, v3, e1, y4, y5, l1, h1, s1, v4, i5, v5, s2, h2, h3, a2, w1, v6, v7, m2, d3, w2, x1, ml1, lp1, sh1, cr1, s3, y6, pk1, sr1, wc1, ex1, vd1, ic1, ps1, s4, lg1, e2, x2, s5, s6, ml2, pc1, hd1, x3, en1, en2, st1, ir1, vn1, mp1, mk1, cs1, er1, mg1, sl1, ec1, s7, sd1, op1, s10, s11]    # checks added in 0.3 (S11: 0.3.13, 24 Oct 2026, Infinity GEM SAM v0.7b, v0.7 without the coal double count; S10: 0.3.13, 24 Oct 2026, Infinity GEM SAM v0.7, coal split from mining; OP1: 0.3.13, 23 Oct 2026, a within-year share of the world oil price reaching domestic prices; EC1: 0.3.13, 23 Oct 2026, an employment cap that settles; SL1: 0.3.13, 23 Oct 2026, slack at the start of short-run years; S7, SD1: 0.3.13, 23 Oct 2026; MG1: 0.3.13, P6, a markup pass-through that depends on the output gap; ER1: 0.3.13, P2(b), incomplete pass-through of the peso to import prices; CS1: 0.3.13, the short-run consumption rule; MK1: 0.3.13; MP1: 0.3.12; VN1: 0.3.12; IR1: 0.3.11; ST1: 0.3.11, sectoral stickiness; EN1, EN2: 0.3.11; HD1, X3: 0.3.11; S5, S6, ML2: 0.3.9; E2, X2: 0.3.9; LG1: 0.3.9; IC1, PS1, S4: 0.3.8; S3, Y6, PK1, SR1, WC1, EX1, VD1: 0.3.7; CR1: 0.3.6; ML1, LP1, SH1: 0.3.5; V4, I5, V5, S2, H2, H3: 0.3.1; W1: 0.3.2; D3: 0.3.3; W2: 0.3.4)
 
 
 if __name__ == "__main__":
