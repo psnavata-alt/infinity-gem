@@ -2,6 +2,16 @@
 
 The public repository continues the version numbers of the code base it was built from, so the version notes in the code ("added in 0.3.7") stay meaningful. Every upgrade after 0.2 is opt-in: with default settings the model reproduces the 0.2 results exactly (check R0).
 
+## 0.3.13.dev4 (28 October 2026)
+
+- **The own 2023 SAM, research versions v0.8 and v0.9** (opt-in, reached by naming them; v0.5 stays the default): v0.8 moves the imported coal and crude oil that PSA's 2018 input-output table books inside refined petroleum back to coal and mining (not a candidate default: its crude imports exceed PSA's customs records); v0.9, built from v0.7, puts coal, crude oil, LNG and refined-petroleum imports and coal exports at PSA's 2023 customs records, with one coal price for power plants, cement and basic metals at IEA volumes. Their input tables (`data/processed/refined_row_content_2018_v0.8_inputs.csv`, `fuel_trade_customs_2023_v0.9_inputs.csv`) and the scripts that make them (`research/coal_lng_prices/`) are included. Check S12 runs v0.9's standalone test; in this repository it reports NOT RUN (`docs/STATUS.md`).
+- **A Philippine coal price for the coal and LNG part of the oil shock** (opt-in): `infinity_gem.oil.coal_lng_paths(coal_series="psa")` and `coal_lng_shock(..., coal_series="psa")` read `data/processed/coal_lng_price_paths_2026-2030_psa_coal.csv`, built by `research/coal_lng_prices/coal_lng_paths.py --coal psa` from PSA's monthly coal imports (HS 2701, CIF value per kg; the Philippines buys mostly Indonesian coal, well below the Newcastle price). The default (`"world_bank"`, Newcastle) is unchanged.
+- **Elasticity sensitivity sets** `ph_va72b`, `ph_va72b_low` and `ph_cet72c` (`infinity_gem/elasticities.py`, reached by name; the default `ph` is unchanged): value-added substitution for agriculture, forestry and fishing (0.29, an own annual time-series estimate, within GTAP's 0.26) and construction (1.06 from establishment cross-sections; 0.74 the low case), and export transformation for business services, travel and fresh fruit (2SLS point estimates, none significant: the data do not identify the CET, so `ph` keeps GTAP's values). The 18 PSA OpenSTAT tables behind the estimates are included (`data/raw/elasticities/`).
+- **Research DSGE, milestone 26:** the sticky-wage capital model with the oil block (`research/dsge/soe_htmkwo.py`; `test_milestone26.py`; `oil_policy_htmkwo.py`; `estimate_rot.py model=htmkwo`) and its link run `scenarios/bsp_oil_response_netting_htmkwo.py`. The estimated posterior cloud is not included (the estimation takes hours; `research/dsge/README.md`).
+- `scenarios/calendar_year_targets_2026.py`: the 2026 growth, consumption and investment targets of the short-run calibration restated on a calendar-year basis from PSA's quarterly expenditure accounts.
+- New data: PSA OpenSTAT customs trade tables (coal imports 2023-2026 by country; HS 25-27 imports and exports, 2022-2023), the primary energy supply table, two ASPBI summary tables, and the 18 tables behind the elasticity estimates.
+- The validation suite has 85 checks. With default settings the model still reproduces version 0.2 exactly (check R0).
+
 ## 0.3.13.dev3 (24 October 2026)
 
 - **Short-run options** (all opt-in; default results unchanged, check R0): incomplete pass-through of the peso to import prices (`DynamicCGE(sr_erpt=...)`, check ER1); a markup pass-through that depends on the output gap (check MG1); slack at the start of short-run years from the LFS natural rate of unemployment (`sr_labour_slack`, `lfs_natural_rate`; `scenarios/natural_rate_lfs.py`; check SL1); an employment cap that settles, as one smooth complementarity condition (`employment_cap="smooth"`, `cge.py labour_cap`; check EC1); a within-year share of the world oil price reaching domestic prices (`sr_oil_pass`, the CGE shock keys `oil_pass` and `oil_ref`; check OP1).
@@ -10,7 +20,7 @@ The public repository continues the version numbers of the code base it was buil
 - **Research scripts:** the OECD inter-country input-output tables (`research/icio/`: an oil cost-push price model and partners' demand; the tables are not included) and the evidence on electricity's fuel mix (`research/electricity_fuel_mix/`).
 - **The rigging audit has a public mode** (`docs/verification/rigging_audit/rigging_audit.py`, on by itself in this repository or with `--public`): the one step that needs PSA's FIES files is reported NOT RUN, and a tamper test that no running check can see is reported NOT JUDGED instead of failing. The repository still carries the development copy's run of 21 October 2026; a public-mode run will replace it once the new options' declared inputs are recorded.
 - New data: PSA OpenSTAT's 2023 institutional-sector accounts, sub-industry GVA, trade by product group and farm costs and returns; the World Bank's monthly coal and LNG prices.
-- The validation suite has 84 checks.
+- The validation suite has 85 checks.
 
 ## 0.3.13.dev2 (23 October 2026)
 

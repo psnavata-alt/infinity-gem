@@ -49,7 +49,13 @@ def elasticity_set(name: str = "default") -> dict:
         code, value, _ = SENSITIVITY_SETS[name]
         el["sigma_q"] = dict(el["sigma_q"], **{code: value})
         return el
-    raise KeyError(f"Unknown elasticity set '{name}' (default, gtap, ph, ph_pcgem_cet, {', '.join(SENSITIVITY_SETS)})")
+    if name in SENSITIVITY_SETS_72BC:            # 0.3.13: "ph" with some sigma_va or omega_t values changed
+        el = elasticity_set("ph")
+        key, values, _ = SENSITIVITY_SETS_72BC[name]
+        el[key] = dict(el[key], **values)
+        return el
+    raise KeyError(f"Unknown elasticity set '{name}' (default, gtap, ph, ph_pcgem_cet, {', '.join(SENSITIVITY_SETS)}, "
+                   f"{', '.join(SENSITIVITY_SETS_72BC)})")
 
 
 # 0.3.9(a) (17 Oct 2026): Infinity GEM's own Armington evidence for rice and fuel, as opt-in sensitivity sets.
@@ -62,4 +68,27 @@ SENSITIVITY_SETS = {
                     "the fuel Armington cannot be estimated from the available data (import-parity pricing at Singapore benchmark prices)"),
     "ph_fuel_high": ("cpetr", 4.2, "refined petroleum: GTAP's import-import elasticity ESUBM for P_C (twice ESUBD 2.1, GTAP's rule "
                      "of two), an upper bound for imported versus domestically refined fuel"),
+}
+
+
+# 0.3.13 (24 Oct 2026): own value-added and export (CET) elasticities estimated from PSA data, as opt-in sensitivity
+# sets (the estimation scripts and their standalone test are not in this repository; the 18 PSA OpenSTAT tables they read
+# are in data/raw/elasticities/PSA_OpenSTAT_72bc_downloaded_2026-10-24/). "ph" keeps GTAP's values either way; these sets
+# change only the codes listed. Kept apart from SENSITIVITY_SETS, whose entries (one Armington value each) check E2 reads.
+AGRI_ACTIVITIES = ("amaiz", "arice", "apuls", "aoils", "aroot", "avege", "asugr", "atoba", "acott", "afrui", "acoff", "aocrp",
+                   "acatt", "apoul", "aoliv", "afore", "afish")
+_VA_AGRI = 0.29      # annual ACMS 2005-2025, PSA GVA, LFS employment, farm wage rates (s.e. 0.05; 0.26-0.30 across samples)
+SENSITIVITY_SETS_72BC = {
+    "ph_va72b": ("sigma_va", {**{a: _VA_AGRI for a in AGRI_ACTIVITIES}, "acons": 1.06},
+                 "value added: agriculture, forestry and fishing 0.29 (the project's annual time-series estimate, = GTAP's 0.26 within "
+                 "its s.e.); construction 1.06 (ASPBI 2015-2017 establishment cross-section, s.e. 0.21; the time series do not "
+                 "identify it); research/elasticities_72bc/va72b.py"),
+    "ph_va72b_low": ("sigma_va", {**{a: _VA_AGRI for a in AGRI_ACTIVITIES}, "acons": 0.74},
+                     "as ph_va72b, construction 0.74 (ASPBI cross-section with industry fixed effects, s.e. 0.22): the low end "
+                     "for the disaster result"),
+    "ph_cet72c": ("omega_t", {"cbsrv": 0.20, "chotl": 4.36, "cfrui": 0.49},
+                  "export CET: the project's 2SLS point estimates (PHP/USD as instrument, first-stage F >= 10, 2000Q1-2026Q2) where "
+                  "positive: business services 0.20 (s.e. 0.79), travel 4.36 (2.76), fresh fruit (bananas) 0.49 (0.39); none "
+                  "significant, and OLS is negative or insignificant in every group: the data do not identify the CET (GTAP's values "
+                  "stay; electronics' CET is inactive, home sales 0 in the SAMs); research/elasticities_72bc/cet72c.py"),
 }

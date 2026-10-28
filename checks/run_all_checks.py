@@ -271,6 +271,12 @@ Checks
       industry, FIES shares and purposes hold; the double count's targets; the CGE calibrates and reproduces it, the dynamic
       model's zero shock; the World Bank coal and LNG paths and their shock; the v0.5 coal-and-LNG equivalent; v0.5 still the
       default).
+  S12 Infinity GEM's own 2023 SAM, version 0.9 (0.3.13, 24 Oct 2026; research, opt-in: paths.sam_own("0.9"), reached only by naming
+      it): a customs-anchored coal and fuel account built from v0.7 (coal, crude, LNG and refined imports and coal exports
+      at PSA's 2023 customs records; v0.7's coal reallocated to power plants, exports and cement; one coal price for the
+      IEA-volume users); runs checks/test_own_sam_v09.py (earlier SAM files keep their sha256 and rebuild; v0.9 rebuilds,
+      balances, meets the customs targets; v0.7 back with the step off; the CGE calibrates and reproduces it; the dynamic
+      model's zero shock; v0.5 still the default).
   SD1 Stochastic outlook, opt-in typhoon draw (0.3.13, 23 Oct 2026 (d); infinity_gem/stochastic.py
       DisasterDraw; a review note (not included), section 2): runs
       validation/stochastic_disasters/test_disaster_draw.py (9 tests: off by default, calibration recomputed from the PAGASA
@@ -342,7 +348,7 @@ _UNDISTRIBUTED = {
     "ELEC-FUEL": ([lambda: paths.DATA_PROCESSED / "electricity_fuel_mix_inputs_2014-2023.csv"],
                   "the electricity fuel-mix inputs of own SAM v0.6e and later (they include GTAP 10A energy volumes, which the "
                   "GTAP licence does not allow us to distribute; research/electricity_fuel_mix/fuel_mix_evidence.py writes them)"),
-    "SAM-TESTS": ([lambda v=v: ROOT / "checks" / f"test_own_sam_v{v}.py" for v in ("05e", "06", "06e", "07", "07b")],
+    "SAM-TESTS": ([lambda v=v: ROOT / "checks" / f"test_own_sam_v{v}.py" for v in ("05e", "06", "06e", "07", "07b", "08", "09")],
                   "the own SAM's standalone rebuild tests (not in this repository: they rebuild the SAM files from the "
                   "licensed FIES and FIES-LFS aggregates; the SAM files themselves are in data/processed)"),
     "PAGASA": ([lambda: paths.DATA_RAW / "disasters" / "PAGASA_ARTC_typhoon_damage_events_and_seasons_2017-2023.csv"],
@@ -356,7 +362,9 @@ _NEEDS = {"P1": ["FIES"], "V1": ["MACRO-Q"], "I1": ["IO80"], "I2": ["IO80", "LFS
           # 24 Oct 2026 (0.3.13.dev3): the own SAM v0.6-v0.7b tests rebuild the SAM files (FIES and FIES-LFS aggregates;
           # from v0.6e the electricity fuel-mix inputs); the typhoon draw is calibrated on the PAGASA-based table
           "S7": ["FIES", "FIES-LFS", "IO240", "SAM-TESTS"], "S10": ["FIES", "FIES-LFS", "IO240", "ELEC-FUEL", "SAM-TESTS"],
-          "S11": ["FIES", "FIES-LFS", "IO240", "ELEC-FUEL", "SAM-TESTS"], "SD1": ["PAGASA"]}
+          "S11": ["FIES", "FIES-LFS", "IO240", "ELEC-FUEL", "SAM-TESTS"], "SD1": ["PAGASA"],
+          # 25 Oct 2026 (0.3.13.dev4): S12 runs the own SAM v0.9's test (v0.9 is built from v0.7, which has the fuel-mix correction)
+          "S12": ["FIES", "FIES-LFS", "IO240", "ELEC-FUEL", "SAM-TESTS"]}
 
 
 def _missing_inputs(code):
@@ -3322,6 +3330,16 @@ def s11():
     return r.returncode == 0, (lines[-1] if lines else "no output")
 
 
+@check("S12", "Infinity GEM's own 2023 SAM v0.9 (research, opt-in): customs-anchored coal and fuel account; rebuilds, customs targets, CGE")
+def s12():
+    import os
+    import subprocess                                      # 0.3.13 (24 Oct 2026): the standalone test, in S11's pattern
+    r = subprocess.run([sys.executable, str(ROOT / "checks" / "test_own_sam_v09.py")], capture_output=True, text=True, encoding="utf-8",
+                       errors="replace", cwd=str(ROOT), timeout=1800, env={**os.environ, "PYTHONIOENCODING": "utf-8"})
+    lines = [l for l in r.stdout.splitlines() if l.strip()]
+    return r.returncode == 0, (lines[-1] if lines else "no output")
+
+
 @check("SD1", "stochastic outlook: opt-in typhoon draw: off by default, calibration, mapping, refusals")
 def sd1():
     import subprocess                                      # 0.3.13 (23 Oct 2026): the standalone test, as check X3 runs its tests
@@ -3332,7 +3350,7 @@ def sd1():
     return ok, f"{sum(l.startswith('[PASS]') for l in res)} of 9 pass; " + "; ".join(l[:70] for l in res if l.startswith("[FAIL]"))
 
 
-EXTRA = [i3, i4, c8, y2, y3, v2, v3, e1, y4, y5, l1, h1, s1, v4, i5, v5, s2, h2, h3, a2, w1, v6, v7, m2, d3, w2, x1, ml1, lp1, sh1, cr1, s3, y6, pk1, sr1, wc1, ex1, vd1, ic1, ps1, s4, lg1, e2, x2, s5, s6, ml2, pc1, hd1, x3, en1, en2, st1, ir1, vn1, mp1, mk1, cs1, er1, mg1, sl1, ec1, s7, sd1, op1, s10, s11]    # checks added in 0.3 (S11: 0.3.13, 24 Oct 2026, Infinity GEM SAM v0.7b, v0.7 without the coal double count; S10: 0.3.13, 24 Oct 2026, Infinity GEM SAM v0.7, coal split from mining; OP1: 0.3.13, 23 Oct 2026, a within-year share of the world oil price reaching domestic prices; EC1: 0.3.13, 23 Oct 2026, an employment cap that settles; SL1: 0.3.13, 23 Oct 2026, slack at the start of short-run years; S7, SD1: 0.3.13, 23 Oct 2026; MG1: 0.3.13, P6, a markup pass-through that depends on the output gap; ER1: 0.3.13, P2(b), incomplete pass-through of the peso to import prices; CS1: 0.3.13, the short-run consumption rule; MK1: 0.3.13; MP1: 0.3.12; VN1: 0.3.12; IR1: 0.3.11; ST1: 0.3.11, sectoral stickiness; EN1, EN2: 0.3.11; HD1, X3: 0.3.11; S5, S6, ML2: 0.3.9; E2, X2: 0.3.9; LG1: 0.3.9; IC1, PS1, S4: 0.3.8; S3, Y6, PK1, SR1, WC1, EX1, VD1: 0.3.7; CR1: 0.3.6; ML1, LP1, SH1: 0.3.5; V4, I5, V5, S2, H2, H3: 0.3.1; W1: 0.3.2; D3: 0.3.3; W2: 0.3.4)
+EXTRA = [i3, i4, c8, y2, y3, v2, v3, e1, y4, y5, l1, h1, s1, v4, i5, v5, s2, h2, h3, a2, w1, v6, v7, m2, d3, w2, x1, ml1, lp1, sh1, cr1, s3, y6, pk1, sr1, wc1, ex1, vd1, ic1, ps1, s4, lg1, e2, x2, s5, s6, ml2, pc1, hd1, x3, en1, en2, st1, ir1, vn1, mp1, mk1, cs1, er1, mg1, sl1, ec1, s7, sd1, op1, s10, s11, s12]    # checks added in 0.3 (S12: 0.3.13, 24 Oct 2026, Infinity GEM SAM v0.9, customs-anchored coal and fuel account; S11: 0.3.13, 24 Oct 2026, Infinity GEM SAM v0.7b, v0.7 without the coal double count; S10: 0.3.13, 24 Oct 2026, Infinity GEM SAM v0.7, coal split from mining; OP1: 0.3.13, 23 Oct 2026, a within-year share of the world oil price reaching domestic prices; EC1: 0.3.13, 23 Oct 2026, an employment cap that settles; SL1: 0.3.13, 23 Oct 2026, slack at the start of short-run years; S7, SD1: 0.3.13, 23 Oct 2026; MG1: 0.3.13, P6, a markup pass-through that depends on the output gap; ER1: 0.3.13, P2(b), incomplete pass-through of the peso to import prices; CS1: 0.3.13, the short-run consumption rule; MK1: 0.3.13; MP1: 0.3.12; VN1: 0.3.12; IR1: 0.3.11; ST1: 0.3.11, sectoral stickiness; EN1, EN2: 0.3.11; HD1, X3: 0.3.11; S5, S6, ML2: 0.3.9; E2, X2: 0.3.9; LG1: 0.3.9; IC1, PS1, S4: 0.3.8; S3, Y6, PK1, SR1, WC1, EX1, VD1: 0.3.7; CR1: 0.3.6; ML1, LP1, SH1: 0.3.5; V4, I5, V5, S2, H2, H3: 0.3.1; W1: 0.3.2; D3: 0.3.3; W2: 0.3.4)
 
 
 if __name__ == "__main__":

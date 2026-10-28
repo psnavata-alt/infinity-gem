@@ -1,0 +1,1563 @@
+# PSA OpenSTAT 0032L4DMFD2.px: Annual Value of Philippine Imports by Commodity and Country of Origin, 2023; https://openstat.psa.gov.ph/PXWeb/api/v1/en/DB/2L/IMT/AVI/0032L4DMFD2.px; downloaded 2026-10-24 10:40 (PXWeb API, every commodity per country; HS 2701-2704 kept). Rows per country: [10505]
+country_code,country,Commodity Code,Country,2023 Quantity,2023 Gross Kilo,2023 CIF
+036,Australia,2701110000,Australia,23385.00,23385.00,18106.00
+036,Australia,2701129000,Australia,58315000.00,58315000.00,8652297.00
+036,Australia,2701190000,Australia,118400674.00,118400674.00,15085995.00
+036,Australia,2701200000,Australia,..,..,..
+036,Australia,2703001000,Australia,..,..,..
+036,Australia,2704001000,Australia,..,..,..
+036,Australia,2704003000,Australia,..,..,..
+368,Hungary,2701110000,Hungary,..,..,..
+368,Hungary,2701129000,Hungary,..,..,..
+368,Hungary,2701190000,Hungary,..,..,..
+368,Hungary,2701200000,Hungary,..,..,..
+368,Hungary,2703001000,Hungary,..,..,..
+368,Hungary,2704001000,Hungary,..,..,..
+368,Hungary,2704003000,Hungary,..,..,..
+592,New Zealand,2701110000,New Zealand,..,..,..
+592,New Zealand,2701129000,New Zealand,..,..,..
+592,New Zealand,2701190000,New Zealand,..,..,..
+592,New Zealand,2701200000,New Zealand,..,..,..
+592,New Zealand,2703001000,New Zealand,..,..,..
+592,New Zealand,2704001000,New Zealand,..,..,..
+592,New Zealand,2704003000,New Zealand,..,..,..
+740,Spain,2701110000,Spain,..,..,..
+740,Spain,2701129000,Spain,..,..,..
+740,Spain,2701190000,Spain,..,..,..
+740,Spain,2701200000,Spain,..,..,..
+740,Spain,2703001000,Spain,..,..,..
+740,Spain,2704001000,Spain,..,..,..
+740,Spain,2704003000,Spain,..,..,..
+720,Singapore,2701110000,Singapore,..,..,..
+720,Singapore,2701129000,Singapore,..,..,..
+720,Singapore,2701190000,Singapore,..,..,..
+720,Singapore,2701200000,Singapore,..,..,..
+720,Singapore,2703001000,Singapore,..,..,..
+720,Singapore,2704001000,Singapore,..,..,..
+720,Singapore,2704003000,Singapore,..,..,..
+860,United States Of America,2701110000,United States Of America,..,..,..
+860,United States Of America,2701129000,United States Of America,..,..,..
+860,United States Of America,2701190000,United States Of America,..,..,..
+860,United States Of America,2701200000,United States Of America,..,..,..
+860,United States Of America,2703001000,United States Of America,..,..,..
+860,United States Of America,2704001000,United States Of America,..,..,..
+860,United States Of America,2704003000,United States Of America,..,..,..
+412,Japan,2701110000,Japan,..,..,..
+412,Japan,2701129000,Japan,..,..,..
+412,Japan,2701190000,Japan,..,..,..
+412,Japan,2701200000,Japan,..,..,..
+412,Japan,2703001000,Japan,..,..,..
+412,Japan,2704001000,Japan,..,..,..
+412,Japan,2704003000,Japan,12000.00,12000.00,13081.00
+040,Austria,2701110000,Austria,..,..,..
+040,Austria,2701129000,Austria,..,..,..
+040,Austria,2701190000,Austria,..,..,..
+040,Austria,2701200000,Austria,..,..,..
+040,Austria,2703001000,Austria,..,..,..
+040,Austria,2704001000,Austria,..,..,..
+040,Austria,2704003000,Austria,..,..,..
+064,Belgium,2701110000,Belgium,..,..,..
+064,Belgium,2701129000,Belgium,..,..,..
+064,Belgium,2701190000,Belgium,..,..,..
+064,Belgium,2701200000,Belgium,..,..,..
+064,Belgium,2703001000,Belgium,..,..,..
+064,Belgium,2704001000,Belgium,..,..,..
+064,Belgium,2704003000,Belgium,..,..,..
+092,Brazil,2701110000,Brazil,..,..,..
+092,Brazil,2701129000,Brazil,..,..,..
+092,Brazil,2701190000,Brazil,..,..,..
+092,Brazil,2701200000,Brazil,..,..,..
+092,Brazil,2703001000,Brazil,..,..,..
+092,Brazil,2704001000,Brazil,..,..,..
+092,Brazil,2704003000,Brazil,..,..,..
+128,Canada,2701110000,Canada,..,..,..
+128,Canada,2701129000,Canada,..,..,..
+128,Canada,2701190000,Canada,..,..,..
+128,Canada,2701200000,Canada,..,..,..
+128,Canada,2703001000,Canada,..,..,..
+128,Canada,2704001000,Canada,..,..,..
+128,Canada,2704003000,Canada,..,..,..
+212,Denmark,2701110000,Denmark,..,..,..
+212,Denmark,2701129000,Denmark,..,..,..
+212,Denmark,2701190000,Denmark,..,..,..
+212,Denmark,2701200000,Denmark,..,..,..
+212,Denmark,2703001000,Denmark,..,..,..
+212,Denmark,2704001000,Denmark,..,..,..
+212,Denmark,2704003000,Denmark,..,..,..
+268,France,2701110000,France,..,..,..
+268,France,2701129000,France,..,..,..
+268,France,2701190000,France,..,..,..
+268,France,2701200000,France,..,..,..
+268,France,2703001000,France,..,..,..
+268,France,2704001000,France,..,..,..
+268,France,2704003000,France,..,..,..
+309,Germany,2701110000,Germany,..,..,..
+309,Germany,2701129000,Germany,..,..,..
+309,Germany,2701190000,Germany,..,..,..
+309,Germany,2701200000,Germany,..,..,..
+309,Germany,2703001000,Germany,675300.00,675300.00,227728.00
+309,Germany,2704001000,Germany,..,..,..
+309,Germany,2704003000,Germany,..,..,..
+392,Ireland,2701110000,Ireland,..,..,..
+392,Ireland,2701129000,Ireland,..,..,..
+392,Ireland,2701190000,Ireland,..,..,..
+392,Ireland,2701200000,Ireland,..,..,..
+392,Ireland,2703001000,Ireland,..,..,..
+392,Ireland,2704001000,Ireland,..,..,..
+392,Ireland,2704003000,Ireland,..,..,..
+576,Netherlands,2701110000,Netherlands,..,..,..
+576,Netherlands,2701129000,Netherlands,..,..,..
+576,Netherlands,2701190000,Netherlands,..,..,..
+576,Netherlands,2701200000,Netherlands,..,..,..
+576,Netherlands,2703001000,Netherlands,459679.00,459679.00,140762.00
+576,Netherlands,2704001000,Netherlands,..,..,..
+576,Netherlands,2704003000,Netherlands,..,..,..
+856,Uk Of Great Britain And N. Ireland,2701110000,Uk Of Great Britain And N. Ireland,..,..,..
+856,Uk Of Great Britain And N. Ireland,2701129000,Uk Of Great Britain And N. Ireland,..,..,..
+856,Uk Of Great Britain And N. Ireland,2701190000,Uk Of Great Britain And N. Ireland,..,..,..
+856,Uk Of Great Britain And N. Ireland,2701200000,Uk Of Great Britain And N. Ireland,..,..,..
+856,Uk Of Great Britain And N. Ireland,2703001000,Uk Of Great Britain And N. Ireland,..,..,..
+856,Uk Of Great Britain And N. Ireland,2704001000,Uk Of Great Britain And N. Ireland,..,..,..
+856,Uk Of Great Britain And N. Ireland,2704003000,Uk Of Great Britain And N. Ireland,..,..,..
+032,Argentina,2701110000,Argentina,..,..,..
+032,Argentina,2701129000,Argentina,..,..,..
+032,Argentina,2701190000,Argentina,..,..,..
+032,Argentina,2701200000,Argentina,..,..,..
+032,Argentina,2703001000,Argentina,..,..,..
+032,Argentina,2704001000,Argentina,..,..,..
+032,Argentina,2704003000,Argentina,..,..,..
+164,People'S Republic Of China,2701110000,People'S Republic Of China,116607.00,116607.00,46360.00
+164,People'S Republic Of China,2701129000,People'S Republic Of China,..,..,..
+164,People'S Republic Of China,2701190000,People'S Republic Of China,400.00,400.00,109.00
+164,People'S Republic Of China,2701200000,People'S Republic Of China,5.29,5.29,6887.00
+164,People'S Republic Of China,2703001000,People'S Republic Of China,..,..,..
+164,People'S Republic Of China,2704001000,People'S Republic Of China,124213557.00,124213557.00,29667645.00
+164,People'S Republic Of China,2704003000,People'S Republic Of China,12369580.00,12369580.00,6334612.00
+376,India,2701110000,India,..,..,..
+376,India,2701129000,India,..,..,..
+376,India,2701190000,India,..,..,..
+376,India,2701200000,India,..,..,..
+376,India,2703001000,India,..,..,..
+376,India,2704001000,India,..,..,..
+376,India,2704003000,India,..,..,..
+160,Chile,2701110000,Chile,..,..,..
+160,Chile,2701129000,Chile,..,..,..
+160,Chile,2701190000,Chile,..,..,..
+160,Chile,2701200000,Chile,..,..,..
+160,Chile,2703001000,Chile,..,..,..
+160,Chile,2704001000,Chile,..,..,..
+160,Chile,2704003000,Chile,..,..,..
+400,Italy,2701110000,Italy,..,..,..
+400,Italy,2701129000,Italy,..,..,..
+400,Italy,2701190000,Italy,..,..,..
+400,Italy,2701200000,Italy,..,..,..
+400,Italy,2703001000,Italy,..,..,..
+400,Italy,2704001000,Italy,..,..,..
+400,Italy,2704003000,Italy,..,..,..
+764,Sweden,2701110000,Sweden,..,..,..
+764,Sweden,2701129000,Sweden,..,..,..
+764,Sweden,2701190000,Sweden,..,..,..
+764,Sweden,2701200000,Sweden,..,..,..
+764,Sweden,2703001000,Sweden,..,..,..
+764,Sweden,2704001000,Sweden,..,..,..
+764,Sweden,2704003000,Sweden,..,..,..
+168,Taiwan (Rep. Of China),2701110000,Taiwan (Rep. Of China),..,..,..
+168,Taiwan (Rep. Of China),2701129000,Taiwan (Rep. Of China),..,..,..
+168,Taiwan (Rep. Of China),2701190000,Taiwan (Rep. Of China),2050.00,2050.00,827.00
+168,Taiwan (Rep. Of China),2701200000,Taiwan (Rep. Of China),..,..,..
+168,Taiwan (Rep. Of China),2703001000,Taiwan (Rep. Of China),..,..,..
+168,Taiwan (Rep. Of China),2704001000,Taiwan (Rep. Of China),..,..,..
+168,Taiwan (Rep. Of China),2704003000,Taiwan (Rep. Of China),5439.00,5439.00,6937.00
+580,Netherlands Antilles,2701110000,Netherlands Antilles,..,..,..
+580,Netherlands Antilles,2701129000,Netherlands Antilles,..,..,..
+580,Netherlands Antilles,2701190000,Netherlands Antilles,..,..,..
+580,Netherlands Antilles,2701200000,Netherlands Antilles,..,..,..
+580,Netherlands Antilles,2703001000,Netherlands Antilles,..,..,..
+580,Netherlands Antilles,2704001000,Netherlands Antilles,..,..,..
+580,Netherlands Antilles,2704003000,Netherlands Antilles,..,..,..
+648,Poland,2701110000,Poland,..,..,..
+648,Poland,2701129000,Poland,..,..,..
+648,Poland,2701190000,Poland,..,..,..
+648,Poland,2701200000,Poland,..,..,..
+648,Poland,2703001000,Poland,..,..,..
+648,Poland,2704001000,Poland,1293140.00,1293140.00,825184.00
+648,Poland,2704003000,Poland,..,..,..
+808,Turkey,2701110000,Turkey,..,..,..
+808,Turkey,2701129000,Turkey,..,..,..
+808,Turkey,2701190000,Turkey,..,..,..
+808,Turkey,2701200000,Turkey,..,..,..
+808,Turkey,2703001000,Turkey,..,..,..
+808,Turkey,2704001000,Turkey,..,..,..
+808,Turkey,2704003000,Turkey,..,..,..
+608,Norway,2701110000,Norway,..,..,..
+608,Norway,2701129000,Norway,..,..,..
+608,Norway,2701190000,Norway,..,..,..
+608,Norway,2701200000,Norway,..,..,..
+608,Norway,2703001000,Norway,..,..,..
+608,Norway,2704001000,Norway,..,..,..
+608,Norway,2704003000,Norway,..,..,..
+892,Vietnam,2701110000,Vietnam,133228649.00,133228649.00,39534542.00
+892,Vietnam,2701129000,Vietnam,..,..,..
+892,Vietnam,2701190000,Vietnam,..,..,..
+892,Vietnam,2701200000,Vietnam,..,..,..
+892,Vietnam,2703001000,Vietnam,..,..,..
+892,Vietnam,2704001000,Vietnam,..,..,..
+892,Vietnam,2704003000,Vietnam,..,..,..
+244,Estonia,2701110000,Estonia,..,..,..
+244,Estonia,2701129000,Estonia,..,..,..
+244,Estonia,2701190000,Estonia,..,..,..
+244,Estonia,2701200000,Estonia,..,..,..
+244,Estonia,2703001000,Estonia,..,..,..
+244,Estonia,2704001000,Estonia,..,..,..
+244,Estonia,2704003000,Estonia,..,..,..
+380,Indonesia,2701110000,Indonesia,..,..,..
+380,Indonesia,2701129000,Indonesia,2943847530.00,2943847530.00,559463579.00
+380,Indonesia,2701190000,Indonesia,33077437819.00,33077437819.00,3434277598.00
+380,Indonesia,2701200000,Indonesia,..,..,..
+380,Indonesia,2703001000,Indonesia,..,..,..
+380,Indonesia,2704001000,Indonesia,..,..,..
+380,Indonesia,2704003000,Indonesia,..,..,..
+372,Iceland,2701110000,Iceland,..,..,..
+372,Iceland,2701129000,Iceland,..,..,..
+372,Iceland,2701190000,Iceland,..,..,..
+372,Iceland,2701200000,Iceland,..,..,..
+372,Iceland,2703001000,Iceland,..,..,..
+372,Iceland,2704001000,Iceland,..,..,..
+372,Iceland,2704003000,Iceland,..,..,..
+820,Russian Federation,2701110000,Russian Federation,..,..,..
+820,Russian Federation,2701129000,Russian Federation,..,..,..
+820,Russian Federation,2701190000,Russian Federation,82500000.00,82500000.00,18208575.00
+820,Russian Federation,2701200000,Russian Federation,..,..,..
+820,Russian Federation,2703001000,Russian Federation,..,..,..
+820,Russian Federation,2704001000,Russian Federation,..,..,..
+820,Russian Federation,2704003000,Russian Federation,..,..,..
+440,Republic Of Korea,2701110000,Republic Of Korea,158980.00,158980.00,44599.00
+440,Republic Of Korea,2701129000,Republic Of Korea,..,..,..
+440,Republic Of Korea,2701190000,Republic Of Korea,..,..,..
+440,Republic Of Korea,2701200000,Republic Of Korea,..,..,..
+440,Republic Of Korea,2703001000,Republic Of Korea,..,..,..
+440,Republic Of Korea,2704001000,Republic Of Korea,..,..,..
+440,Republic Of Korea,2704003000,Republic Of Korea,..,..,..
+434,Kiribati,2701110000,Kiribati,..,..,..
+434,Kiribati,2701129000,Kiribati,..,..,..
+434,Kiribati,2701190000,Kiribati,..,..,..
+434,Kiribati,2701200000,Kiribati,..,..,..
+434,Kiribati,2703001000,Kiribati,..,..,..
+434,Kiribati,2704001000,Kiribati,..,..,..
+434,Kiribati,2704003000,Kiribati,..,..,..
+500,Malaysia,2701110000,Malaysia,..,..,..
+500,Malaysia,2701129000,Malaysia,..,..,..
+500,Malaysia,2701190000,Malaysia,..,..,..
+500,Malaysia,2701200000,Malaysia,..,..,..
+500,Malaysia,2703001000,Malaysia,110000.00,110000.00,15533.00
+500,Malaysia,2704001000,Malaysia,..,..,..
+500,Malaysia,2704003000,Malaysia,..,..,..
+512,"Maldives, Rep. Of",2701110000,"Maldives, Rep. Of",..,..,..
+512,"Maldives, Rep. Of",2701129000,"Maldives, Rep. Of",..,..,..
+512,"Maldives, Rep. Of",2701190000,"Maldives, Rep. Of",..,..,..
+512,"Maldives, Rep. Of",2701200000,"Maldives, Rep. Of",..,..,..
+512,"Maldives, Rep. Of",2703001000,"Maldives, Rep. Of",..,..,..
+512,"Maldives, Rep. Of",2704001000,"Maldives, Rep. Of",..,..,..
+512,"Maldives, Rep. Of",2704003000,"Maldives, Rep. Of",..,..,..
+522,"Marshall Islands, Rep. Of",2701110000,"Marshall Islands, Rep. Of",..,..,..
+522,"Marshall Islands, Rep. Of",2701129000,"Marshall Islands, Rep. Of",..,..,..
+522,"Marshall Islands, Rep. Of",2701190000,"Marshall Islands, Rep. Of",..,..,..
+522,"Marshall Islands, Rep. Of",2701200000,"Marshall Islands, Rep. Of",..,..,..
+522,"Marshall Islands, Rep. Of",2703001000,"Marshall Islands, Rep. Of",..,..,..
+522,"Marshall Islands, Rep. Of",2704001000,"Marshall Islands, Rep. Of",..,..,..
+522,"Marshall Islands, Rep. Of",2704003000,"Marshall Islands, Rep. Of",..,..,..
+532,Mauritius,2701110000,Mauritius,..,..,..
+532,Mauritius,2701129000,Mauritius,..,..,..
+532,Mauritius,2701190000,Mauritius,..,..,..
+532,Mauritius,2701200000,Mauritius,..,..,..
+532,Mauritius,2703001000,Mauritius,..,..,..
+532,Mauritius,2704001000,Mauritius,..,..,..
+532,Mauritius,2704003000,Mauritius,..,..,..
+538,"Micronesia, Federated States Of",2701110000,"Micronesia, Federated States Of",..,..,..
+538,"Micronesia, Federated States Of",2701129000,"Micronesia, Federated States Of",..,..,..
+538,"Micronesia, Federated States Of",2701190000,"Micronesia, Federated States Of",..,..,..
+538,"Micronesia, Federated States Of",2701200000,"Micronesia, Federated States Of",..,..,..
+538,"Micronesia, Federated States Of",2703001000,"Micronesia, Federated States Of",..,..,..
+538,"Micronesia, Federated States Of",2704001000,"Micronesia, Federated States Of",..,..,..
+538,"Micronesia, Federated States Of",2704003000,"Micronesia, Federated States Of",..,..,..
+568,"Nauru, Rep. Of",2701110000,"Nauru, Rep. Of",..,..,..
+568,"Nauru, Rep. Of",2701129000,"Nauru, Rep. Of",..,..,..
+568,"Nauru, Rep. Of",2701190000,"Nauru, Rep. Of",..,..,..
+568,"Nauru, Rep. Of",2701200000,"Nauru, Rep. Of",..,..,..
+568,"Nauru, Rep. Of",2703001000,"Nauru, Rep. Of",..,..,..
+568,"Nauru, Rep. Of",2704001000,"Nauru, Rep. Of",..,..,..
+568,"Nauru, Rep. Of",2704003000,"Nauru, Rep. Of",..,..,..
+588,Vanuatu (New Hebrides),2701110000,Vanuatu (New Hebrides),..,..,..
+588,Vanuatu (New Hebrides),2701129000,Vanuatu (New Hebrides),..,..,..
+588,Vanuatu (New Hebrides),2701190000,Vanuatu (New Hebrides),..,..,..
+588,Vanuatu (New Hebrides),2701200000,Vanuatu (New Hebrides),..,..,..
+588,Vanuatu (New Hebrides),2703001000,Vanuatu (New Hebrides),..,..,..
+588,Vanuatu (New Hebrides),2704001000,Vanuatu (New Hebrides),..,..,..
+588,Vanuatu (New Hebrides),2704003000,Vanuatu (New Hebrides),..,..,..
+632,Papua New Guinea,2701110000,Papua New Guinea,..,..,..
+632,Papua New Guinea,2701129000,Papua New Guinea,..,..,..
+632,Papua New Guinea,2701190000,Papua New Guinea,..,..,..
+632,Papua New Guinea,2701200000,Papua New Guinea,..,..,..
+632,Papua New Guinea,2703001000,Papua New Guinea,..,..,..
+632,Papua New Guinea,2704001000,Papua New Guinea,..,..,..
+632,Papua New Guinea,2704003000,Papua New Guinea,..,..,..
+712,Seychelles Republic,2701110000,Seychelles Republic,..,..,..
+712,Seychelles Republic,2701129000,Seychelles Republic,..,..,..
+712,Seychelles Republic,2701190000,Seychelles Republic,..,..,..
+712,Seychelles Republic,2701200000,Seychelles Republic,..,..,..
+712,Seychelles Republic,2703001000,Seychelles Republic,..,..,..
+712,Seychelles Republic,2704001000,Seychelles Republic,..,..,..
+712,Seychelles Republic,2704003000,Seychelles Republic,..,..,..
+776,"Tanzania, United Rep. Of",2701110000,"Tanzania, United Rep. Of",..,..,..
+776,"Tanzania, United Rep. Of",2701129000,"Tanzania, United Rep. Of",..,..,..
+776,"Tanzania, United Rep. Of",2701190000,"Tanzania, United Rep. Of",..,..,..
+776,"Tanzania, United Rep. Of",2701200000,"Tanzania, United Rep. Of",..,..,..
+776,"Tanzania, United Rep. Of",2703001000,"Tanzania, United Rep. Of",..,..,..
+776,"Tanzania, United Rep. Of",2704001000,"Tanzania, United Rep. Of",..,..,..
+776,"Tanzania, United Rep. Of",2704003000,"Tanzania, United Rep. Of",..,..,..
+780,Thailand,2701110000,Thailand,..,..,..
+780,Thailand,2701129000,Thailand,..,..,..
+780,Thailand,2701190000,Thailand,..,..,..
+780,Thailand,2701200000,Thailand,..,..,..
+780,Thailand,2703001000,Thailand,..,..,..
+780,Thailand,2704001000,Thailand,..,..,..
+780,Thailand,2704003000,Thailand,..,..,..
+814,Tuvalu,2701110000,Tuvalu,..,..,..
+814,Tuvalu,2701129000,Tuvalu,..,..,..
+814,Tuvalu,2701190000,Tuvalu,..,..,..
+814,Tuvalu,2701200000,Tuvalu,..,..,..
+814,Tuvalu,2703001000,Tuvalu,..,..,..
+814,Tuvalu,2704001000,Tuvalu,..,..,..
+814,Tuvalu,2704003000,Tuvalu,..,..,..
+840,Oman,2701110000,Oman,..,..,..
+840,Oman,2701129000,Oman,..,..,..
+840,Oman,2701190000,Oman,..,..,..
+840,Oman,2701200000,Oman,..,..,..
+840,Oman,2703001000,Oman,..,..,..
+840,Oman,2704001000,Oman,..,..,..
+840,Oman,2704003000,Oman,..,..,..
+556,Morocco,2701110000,Morocco,..,..,..
+556,Morocco,2701129000,Morocco,..,..,..
+556,Morocco,2701190000,Morocco,..,..,..
+556,Morocco,2701200000,Morocco,..,..,..
+556,Morocco,2703001000,Morocco,..,..,..
+556,Morocco,2704001000,Morocco,..,..,..
+556,Morocco,2704003000,Morocco,..,..,..
+748,Sri Lanka  (Ceylon),2701110000,Sri Lanka  (Ceylon),..,..,..
+748,Sri Lanka  (Ceylon),2701129000,Sri Lanka  (Ceylon),..,..,..
+748,Sri Lanka  (Ceylon),2701190000,Sri Lanka  (Ceylon),..,..,..
+748,Sri Lanka  (Ceylon),2701200000,Sri Lanka  (Ceylon),..,..,..
+748,Sri Lanka  (Ceylon),2703001000,Sri Lanka  (Ceylon),..,..,..
+748,Sri Lanka  (Ceylon),2704001000,Sri Lanka  (Ceylon),..,..,..
+748,Sri Lanka  (Ceylon),2704003000,Sri Lanka  (Ceylon),..,..,..
+252,Faeroe Islands,2701110000,Faeroe Islands,..,..,..
+252,Faeroe Islands,2701129000,Faeroe Islands,..,..,..
+252,Faeroe Islands,2701190000,Faeroe Islands,..,..,..
+252,Faeroe Islands,2701200000,Faeroe Islands,..,..,..
+252,Faeroe Islands,2703001000,Faeroe Islands,..,..,..
+252,Faeroe Islands,2704001000,Faeroe Islands,..,..,..
+252,Faeroe Islands,2704003000,Faeroe Islands,..,..,..
+264,Finland,2701110000,Finland,..,..,..
+264,Finland,2701129000,Finland,..,..,..
+264,Finland,2701190000,Finland,..,..,..
+264,Finland,2701200000,Finland,..,..,..
+264,Finland,2703001000,Finland,..,..,..
+264,Finland,2704001000,Finland,..,..,..
+264,Finland,2704003000,Finland,..,..,..
+476,Lithuania,2701110000,Lithuania,..,..,..
+476,Lithuania,2701129000,Lithuania,..,..,..
+476,Lithuania,2701190000,Lithuania,..,..,..
+476,Lithuania,2701200000,Lithuania,..,..,..
+476,Lithuania,2703001000,Lithuania,..,..,..
+476,Lithuania,2704001000,Lithuania,..,..,..
+476,Lithuania,2704003000,Lithuania,..,..,..
+756,Suriname,2701110000,Suriname,..,..,..
+756,Suriname,2701129000,Suriname,..,..,..
+756,Suriname,2701190000,Suriname,..,..,..
+756,Suriname,2701200000,Suriname,..,..,..
+756,Suriname,2703001000,Suriname,..,..,..
+756,Suriname,2704001000,Suriname,..,..,..
+756,Suriname,2704003000,Suriname,..,..,..
+364,"Hong Kong, China",2701110000,"Hong Kong, China",..,..,..
+364,"Hong Kong, China",2701129000,"Hong Kong, China",..,..,..
+364,"Hong Kong, China",2701190000,"Hong Kong, China",..,..,..
+364,"Hong Kong, China",2701200000,"Hong Kong, China",..,..,..
+364,"Hong Kong, China",2703001000,"Hong Kong, China",..,..,..
+364,"Hong Kong, China",2704001000,"Hong Kong, China",187080.00,187080.00,50384.00
+364,"Hong Kong, China",2704003000,"Hong Kong, China",187080.00,187080.00,50384.00
+116,"Myanmar, Union Of (Burma)",2701110000,"Myanmar, Union Of (Burma)",..,..,..
+116,"Myanmar, Union Of (Burma)",2701129000,"Myanmar, Union Of (Burma)",..,..,..
+116,"Myanmar, Union Of (Burma)",2701190000,"Myanmar, Union Of (Burma)",..,..,..
+116,"Myanmar, Union Of (Burma)",2701200000,"Myanmar, Union Of (Burma)",..,..,..
+116,"Myanmar, Union Of (Burma)",2703001000,"Myanmar, Union Of (Burma)",..,..,..
+116,"Myanmar, Union Of (Burma)",2704001000,"Myanmar, Union Of (Burma)",..,..,..
+116,"Myanmar, Union Of (Burma)",2704003000,"Myanmar, Union Of (Burma)",..,..,..
+640,Peru,2701110000,Peru,10500000.00,10500000.00,3013710.00
+640,Peru,2701129000,Peru,..,..,..
+640,Peru,2701190000,Peru,..,..,..
+640,Peru,2701200000,Peru,..,..,..
+640,Peru,2703001000,Peru,..,..,..
+640,Peru,2704001000,Peru,..,..,..
+640,Peru,2704003000,Peru,..,..,..
+768,Switzerland,2701110000,Switzerland,..,..,..
+768,Switzerland,2701129000,Switzerland,..,..,..
+768,Switzerland,2701190000,Switzerland,..,..,..
+768,Switzerland,2701200000,Switzerland,..,..,..
+768,Switzerland,2703001000,Switzerland,..,..,..
+768,Switzerland,2704001000,Switzerland,..,..,..
+768,Switzerland,2704003000,Switzerland,..,..,..
+056,Bangladesh,2701110000,Bangladesh,..,..,..
+056,Bangladesh,2701129000,Bangladesh,..,..,..
+056,Bangladesh,2701190000,Bangladesh,..,..,..
+056,Bangladesh,2701200000,Bangladesh,..,..,..
+056,Bangladesh,2703001000,Bangladesh,..,..,..
+056,Bangladesh,2704001000,Bangladesh,..,..,..
+056,Bangladesh,2704003000,Bangladesh,..,..,..
+208,Czech Republic (Czechoslovakia),2701110000,Czech Republic (Czechoslovakia),..,..,..
+208,Czech Republic (Czechoslovakia),2701129000,Czech Republic (Czechoslovakia),..,..,..
+208,Czech Republic (Czechoslovakia),2701190000,Czech Republic (Czechoslovakia),..,..,..
+208,Czech Republic (Czechoslovakia),2701200000,Czech Republic (Czechoslovakia),..,..,..
+208,Czech Republic (Czechoslovakia),2703001000,Czech Republic (Czechoslovakia),..,..,..
+208,Czech Republic (Czechoslovakia),2704001000,Czech Republic (Czechoslovakia),..,..,..
+208,Czech Republic (Czechoslovakia),2704003000,Czech Republic (Czechoslovakia),..,..,..
+722,Slovenia,2701110000,Slovenia,..,..,..
+722,Slovenia,2701129000,Slovenia,..,..,..
+722,Slovenia,2701190000,Slovenia,..,..,..
+722,Slovenia,2701200000,Slovenia,..,..,..
+722,Slovenia,2703001000,Slovenia,..,..,..
+722,Slovenia,2704001000,Slovenia,..,..,..
+722,Slovenia,2704003000,Slovenia,..,..,..
+884,Uruguay,2701110000,Uruguay,..,..,..
+884,Uruguay,2701129000,Uruguay,..,..,..
+884,Uruguay,2701190000,Uruguay,..,..,..
+884,Uruguay,2701200000,Uruguay,..,..,..
+884,Uruguay,2703001000,Uruguay,..,..,..
+884,Uruguay,2704001000,Uruguay,..,..,..
+884,Uruguay,2704003000,Uruguay,..,..,..
+836,"United Arab Emirates, N.E.S.",2701110000,"United Arab Emirates, N.E.S.",..,..,..
+836,"United Arab Emirates, N.E.S.",2701129000,"United Arab Emirates, N.E.S.",..,..,..
+836,"United Arab Emirates, N.E.S.",2701190000,"United Arab Emirates, N.E.S.",..,..,..
+836,"United Arab Emirates, N.E.S.",2701200000,"United Arab Emirates, N.E.S.",..,..,..
+836,"United Arab Emirates, N.E.S.",2703001000,"United Arab Emirates, N.E.S.",..,..,..
+836,"United Arab Emirates, N.E.S.",2704001000,"United Arab Emirates, N.E.S.",543380.00,543380.00,146437.00
+836,"United Arab Emirates, N.E.S.",2704003000,"United Arab Emirates, N.E.S.",..,..,..
+070,Belarus (Byelorussian S.S.R.),2701110000,Belarus (Byelorussian S.S.R.),..,..,..
+070,Belarus (Byelorussian S.S.R.),2701129000,Belarus (Byelorussian S.S.R.),..,..,..
+070,Belarus (Byelorussian S.S.R.),2701190000,Belarus (Byelorussian S.S.R.),..,..,..
+070,Belarus (Byelorussian S.S.R.),2701200000,Belarus (Byelorussian S.S.R.),..,..,..
+070,Belarus (Byelorussian S.S.R.),2703001000,Belarus (Byelorussian S.S.R.),..,..,..
+070,Belarus (Byelorussian S.S.R.),2704001000,Belarus (Byelorussian S.S.R.),..,..,..
+070,Belarus (Byelorussian S.S.R.),2704003000,Belarus (Byelorussian S.S.R.),..,..,..
+832,Ukraine (Ukrainian S.S.R.),2701110000,Ukraine (Ukrainian S.S.R.),..,..,..
+832,Ukraine (Ukrainian S.S.R.),2701129000,Ukraine (Ukrainian S.S.R.),..,..,..
+832,Ukraine (Ukrainian S.S.R.),2701190000,Ukraine (Ukrainian S.S.R.),..,..,..
+832,Ukraine (Ukrainian S.S.R.),2701200000,Ukraine (Ukrainian S.S.R.),..,..,..
+832,Ukraine (Ukrainian S.S.R.),2703001000,Ukraine (Ukrainian S.S.R.),..,..,..
+832,Ukraine (Ukrainian S.S.R.),2704001000,Ukraine (Ukrainian S.S.R.),..,..,..
+832,Ukraine (Ukrainian S.S.R.),2704003000,Ukraine (Ukrainian S.S.R.),..,..,..
+324,Greece,2701110000,Greece,..,..,..
+324,Greece,2701129000,Greece,..,..,..
+324,Greece,2701190000,Greece,..,..,..
+324,Greece,2701200000,Greece,..,..,..
+324,Greece,2703001000,Greece,..,..,..
+324,Greece,2704001000,Greece,..,..,..
+324,Greece,2704003000,Greece,..,..,..
+732,"South Africa, Rep. Of",2701110000,"South Africa, Rep. Of",1848690.00,1848690.00,1032174.00
+732,"South Africa, Rep. Of",2701129000,"South Africa, Rep. Of",..,..,..
+732,"South Africa, Rep. Of",2701190000,"South Africa, Rep. Of",..,..,..
+732,"South Africa, Rep. Of",2701200000,"South Africa, Rep. Of",..,..,..
+732,"South Africa, Rep. Of",2703001000,"South Africa, Rep. Of",..,..,..
+732,"South Africa, Rep. Of",2704001000,"South Africa, Rep. Of",..,..,..
+732,"South Africa, Rep. Of",2704003000,"South Africa, Rep. Of",..,..,..
+198,Croatia,2701110000,Croatia,..,..,..
+198,Croatia,2701129000,Croatia,..,..,..
+198,Croatia,2701190000,Croatia,..,..,..
+198,Croatia,2701200000,Croatia,..,..,..
+198,Croatia,2703001000,Croatia,..,..,..
+198,Croatia,2704001000,Croatia,..,..,..
+198,Croatia,2704003000,Croatia,..,..,..
+672,Romania,2701110000,Romania,..,..,..
+672,Romania,2701129000,Romania,..,..,..
+672,Romania,2701190000,Romania,..,..,..
+672,Romania,2701200000,Romania,..,..,..
+672,Romania,2703001000,Romania,..,..,..
+672,Romania,2704001000,Romania,..,..,..
+672,Romania,2704003000,Romania,..,..,..
+536,Mexico,2701110000,Mexico,..,..,..
+536,Mexico,2701129000,Mexico,..,..,..
+536,Mexico,2701190000,Mexico,..,..,..
+536,Mexico,2701200000,Mexico,..,..,..
+536,Mexico,2703001000,Mexico,..,..,..
+536,Mexico,2704001000,Mexico,..,..,..
+536,Mexico,2704003000,Mexico,..,..,..
+704,Saudi Arabia,2701110000,Saudi Arabia,..,..,..
+704,Saudi Arabia,2701129000,Saudi Arabia,..,..,..
+704,Saudi Arabia,2701190000,Saudi Arabia,..,..,..
+704,Saudi Arabia,2701200000,Saudi Arabia,..,..,..
+704,Saudi Arabia,2703001000,Saudi Arabia,..,..,..
+704,Saudi Arabia,2704001000,Saudi Arabia,..,..,..
+704,Saudi Arabia,2704003000,Saudi Arabia,..,..,..
+052,Bahrain,2701110000,Bahrain,..,..,..
+052,Bahrain,2701129000,Bahrain,..,..,..
+052,Bahrain,2701190000,Bahrain,..,..,..
+052,Bahrain,2701200000,Bahrain,..,..,..
+052,Bahrain,2703001000,Bahrain,..,..,..
+052,Bahrain,2704001000,Bahrain,..,..,..
+052,Bahrain,2704003000,Bahrain,..,..,..
+828,Latvia (Latvian Soviet Socialist Rep.),2701110000,Latvia (Latvian Soviet Socialist Rep.),..,..,..
+828,Latvia (Latvian Soviet Socialist Rep.),2701129000,Latvia (Latvian Soviet Socialist Rep.),..,..,..
+828,Latvia (Latvian Soviet Socialist Rep.),2701190000,Latvia (Latvian Soviet Socialist Rep.),..,..,..
+828,Latvia (Latvian Soviet Socialist Rep.),2701200000,Latvia (Latvian Soviet Socialist Rep.),..,..,..
+828,Latvia (Latvian Soviet Socialist Rep.),2703001000,Latvia (Latvian Soviet Socialist Rep.),345605.00,345605.00,134297.00
+828,Latvia (Latvian Soviet Socialist Rep.),2704001000,Latvia (Latvian Soviet Socialist Rep.),..,..,..
+828,Latvia (Latvian Soviet Socialist Rep.),2704003000,Latvia (Latvian Soviet Socialist Rep.),..,..,..
+299,Georgia,2701110000,Georgia,..,..,..
+299,Georgia,2701129000,Georgia,..,..,..
+299,Georgia,2701190000,Georgia,..,..,..
+299,Georgia,2701200000,Georgia,..,..,..
+299,Georgia,2703001000,Georgia,..,..,..
+299,Georgia,2704001000,Georgia,..,..,..
+299,Georgia,2704003000,Georgia,..,..,..
+284,French Polynesia,2701110000,French Polynesia,..,..,..
+284,French Polynesia,2701129000,French Polynesia,..,..,..
+284,French Polynesia,2701190000,French Polynesia,..,..,..
+284,French Polynesia,2701200000,French Polynesia,..,..,..
+284,French Polynesia,2703001000,French Polynesia,..,..,..
+284,French Polynesia,2704001000,French Polynesia,..,..,..
+284,French Polynesia,2704003000,French Polynesia,..,..,..
+432,Kenya,2701110000,Kenya,..,..,..
+432,Kenya,2701129000,Kenya,..,..,..
+432,Kenya,2701190000,Kenya,..,..,..
+432,Kenya,2701200000,Kenya,..,..,..
+432,Kenya,2703001000,Kenya,..,..,..
+432,Kenya,2704001000,Kenya,..,..,..
+432,Kenya,2704003000,Kenya,..,..,..
+488,"Madagascar, Democratic Rep. Of",2701110000,"Madagascar, Democratic Rep. Of",..,..,..
+488,"Madagascar, Democratic Rep. Of",2701129000,"Madagascar, Democratic Rep. Of",..,..,..
+488,"Madagascar, Democratic Rep. Of",2701190000,"Madagascar, Democratic Rep. Of",..,..,..
+488,"Madagascar, Democratic Rep. Of",2701200000,"Madagascar, Democratic Rep. Of",..,..,..
+488,"Madagascar, Democratic Rep. Of",2703001000,"Madagascar, Democratic Rep. Of",..,..,..
+488,"Madagascar, Democratic Rep. Of",2704001000,"Madagascar, Democratic Rep. Of",..,..,..
+488,"Madagascar, Democratic Rep. Of",2704003000,"Madagascar, Democratic Rep. Of",..,..,..
+396,Israel,2701110000,Israel,..,..,..
+396,Israel,2701129000,Israel,..,..,..
+396,Israel,2701190000,Israel,..,..,..
+396,Israel,2701200000,Israel,..,..,..
+396,Israel,2703001000,Israel,..,..,..
+396,Israel,2704001000,Israel,..,..,..
+396,Israel,2704003000,Israel,..,..,..
+112,Bulgaria,2701110000,Bulgaria,..,..,..
+112,Bulgaria,2701129000,Bulgaria,..,..,..
+112,Bulgaria,2701190000,Bulgaria,..,..,..
+112,Bulgaria,2701200000,Bulgaria,..,..,..
+112,Bulgaria,2703001000,Bulgaria,..,..,..
+112,Bulgaria,2704001000,Bulgaria,..,..,..
+112,Bulgaria,2704003000,Bulgaria,..,..,..
+232,Egypt Arab Republic,2701110000,Egypt Arab Republic,..,..,..
+232,Egypt Arab Republic,2701129000,Egypt Arab Republic,..,..,..
+232,Egypt Arab Republic,2701190000,Egypt Arab Republic,..,..,..
+232,Egypt Arab Republic,2701200000,Egypt Arab Republic,..,..,..
+232,Egypt Arab Republic,2703001000,Egypt Arab Republic,..,..,..
+232,Egypt Arab Republic,2704001000,Egypt Arab Republic,..,..,..
+232,Egypt Arab Republic,2704003000,Egypt Arab Republic,..,..,..
+710,Serbia,2701110000,Serbia,..,..,..
+710,Serbia,2701129000,Serbia,..,..,..
+710,Serbia,2701190000,Serbia,..,..,..
+710,Serbia,2701200000,Serbia,..,..,..
+710,Serbia,2703001000,Serbia,..,..,..
+710,Serbia,2704001000,Serbia,..,..,..
+710,Serbia,2704003000,Serbia,..,..,..
+542,"Moldova, Republic Of",2701110000,"Moldova, Republic Of",..,..,..
+542,"Moldova, Republic Of",2701129000,"Moldova, Republic Of",..,..,..
+542,"Moldova, Republic Of",2701190000,"Moldova, Republic Of",..,..,..
+542,"Moldova, Republic Of",2701200000,"Moldova, Republic Of",..,..,..
+542,"Moldova, Republic Of",2703001000,"Moldova, Republic Of",..,..,..
+542,"Moldova, Republic Of",2704001000,"Moldova, Republic Of",..,..,..
+542,"Moldova, Republic Of",2704003000,"Moldova, Republic Of",..,..,..
+888,Venezuela,2701110000,Venezuela,..,..,..
+888,Venezuela,2701129000,Venezuela,..,..,..
+888,Venezuela,2701190000,Venezuela,..,..,..
+888,Venezuela,2701200000,Venezuela,..,..,..
+888,Venezuela,2703001000,Venezuela,..,..,..
+888,Venezuela,2704001000,Venezuela,..,..,..
+888,Venezuela,2704003000,Venezuela,..,..,..
+248,Ethiopia,2701110000,Ethiopia,..,..,..
+248,Ethiopia,2701129000,Ethiopia,..,..,..
+248,Ethiopia,2701190000,Ethiopia,..,..,..
+248,Ethiopia,2701200000,Ethiopia,..,..,..
+248,Ethiopia,2703001000,Ethiopia,..,..,..
+248,Ethiopia,2704001000,Ethiopia,..,..,..
+248,Ethiopia,2704003000,Ethiopia,..,..,..
+868,Guam,2701110000,Guam,..,..,..
+868,Guam,2701129000,Guam,..,..,..
+868,Guam,2701190000,Guam,..,..,..
+868,Guam,2701200000,Guam,..,..,..
+868,Guam,2703001000,Guam,..,..,..
+868,Guam,2704001000,Guam,..,..,..
+868,Guam,2704003000,Guam,..,..,..
+384,"Iran, Islamic Rep. Of",2701110000,"Iran, Islamic Rep. Of",..,..,..
+384,"Iran, Islamic Rep. Of",2701129000,"Iran, Islamic Rep. Of",..,..,..
+384,"Iran, Islamic Rep. Of",2701190000,"Iran, Islamic Rep. Of",..,..,..
+384,"Iran, Islamic Rep. Of",2701200000,"Iran, Islamic Rep. Of",..,..,..
+384,"Iran, Islamic Rep. Of",2703001000,"Iran, Islamic Rep. Of",..,..,..
+384,"Iran, Islamic Rep. Of",2704001000,"Iran, Islamic Rep. Of",..,..,..
+384,"Iran, Islamic Rep. Of",2704003000,"Iran, Islamic Rep. Of",..,..,..
+624,"Pakistan, Islamic Rep. Of",2701110000,"Pakistan, Islamic Rep. Of",..,..,..
+624,"Pakistan, Islamic Rep. Of",2701129000,"Pakistan, Islamic Rep. Of",..,..,..
+624,"Pakistan, Islamic Rep. Of",2701190000,"Pakistan, Islamic Rep. Of",..,..,..
+624,"Pakistan, Islamic Rep. Of",2701200000,"Pakistan, Islamic Rep. Of",..,..,..
+624,"Pakistan, Islamic Rep. Of",2703001000,"Pakistan, Islamic Rep. Of",..,..,..
+624,"Pakistan, Islamic Rep. Of",2704001000,"Pakistan, Islamic Rep. Of",..,..,..
+624,"Pakistan, Islamic Rep. Of",2704003000,"Pakistan, Islamic Rep. Of",..,..,..
+428,Cambodia (Democratic Kampuchea),2701110000,Cambodia (Democratic Kampuchea),..,..,..
+428,Cambodia (Democratic Kampuchea),2701129000,Cambodia (Democratic Kampuchea),..,..,..
+428,Cambodia (Democratic Kampuchea),2701190000,Cambodia (Democratic Kampuchea),..,..,..
+428,Cambodia (Democratic Kampuchea),2701200000,Cambodia (Democratic Kampuchea),..,..,..
+428,Cambodia (Democratic Kampuchea),2703001000,Cambodia (Democratic Kampuchea),..,..,..
+428,Cambodia (Democratic Kampuchea),2704001000,Cambodia (Democratic Kampuchea),..,..,..
+428,Cambodia (Democratic Kampuchea),2704003000,Cambodia (Democratic Kampuchea),..,..,..
+204,Cyprus,2701110000,Cyprus,..,..,..
+204,Cyprus,2701129000,Cyprus,..,..,..
+204,Cyprus,2701190000,Cyprus,..,..,..
+204,Cyprus,2701200000,Cyprus,..,..,..
+204,Cyprus,2703001000,Cyprus,..,..,..
+204,Cyprus,2704001000,Cyprus,..,..,..
+204,Cyprus,2704003000,Cyprus,..,..,..
+340,Guatemala,2701110000,Guatemala,..,..,..
+340,Guatemala,2701129000,Guatemala,..,..,..
+340,Guatemala,2701190000,Guatemala,..,..,..
+340,Guatemala,2701200000,Guatemala,..,..,..
+340,Guatemala,2703001000,Guatemala,..,..,..
+340,Guatemala,2704001000,Guatemala,..,..,..
+340,Guatemala,2704003000,Guatemala,..,..,..
+360,"Honduras, Republic Of",2701110000,"Honduras, Republic Of",..,..,..
+360,"Honduras, Republic Of",2701129000,"Honduras, Republic Of",..,..,..
+360,"Honduras, Republic Of",2701190000,"Honduras, Republic Of",..,..,..
+360,"Honduras, Republic Of",2701200000,"Honduras, Republic Of",..,..,..
+360,"Honduras, Republic Of",2703001000,"Honduras, Republic Of",..,..,..
+360,"Honduras, Republic Of",2704001000,"Honduras, Republic Of",..,..,..
+360,"Honduras, Republic Of",2704003000,"Honduras, Republic Of",..,..,..
+180,Colombia,2701110000,Colombia,..,..,..
+180,Colombia,2701129000,Colombia,..,..,..
+180,Colombia,2701190000,Colombia,..,..,..
+180,Colombia,2701200000,Colombia,..,..,..
+180,Colombia,2703001000,Colombia,..,..,..
+180,Colombia,2704001000,Colombia,..,..,..
+180,Colombia,2704003000,Colombia,..,..,..
+628,Panama,2701110000,Panama,..,..,..
+628,Panama,2701129000,Panama,..,..,..
+628,Panama,2701190000,Panama,..,..,..
+628,Panama,2701200000,Panama,..,..,..
+628,Panama,2703001000,Panama,..,..,..
+628,Panama,2704001000,Panama,..,..,..
+628,Panama,2704003000,Panama,..,..,..
+652,Portugal,2701110000,Portugal,..,..,..
+652,Portugal,2701129000,Portugal,..,..,..
+652,Portugal,2701190000,Portugal,..,..,..
+652,Portugal,2701200000,Portugal,..,..,..
+652,Portugal,2703001000,Portugal,..,..,..
+652,Portugal,2704001000,Portugal,..,..,..
+652,Portugal,2704003000,Portugal,..,..,..
+448,Lao People'S Democratic Republic (Laos),2701110000,Lao People'S Democratic Republic (Laos),..,..,..
+448,Lao People'S Democratic Republic (Laos),2701129000,Lao People'S Democratic Republic (Laos),..,..,..
+448,Lao People'S Democratic Republic (Laos),2701190000,Lao People'S Democratic Republic (Laos),..,..,..
+448,Lao People'S Democratic Republic (Laos),2701200000,Lao People'S Democratic Republic (Laos),..,..,..
+448,Lao People'S Democratic Republic (Laos),2703001000,Lao People'S Democratic Republic (Laos),..,..,..
+448,Lao People'S Democratic Republic (Laos),2704001000,Lao People'S Democratic Republic (Laos),..,..,..
+448,Lao People'S Democratic Republic (Laos),2704003000,Lao People'S Democratic Republic (Laos),..,..,..
+484,Macau,2701110000,Macau,..,..,..
+484,Macau,2701129000,Macau,..,..,..
+484,Macau,2701190000,Macau,..,..,..
+484,Macau,2701200000,Macau,..,..,..
+484,Macau,2703001000,Macau,..,..,..
+484,Macau,2704001000,Macau,..,..,..
+484,Macau,2704003000,Macau,..,..,..
+452,Lebanon,2701110000,Lebanon,..,..,..
+452,Lebanon,2701129000,Lebanon,..,..,..
+452,Lebanon,2701190000,Lebanon,..,..,..
+452,Lebanon,2701200000,Lebanon,..,..,..
+452,Lebanon,2703001000,Lebanon,..,..,..
+452,Lebanon,2704001000,Lebanon,..,..,..
+452,Lebanon,2704003000,Lebanon,..,..,..
+084,Bolivia,2701110000,Bolivia,..,..,..
+084,Bolivia,2701129000,Bolivia,..,..,..
+084,Bolivia,2701190000,Bolivia,..,..,..
+084,Bolivia,2701200000,Bolivia,..,..,..
+084,Bolivia,2703001000,Bolivia,..,..,..
+084,Bolivia,2704001000,Bolivia,..,..,..
+084,Bolivia,2704003000,Bolivia,..,..,..
+486,"Macedonia, The Former Yugoslav Rep. Of",2701110000,"Macedonia, The Former Yugoslav Rep. Of",..,..,..
+486,"Macedonia, The Former Yugoslav Rep. Of",2701129000,"Macedonia, The Former Yugoslav Rep. Of",..,..,..
+486,"Macedonia, The Former Yugoslav Rep. Of",2701190000,"Macedonia, The Former Yugoslav Rep. Of",..,..,..
+486,"Macedonia, The Former Yugoslav Rep. Of",2701200000,"Macedonia, The Former Yugoslav Rep. Of",..,..,..
+486,"Macedonia, The Former Yugoslav Rep. Of",2703001000,"Macedonia, The Former Yugoslav Rep. Of",..,..,..
+486,"Macedonia, The Former Yugoslav Rep. Of",2704001000,"Macedonia, The Former Yugoslav Rep. Of",..,..,..
+486,"Macedonia, The Former Yugoslav Rep. Of",2704003000,"Macedonia, The Former Yugoslav Rep. Of",..,..,..
+876,Virgin Islands (U.S.),2701110000,Virgin Islands (U.S.),..,..,..
+876,Virgin Islands (U.S.),2701129000,Virgin Islands (U.S.),..,..,..
+876,Virgin Islands (U.S.),2701190000,Virgin Islands (U.S.),..,..,..
+876,Virgin Islands (U.S.),2701200000,Virgin Islands (U.S.),..,..,..
+876,Virgin Islands (U.S.),2703001000,Virgin Islands (U.S.),..,..,..
+876,Virgin Islands (U.S.),2704001000,Virgin Islands (U.S.),..,..,..
+876,Virgin Islands (U.S.),2704003000,Virgin Islands (U.S.),..,..,..
+560,Mozambique,2701110000,Mozambique,..,..,..
+560,Mozambique,2701129000,Mozambique,..,..,..
+560,Mozambique,2701190000,Mozambique,..,..,..
+560,Mozambique,2701200000,Mozambique,..,..,..
+560,Mozambique,2703001000,Mozambique,..,..,..
+560,Mozambique,2704001000,Mozambique,..,..,..
+560,Mozambique,2704003000,Mozambique,..,..,..
+724,Solomon Islands (British),2701110000,Solomon Islands (British),..,..,..
+724,Solomon Islands (British),2701129000,Solomon Islands (British),..,..,..
+724,Solomon Islands (British),2701190000,Solomon Islands (British),..,..,..
+724,Solomon Islands (British),2701200000,Solomon Islands (British),..,..,..
+724,Solomon Islands (British),2703001000,Solomon Islands (British),..,..,..
+724,Solomon Islands (British),2704001000,Solomon Islands (British),..,..,..
+724,Solomon Islands (British),2704003000,Solomon Islands (British),..,..,..
+636,Paraguay,2701110000,Paraguay,..,..,..
+636,Paraguay,2701129000,Paraguay,..,..,..
+636,Paraguay,2701190000,Paraguay,..,..,..
+636,Paraguay,2701200000,Paraguay,..,..,..
+636,Paraguay,2703001000,Paraguay,..,..,..
+636,Paraguay,2704001000,Paraguay,..,..,..
+636,Paraguay,2704003000,Paraguay,..,..,..
+196,Costa Rica,2701110000,Costa Rica,..,..,..
+196,Costa Rica,2701129000,Costa Rica,..,..,..
+196,Costa Rica,2701190000,Costa Rica,..,..,..
+196,Costa Rica,2701200000,Costa Rica,..,..,..
+196,Costa Rica,2703001000,Costa Rica,..,..,..
+196,Costa Rica,2704001000,Costa Rica,..,..,..
+196,Costa Rica,2704003000,Costa Rica,..,..,..
+408,"Jamaica (Excludes Cayman Is.,Turks,Caicos)",2701110000,"Jamaica (Excludes Cayman Is.,Turks,Caicos)",..,..,..
+408,"Jamaica (Excludes Cayman Is.,Turks,Caicos)",2701129000,"Jamaica (Excludes Cayman Is.,Turks,Caicos)",..,..,..
+408,"Jamaica (Excludes Cayman Is.,Turks,Caicos)",2701190000,"Jamaica (Excludes Cayman Is.,Turks,Caicos)",..,..,..
+408,"Jamaica (Excludes Cayman Is.,Turks,Caicos)",2701200000,"Jamaica (Excludes Cayman Is.,Turks,Caicos)",..,..,..
+408,"Jamaica (Excludes Cayman Is.,Turks,Caicos)",2703001000,"Jamaica (Excludes Cayman Is.,Turks,Caicos)",..,..,..
+408,"Jamaica (Excludes Cayman Is.,Turks,Caicos)",2704001000,"Jamaica (Excludes Cayman Is.,Turks,Caicos)",..,..,..
+408,"Jamaica (Excludes Cayman Is.,Turks,Caicos)",2704003000,"Jamaica (Excludes Cayman Is.,Turks,Caicos)",..,..,..
+008,Albania,2701110000,Albania,..,..,..
+008,Albania,2701129000,Albania,..,..,..
+008,Albania,2701190000,Albania,..,..,..
+008,Albania,2701200000,Albania,..,..,..
+008,Albania,2703001000,Albania,..,..,..
+008,Albania,2704001000,Albania,..,..,..
+008,Albania,2704003000,Albania,..,..,..
+804,Tunisia,2701110000,Tunisia,..,..,..
+804,Tunisia,2701129000,Tunisia,..,..,..
+804,Tunisia,2701190000,Tunisia,..,..,..
+804,Tunisia,2701200000,Tunisia,..,..,..
+804,Tunisia,2703001000,Tunisia,..,..,..
+804,Tunisia,2704001000,Tunisia,..,..,..
+804,Tunisia,2704003000,Tunisia,..,..,..
+012,Algeria,2701110000,Algeria,..,..,..
+012,Algeria,2701129000,Algeria,..,..,..
+012,Algeria,2701190000,Algeria,..,..,..
+012,Algeria,2701200000,Algeria,..,..,..
+012,Algeria,2703001000,Algeria,..,..,..
+012,Algeria,2704001000,Algeria,..,..,..
+012,Algeria,2704003000,Algeria,..,..,..
+086,Bosnia And Herzegovina,2701110000,Bosnia And Herzegovina,..,..,..
+086,Bosnia And Herzegovina,2701129000,Bosnia And Herzegovina,..,..,..
+086,Bosnia And Herzegovina,2701190000,Bosnia And Herzegovina,..,..,..
+086,Bosnia And Herzegovina,2701200000,Bosnia And Herzegovina,..,..,..
+086,Bosnia And Herzegovina,2703001000,Bosnia And Herzegovina,..,..,..
+086,Bosnia And Herzegovina,2704001000,Bosnia And Herzegovina,..,..,..
+086,Bosnia And Herzegovina,2704003000,Bosnia And Herzegovina,..,..,..
+312,Ghana,2701110000,Ghana,..,..,..
+312,Ghana,2701129000,Ghana,..,..,..
+312,Ghana,2701190000,Ghana,..,..,..
+312,Ghana,2701200000,Ghana,..,..,..
+312,Ghana,2703001000,Ghana,..,..,..
+312,Ghana,2704001000,Ghana,..,..,..
+312,Ghana,2704003000,Ghana,..,..,..
+880,Burkina Faso (Upper Volta),2701110000,Burkina Faso (Upper Volta),..,..,..
+880,Burkina Faso (Upper Volta),2701129000,Burkina Faso (Upper Volta),..,..,..
+880,Burkina Faso (Upper Volta),2701190000,Burkina Faso (Upper Volta),..,..,..
+880,Burkina Faso (Upper Volta),2701200000,Burkina Faso (Upper Volta),..,..,..
+880,Burkina Faso (Upper Volta),2703001000,Burkina Faso (Upper Volta),..,..,..
+880,Burkina Faso (Upper Volta),2704001000,Burkina Faso (Upper Volta),..,..,..
+880,Burkina Faso (Upper Volta),2704003000,Burkina Faso (Upper Volta),..,..,..
+108,Brunei Darussalam,2701110000,Brunei Darussalam,..,..,..
+108,Brunei Darussalam,2701129000,Brunei Darussalam,..,..,..
+108,Brunei Darussalam,2701190000,Brunei Darussalam,..,..,..
+108,Brunei Darussalam,2701200000,Brunei Darussalam,..,..,..
+108,Brunei Darussalam,2703001000,Brunei Darussalam,..,..,..
+108,Brunei Darussalam,2704001000,Brunei Darussalam,..,..,..
+108,Brunei Darussalam,2704003000,Brunei Darussalam,..,..,..
+660,Puerto Rico,2701110000,Puerto Rico,..,..,..
+660,Puerto Rico,2701129000,Puerto Rico,..,..,..
+660,Puerto Rico,2701190000,Puerto Rico,..,..,..
+660,Puerto Rico,2701200000,Puerto Rico,..,..,..
+660,Puerto Rico,2703001000,Puerto Rico,..,..,..
+660,Puerto Rico,2704001000,Puerto Rico,..,..,..
+660,Puerto Rico,2704003000,Puerto Rico,..,..,..
+328,Greenland,2701110000,Greenland,..,..,..
+328,Greenland,2701129000,Greenland,..,..,..
+328,Greenland,2701190000,Greenland,..,..,..
+328,Greenland,2701200000,Greenland,..,..,..
+328,Greenland,2703001000,Greenland,..,..,..
+328,Greenland,2704001000,Greenland,..,..,..
+328,Greenland,2704003000,Greenland,..,..,..
+424,Jordan,2701110000,Jordan,..,..,..
+424,Jordan,2701129000,Jordan,..,..,..
+424,Jordan,2701190000,Jordan,..,..,..
+424,Jordan,2701200000,Jordan,..,..,..
+424,Jordan,2703001000,Jordan,..,..,..
+424,Jordan,2704001000,Jordan,..,..,..
+424,Jordan,2704003000,Jordan,..,..,..
+240,"Equatorial Guinea, Rep. Of",2701110000,"Equatorial Guinea, Rep. Of",..,..,..
+240,"Equatorial Guinea, Rep. Of",2701129000,"Equatorial Guinea, Rep. Of",..,..,..
+240,"Equatorial Guinea, Rep. Of",2701190000,"Equatorial Guinea, Rep. Of",..,..,..
+240,"Equatorial Guinea, Rep. Of",2701200000,"Equatorial Guinea, Rep. Of",..,..,..
+240,"Equatorial Guinea, Rep. Of",2703001000,"Equatorial Guinea, Rep. Of",..,..,..
+240,"Equatorial Guinea, Rep. Of",2704001000,"Equatorial Guinea, Rep. Of",..,..,..
+240,"Equatorial Guinea, Rep. Of",2704003000,"Equatorial Guinea, Rep. Of",..,..,..
+228,Ecuador,2701110000,Ecuador,..,..,..
+228,Ecuador,2701129000,Ecuador,..,..,..
+228,Ecuador,2701190000,Ecuador,..,..,..
+228,Ecuador,2701200000,Ecuador,..,..,..
+228,Ecuador,2703001000,Ecuador,..,..,..
+228,Ecuador,2704001000,Ecuador,..,..,..
+228,Ecuador,2704003000,Ecuador,..,..,..
+548,Mongolia,2701110000,Mongolia,..,..,..
+548,Mongolia,2701129000,Mongolia,..,..,..
+548,Mongolia,2701190000,Mongolia,..,..,..
+548,Mongolia,2701200000,Mongolia,..,..,..
+548,Mongolia,2703001000,Mongolia,..,..,..
+548,Mongolia,2704001000,Mongolia,..,..,..
+548,Mongolia,2704003000,Mongolia,..,..,..
+020,Andorra,2701110000,Andorra,..,..,..
+020,Andorra,2701129000,Andorra,..,..,..
+020,Andorra,2701190000,Andorra,..,..,..
+020,Andorra,2701200000,Andorra,..,..,..
+020,Andorra,2703001000,Andorra,..,..,..
+020,Andorra,2704001000,Andorra,..,..,..
+020,Andorra,2704003000,Andorra,..,..,..
+124,Cameroon,2701110000,Cameroon,..,..,..
+124,Cameroon,2701129000,Cameroon,..,..,..
+124,Cameroon,2701190000,Cameroon,..,..,..
+124,Cameroon,2701200000,Cameroon,..,..,..
+124,Cameroon,2703001000,Cameroon,..,..,..
+124,Cameroon,2704001000,Cameroon,..,..,..
+124,Cameroon,2704003000,Cameroon,..,..,..
+224,Dominican Republic,2701110000,Dominican Republic,..,..,..
+224,Dominican Republic,2701129000,Dominican Republic,..,..,..
+224,Dominican Republic,2701190000,Dominican Republic,..,..,..
+224,Dominican Republic,2701200000,Dominican Republic,..,..,..
+224,Dominican Republic,2703001000,Dominican Republic,..,..,..
+224,Dominican Republic,2704001000,Dominican Republic,..,..,..
+224,Dominican Republic,2704003000,Dominican Republic,..,..,..
+716,Sierra Leone,2701110000,Sierra Leone,..,..,..
+716,Sierra Leone,2701129000,Sierra Leone,..,..,..
+716,Sierra Leone,2701190000,Sierra Leone,..,..,..
+716,Sierra Leone,2701200000,Sierra Leone,..,..,..
+716,Sierra Leone,2703001000,Sierra Leone,..,..,..
+716,Sierra Leone,2704001000,Sierra Leone,..,..,..
+716,Sierra Leone,2704003000,Sierra Leone,..,..,..
+444,Kuwait,2701110000,Kuwait,..,..,..
+444,Kuwait,2701129000,Kuwait,..,..,..
+444,Kuwait,2701190000,Kuwait,..,..,..
+444,Kuwait,2701200000,Kuwait,..,..,..
+444,Kuwait,2703001000,Kuwait,..,..,..
+444,Kuwait,2704001000,Kuwait,..,..,..
+444,Kuwait,2704003000,Kuwait,..,..,..
+520,Malta,2701110000,Malta,..,..,..
+520,Malta,2701129000,Malta,..,..,..
+520,Malta,2701190000,Malta,..,..,..
+520,Malta,2701200000,Malta,..,..,..
+520,Malta,2703001000,Malta,..,..,..
+520,Malta,2704001000,Malta,..,..,..
+520,Malta,2704003000,Malta,..,..,..
+076,Bermuda,2701110000,Bermuda,..,..,..
+076,Bermuda,2701129000,Bermuda,..,..,..
+076,Bermuda,2701190000,Bermuda,..,..,..
+076,Bermuda,2701200000,Bermuda,..,..,..
+076,Bermuda,2703001000,Bermuda,..,..,..
+076,Bermuda,2704001000,Bermuda,..,..,..
+076,Bermuda,2704003000,Bermuda,..,..,..
+604,Nigeria,2701110000,Nigeria,..,..,..
+604,Nigeria,2701129000,Nigeria,..,..,..
+604,Nigeria,2701190000,Nigeria,..,..,..
+604,Nigeria,2701200000,Nigeria,..,..,..
+604,Nigeria,2703001000,Nigeria,..,..,..
+604,Nigeria,2704001000,Nigeria,..,..,..
+604,Nigeria,2704003000,Nigeria,..,..,..
+698,San Marino,2701110000,San Marino,..,..,..
+698,San Marino,2701129000,San Marino,..,..,..
+698,San Marino,2701190000,San Marino,..,..,..
+698,San Marino,2701200000,San Marino,..,..,..
+698,San Marino,2703001000,San Marino,..,..,..
+698,San Marino,2704001000,San Marino,..,..,..
+698,San Marino,2704003000,San Marino,..,..,..
+721,Slovak Republic (Slovakia),2701110000,Slovak Republic (Slovakia),..,..,..
+721,Slovak Republic (Slovakia),2701129000,Slovak Republic (Slovakia),..,..,..
+721,Slovak Republic (Slovakia),2701190000,Slovak Republic (Slovakia),..,..,..
+721,Slovak Republic (Slovakia),2701200000,Slovak Republic (Slovakia),..,..,..
+721,Slovak Republic (Slovakia),2703001000,Slovak Republic (Slovakia),..,..,..
+721,Slovak Republic (Slovakia),2704001000,Slovak Republic (Slovakia),..,..,..
+721,Slovak Republic (Slovakia),2704003000,Slovak Republic (Slovakia),..,..,..
+844,Qatar,2701110000,Qatar,..,..,..
+844,Qatar,2701129000,Qatar,..,..,..
+844,Qatar,2701190000,Qatar,..,..,..
+844,Qatar,2701200000,Qatar,..,..,..
+844,Qatar,2703001000,Qatar,..,..,..
+844,Qatar,2704001000,Qatar,..,..,..
+844,Qatar,2704003000,Qatar,..,..,..
+260,Fiji,2701110000,Fiji,..,..,..
+260,Fiji,2701129000,Fiji,..,..,..
+260,Fiji,2701190000,Fiji,..,..,..
+260,Fiji,2701200000,Fiji,..,..,..
+260,Fiji,2703001000,Fiji,..,..,..
+260,Fiji,2704001000,Fiji,..,..,..
+260,Fiji,2704003000,Fiji,..,..,..
+572,Nepal,2701110000,Nepal,..,..,..
+572,Nepal,2701129000,Nepal,..,..,..
+572,Nepal,2701190000,Nepal,..,..,..
+572,Nepal,2701200000,Nepal,..,..,..
+572,Nepal,2703001000,Nepal,..,..,..
+572,Nepal,2704001000,Nepal,..,..,..
+572,Nepal,2704003000,Nepal,..,..,..
+760,Swaziland (Eswatini),2701110000,Swaziland (Eswatini),..,..,..
+760,Swaziland (Eswatini),2701129000,Swaziland (Eswatini),..,..,..
+760,Swaziland (Eswatini),2701190000,Swaziland (Eswatini),..,..,..
+760,Swaziland (Eswatini),2701200000,Swaziland (Eswatini),..,..,..
+760,Swaziland (Eswatini),2703001000,Swaziland (Eswatini),..,..,..
+760,Swaziland (Eswatini),2704001000,Swaziland (Eswatini),..,..,..
+760,Swaziland (Eswatini),2704003000,Swaziland (Eswatini),..,..,..
+668,Zimbabwe (Rhodesia),2701110000,Zimbabwe (Rhodesia),..,..,..
+668,Zimbabwe (Rhodesia),2701129000,Zimbabwe (Rhodesia),..,..,..
+668,Zimbabwe (Rhodesia),2701190000,Zimbabwe (Rhodesia),..,..,..
+668,Zimbabwe (Rhodesia),2701200000,Zimbabwe (Rhodesia),..,..,..
+668,Zimbabwe (Rhodesia),2703001000,Zimbabwe (Rhodesia),..,..,..
+668,Zimbabwe (Rhodesia),2704001000,Zimbabwe (Rhodesia),..,..,..
+668,Zimbabwe (Rhodesia),2704003000,Zimbabwe (Rhodesia),..,..,..
+496,Malawi,2701110000,Malawi,..,..,..
+496,Malawi,2701129000,Malawi,..,..,..
+496,Malawi,2701190000,Malawi,..,..,..
+496,Malawi,2701200000,Malawi,..,..,..
+496,Malawi,2703001000,Malawi,..,..,..
+496,Malawi,2704001000,Malawi,..,..,..
+496,Malawi,2704003000,Malawi,..,..,..
+516,Mali (West Africa),2701110000,Mali (West Africa),..,..,..
+516,Mali (West Africa),2701129000,Mali (West Africa),..,..,..
+516,Mali (West Africa),2701190000,Mali (West Africa),..,..,..
+516,Mali (West Africa),2701200000,Mali (West Africa),..,..,..
+516,Mali (West Africa),2703001000,Mali (West Africa),..,..,..
+516,Mali (West Africa),2704001000,Mali (West Africa),..,..,..
+516,Mali (West Africa),2704003000,Mali (West Africa),..,..,..
+924,Zambia,2701110000,Zambia,..,..,..
+924,Zambia,2701129000,Zambia,..,..,..
+924,Zambia,2701190000,Zambia,..,..,..
+924,Zambia,2701200000,Zambia,..,..,..
+924,Zambia,2703001000,Zambia,..,..,..
+924,Zambia,2704001000,Zambia,..,..,..
+924,Zambia,2704003000,Zambia,..,..,..
+200,Cuba,2701110000,Cuba,..,..,..
+200,Cuba,2701129000,Cuba,..,..,..
+200,Cuba,2701190000,Cuba,..,..,..
+200,Cuba,2701200000,Cuba,..,..,..
+200,Cuba,2703001000,Cuba,..,..,..
+200,Cuba,2704001000,Cuba,..,..,..
+200,Cuba,2704003000,Cuba,..,..,..
+596,Nicaragua,2701110000,Nicaragua,..,..,..
+596,Nicaragua,2701129000,Nicaragua,..,..,..
+596,Nicaragua,2701190000,Nicaragua,..,..,..
+596,Nicaragua,2701200000,Nicaragua,..,..,..
+596,Nicaragua,2703001000,Nicaragua,..,..,..
+596,Nicaragua,2704001000,Nicaragua,..,..,..
+596,Nicaragua,2704003000,Nicaragua,..,..,..
+784,Togo,2701110000,Togo,..,..,..
+784,Togo,2701129000,Togo,..,..,..
+784,Togo,2701190000,Togo,..,..,..
+784,Togo,2701200000,Togo,..,..,..
+784,Togo,2703001000,Togo,..,..,..
+784,Togo,2704001000,Togo,..,..,..
+784,Togo,2704003000,Togo,..,..,..
+472,Liechtenstein,2701110000,Liechtenstein,..,..,..
+472,Liechtenstein,2701129000,Liechtenstein,..,..,..
+472,Liechtenstein,2701190000,Liechtenstein,..,..,..
+472,Liechtenstein,2701200000,Liechtenstein,..,..,..
+472,Liechtenstein,2703001000,Liechtenstein,..,..,..
+472,Liechtenstein,2704001000,Liechtenstein,..,..,..
+472,Liechtenstein,2704003000,Liechtenstein,..,..,..
+242,Eritrea,2701110000,Eritrea,..,..,..
+242,Eritrea,2701129000,Eritrea,..,..,..
+242,Eritrea,2701190000,Eritrea,..,..,..
+242,Eritrea,2701200000,Eritrea,..,..,..
+242,Eritrea,2703001000,Eritrea,..,..,..
+242,Eritrea,2704001000,Eritrea,..,..,..
+242,Eritrea,2704003000,Eritrea,..,..,..
+388,Iraq,2701110000,Iraq,..,..,..
+388,Iraq,2701129000,Iraq,..,..,..
+388,Iraq,2701190000,Iraq,..,..,..
+388,Iraq,2701200000,Iraq,..,..,..
+388,Iraq,2703001000,Iraq,..,..,..
+388,Iraq,2704001000,Iraq,..,..,..
+388,Iraq,2704003000,Iraq,..,..,..
+480,Luxembourg,2701110000,Luxembourg,..,..,..
+480,Luxembourg,2701129000,Luxembourg,..,..,..
+480,Luxembourg,2701190000,Luxembourg,..,..,..
+480,Luxembourg,2701200000,Luxembourg,..,..,..
+480,Luxembourg,2703001000,Luxembourg,..,..,..
+480,Luxembourg,2704001000,Luxembourg,..,..,..
+480,Luxembourg,2704003000,Luxembourg,..,..,..
+816,Uganda,2701110000,Uganda,..,..,..
+816,Uganda,2701129000,Uganda,..,..,..
+816,Uganda,2701190000,Uganda,..,..,..
+816,Uganda,2701200000,Uganda,..,..,..
+816,Uganda,2703001000,Uganda,..,..,..
+816,Uganda,2704001000,Uganda,..,..,..
+816,Uganda,2704003000,Uganda,..,..,..
+024,Angola,2701110000,Angola,..,..,..
+024,Angola,2701129000,Angola,..,..,..
+024,Angola,2701190000,Angola,..,..,..
+024,Angola,2701200000,Angola,..,..,..
+024,Angola,2703001000,Angola,..,..,..
+024,Angola,2704001000,Angola,..,..,..
+024,Angola,2704003000,Angola,..,..,..
+433,Kyrgyzstan,2701110000,Kyrgyzstan,..,..,..
+433,Kyrgyzstan,2701129000,Kyrgyzstan,..,..,..
+433,Kyrgyzstan,2701190000,Kyrgyzstan,..,..,..
+433,Kyrgyzstan,2701200000,Kyrgyzstan,..,..,..
+433,Kyrgyzstan,2703001000,Kyrgyzstan,..,..,..
+433,Kyrgyzstan,2704001000,Kyrgyzstan,..,..,..
+433,Kyrgyzstan,2704003000,Kyrgyzstan,..,..,..
+626,"Palau, Rep. Of",2701110000,"Palau, Rep. Of",..,..,..
+626,"Palau, Rep. Of",2701129000,"Palau, Rep. Of",..,..,..
+626,"Palau, Rep. Of",2701190000,"Palau, Rep. Of",..,..,..
+626,"Palau, Rep. Of",2701200000,"Palau, Rep. Of",..,..,..
+626,"Palau, Rep. Of",2703001000,"Palau, Rep. Of",..,..,..
+626,"Palau, Rep. Of",2704001000,"Palau, Rep. Of",..,..,..
+626,"Palau, Rep. Of",2704003000,"Palau, Rep. Of",..,..,..
+236,El Salvador,2701110000,El Salvador,..,..,..
+236,El Salvador,2701129000,El Salvador,..,..,..
+236,El Salvador,2701190000,El Salvador,..,..,..
+236,El Salvador,2701200000,El Salvador,..,..,..
+236,El Salvador,2703001000,El Salvador,..,..,..
+236,El Salvador,2704001000,El Salvador,..,..,..
+236,El Salvador,2704003000,El Salvador,..,..,..
+048,Bahamas,2701110000,Bahamas,..,..,..
+048,Bahamas,2701129000,Bahamas,..,..,..
+048,Bahamas,2701190000,Bahamas,..,..,..
+048,Bahamas,2701200000,Bahamas,..,..,..
+048,Bahamas,2703001000,Bahamas,..,..,..
+048,Bahamas,2704001000,Bahamas,..,..,..
+048,Bahamas,2704003000,Bahamas,..,..,..
+088,Botswana,2701110000,Botswana,..,..,..
+088,Botswana,2701129000,Botswana,..,..,..
+088,Botswana,2701190000,Botswana,..,..,..
+088,Botswana,2701200000,Botswana,..,..,..
+088,Botswana,2703001000,Botswana,..,..,..
+088,Botswana,2704001000,Botswana,..,..,..
+088,Botswana,2704003000,Botswana,..,..,..
+796,Trinidad And Tobago,2701110000,Trinidad And Tobago,..,..,..
+796,Trinidad And Tobago,2701129000,Trinidad And Tobago,..,..,..
+796,Trinidad And Tobago,2701190000,Trinidad And Tobago,..,..,..
+796,Trinidad And Tobago,2701200000,Trinidad And Tobago,..,..,..
+796,Trinidad And Tobago,2703001000,Trinidad And Tobago,..,..,..
+796,Trinidad And Tobago,2704001000,Trinidad And Tobago,..,..,..
+796,Trinidad And Tobago,2704003000,Trinidad And Tobago,..,..,..
+004,Afghanistan,2701110000,Afghanistan,..,..,..
+004,Afghanistan,2701129000,Afghanistan,..,..,..
+004,Afghanistan,2701190000,Afghanistan,..,..,..
+004,Afghanistan,2701200000,Afghanistan,..,..,..
+004,Afghanistan,2703001000,Afghanistan,..,..,..
+004,Afghanistan,2704001000,Afghanistan,..,..,..
+004,Afghanistan,2704003000,Afghanistan,..,..,..
+866,Uzbekistan,2701110000,Uzbekistan,..,..,..
+866,Uzbekistan,2701129000,Uzbekistan,..,..,..
+866,Uzbekistan,2701190000,Uzbekistan,..,..,..
+866,Uzbekistan,2701200000,Uzbekistan,..,..,..
+866,Uzbekistan,2703001000,Uzbekistan,..,..,..
+866,Uzbekistan,2704001000,Uzbekistan,..,..,..
+866,Uzbekistan,2704003000,Uzbekistan,..,..,..
+544,Monaco,2701110000,Monaco,..,..,..
+544,Monaco,2701129000,Monaco,..,..,..
+544,Monaco,2701190000,Monaco,..,..,..
+544,Monaco,2701200000,Monaco,..,..,..
+544,Monaco,2703001000,Monaco,..,..,..
+544,Monaco,2704001000,Monaco,..,..,..
+544,Monaco,2704003000,Monaco,..,..,..
+870,U.S. Minor Outlying Islands,2701110000,U.S. Minor Outlying Islands,..,..,..
+870,U.S. Minor Outlying Islands,2701129000,U.S. Minor Outlying Islands,..,..,..
+870,U.S. Minor Outlying Islands,2701190000,U.S. Minor Outlying Islands,..,..,..
+870,U.S. Minor Outlying Islands,2701200000,U.S. Minor Outlying Islands,..,..,..
+870,U.S. Minor Outlying Islands,2703001000,U.S. Minor Outlying Islands,..,..,..
+870,U.S. Minor Outlying Islands,2704001000,U.S. Minor Outlying Islands,..,..,..
+870,U.S. Minor Outlying Islands,2704003000,U.S. Minor Outlying Islands,..,..,..
+216,Djibouti (Affars & Issas),2701110000,Djibouti (Affars & Issas),..,..,..
+216,Djibouti (Affars & Issas),2701129000,Djibouti (Affars & Issas),..,..,..
+216,Djibouti (Affars & Issas),2701190000,Djibouti (Affars & Issas),..,..,..
+216,Djibouti (Affars & Issas),2701200000,Djibouti (Affars & Issas),..,..,..
+216,Djibouti (Affars & Issas),2703001000,Djibouti (Affars & Issas),..,..,..
+216,Djibouti (Affars & Issas),2704001000,Djibouti (Affars & Issas),..,..,..
+216,Djibouti (Affars & Issas),2704003000,Djibouti (Affars & Issas),..,..,..
+680,St. Helena,2701110000,St. Helena,..,..,..
+680,St. Helena,2701129000,St. Helena,..,..,..
+680,St. Helena,2701190000,St. Helena,..,..,..
+680,St. Helena,2701200000,St. Helena,..,..,..
+680,St. Helena,2703001000,St. Helena,..,..,..
+680,St. Helena,2704001000,St. Helena,..,..,..
+680,St. Helena,2704003000,St. Helena,..,..,..
+664,Reunion,2701110000,Reunion,..,..,..
+664,Reunion,2701129000,Reunion,..,..,..
+664,Reunion,2701190000,Reunion,..,..,..
+664,Reunion,2701200000,Reunion,..,..,..
+664,Reunion,2703001000,Reunion,..,..,..
+664,Reunion,2704001000,Reunion,..,..,..
+664,Reunion,2704003000,Reunion,..,..,..
+676,Rwanda,2701110000,Rwanda,..,..,..
+676,Rwanda,2701129000,Rwanda,..,..,..
+676,Rwanda,2701190000,Rwanda,..,..,..
+676,Rwanda,2701200000,Rwanda,..,..,..
+676,Rwanda,2703001000,Rwanda,..,..,..
+676,Rwanda,2704001000,Rwanda,..,..,..
+676,Rwanda,2704003000,Rwanda,..,..,..
+684,St.Kitts & Nevis (St.Christopher & Nevis),2701110000,St.Kitts & Nevis (St.Christopher & Nevis),..,..,..
+684,St.Kitts & Nevis (St.Christopher & Nevis),2701129000,St.Kitts & Nevis (St.Christopher & Nevis),..,..,..
+684,St.Kitts & Nevis (St.Christopher & Nevis),2701190000,St.Kitts & Nevis (St.Christopher & Nevis),..,..,..
+684,St.Kitts & Nevis (St.Christopher & Nevis),2701200000,St.Kitts & Nevis (St.Christopher & Nevis),..,..,..
+684,St.Kitts & Nevis (St.Christopher & Nevis),2703001000,St.Kitts & Nevis (St.Christopher & Nevis),..,..,..
+684,St.Kitts & Nevis (St.Christopher & Nevis),2704001000,St.Kitts & Nevis (St.Christopher & Nevis),..,..,..
+684,St.Kitts & Nevis (St.Christopher & Nevis),2704003000,St.Kitts & Nevis (St.Christopher & Nevis),..,..,..
+774,Tajikistan,2701110000,Tajikistan,..,..,..
+774,Tajikistan,2701129000,Tajikistan,..,..,..
+774,Tajikistan,2701190000,Tajikistan,..,..,..
+774,Tajikistan,2701200000,Tajikistan,..,..,..
+774,Tajikistan,2703001000,Tajikistan,..,..,..
+774,Tajikistan,2704001000,Tajikistan,..,..,..
+774,Tajikistan,2704003000,Tajikistan,..,..,..
+016,American Samoa,2701110000,American Samoa,..,..,..
+016,American Samoa,2701129000,American Samoa,..,..,..
+016,American Samoa,2701190000,American Samoa,..,..,..
+016,American Samoa,2701200000,American Samoa,..,..,..
+016,American Samoa,2703001000,American Samoa,..,..,..
+016,American Samoa,2704001000,American Samoa,..,..,..
+016,American Samoa,2704003000,American Samoa,..,..,..
+896,Virgin Islands (British),2701110000,Virgin Islands (British),..,..,..
+896,Virgin Islands (British),2701129000,Virgin Islands (British),..,..,..
+896,Virgin Islands (British),2701190000,Virgin Islands (British),..,..,..
+896,Virgin Islands (British),2701200000,Virgin Islands (British),..,..,..
+896,Virgin Islands (British),2703001000,Virgin Islands (British),..,..,..
+896,Virgin Islands (British),2704001000,Virgin Islands (British),..,..,..
+896,Virgin Islands (British),2704003000,Virgin Islands (British),..,..,..
+607,Norfolk Island,2701110000,Norfolk Island,..,..,..
+607,Norfolk Island,2701129000,Norfolk Island,..,..,..
+607,Norfolk Island,2701190000,Norfolk Island,..,..,..
+607,Norfolk Island,2701200000,Norfolk Island,..,..,..
+607,Norfolk Island,2703001000,Norfolk Island,..,..,..
+607,Norfolk Island,2704001000,Norfolk Island,..,..,..
+607,Norfolk Island,2704003000,Norfolk Island,..,..,..
+600,Niger,2701110000,Niger,..,..,..
+600,Niger,2701129000,Niger,..,..,..
+600,Niger,2701190000,Niger,..,..,..
+600,Niger,2701200000,Niger,..,..,..
+600,Niger,2703001000,Niger,..,..,..
+600,Niger,2704001000,Niger,..,..,..
+600,Niger,2704003000,Niger,..,..,..
+902,Wallis And Futuna Islands,2701110000,Wallis And Futuna Islands,..,..,..
+902,Wallis And Futuna Islands,2701129000,Wallis And Futuna Islands,..,..,..
+902,Wallis And Futuna Islands,2701190000,Wallis And Futuna Islands,..,..,..
+902,Wallis And Futuna Islands,2701200000,Wallis And Futuna Islands,..,..,..
+902,Wallis And Futuna Islands,2703001000,Wallis And Futuna Islands,..,..,..
+902,Wallis And Futuna Islands,2704001000,Wallis And Futuna Islands,..,..,..
+902,Wallis And Futuna Islands,2704003000,Wallis And Futuna Islands,..,..,..
+033,Armenia,2701110000,Armenia,..,..,..
+033,Armenia,2701129000,Armenia,..,..,..
+033,Armenia,2701190000,Armenia,..,..,..
+033,Armenia,2701200000,Armenia,..,..,..
+033,Armenia,2703001000,Armenia,..,..,..
+033,Armenia,2704001000,Armenia,..,..,..
+033,Armenia,2704003000,Armenia,..,..,..
+090,Bouvet Island,2701110000,Bouvet Island,..,..,..
+090,Bouvet Island,2701129000,Bouvet Island,..,..,..
+090,Bouvet Island,2701190000,Bouvet Island,..,..,..
+090,Bouvet Island,2701200000,Bouvet Island,..,..,..
+090,Bouvet Island,2703001000,Bouvet Island,..,..,..
+090,Bouvet Island,2704001000,Bouvet Island,..,..,..
+090,Bouvet Island,2704003000,Bouvet Island,..,..,..
+256,Falkland Islands (Malvinas),2701110000,Falkland Islands (Malvinas),..,..,..
+256,Falkland Islands (Malvinas),2701129000,Falkland Islands (Malvinas),..,..,..
+256,Falkland Islands (Malvinas),2701190000,Falkland Islands (Malvinas),..,..,..
+256,Falkland Islands (Malvinas),2701200000,Falkland Islands (Malvinas),..,..,..
+256,Falkland Islands (Malvinas),2703001000,Falkland Islands (Malvinas),..,..,..
+256,Falkland Islands (Malvinas),2704001000,Falkland Islands (Malvinas),..,..,..
+256,Falkland Islands (Malvinas),2704003000,Falkland Islands (Malvinas),..,..,..
+912,Samoa (Western Samoa),2701110000,Samoa (Western Samoa),..,..,..
+912,Samoa (Western Samoa),2701129000,Samoa (Western Samoa),..,..,..
+912,Samoa (Western Samoa),2701190000,Samoa (Western Samoa),..,..,..
+912,Samoa (Western Samoa),2701200000,Samoa (Western Samoa),..,..,..
+912,Samoa (Western Samoa),2703001000,Samoa (Western Samoa),..,..,..
+912,Samoa (Western Samoa),2704001000,Samoa (Western Samoa),..,..,..
+912,Samoa (Western Samoa),2704003000,Samoa (Western Samoa),..,..,..
+176,Cocos Island,2701110000,Cocos Island,..,..,..
+176,Cocos Island,2701129000,Cocos Island,..,..,..
+176,Cocos Island,2701190000,Cocos Island,..,..,..
+176,Cocos Island,2701200000,Cocos Island,..,..,..
+176,Cocos Island,2703001000,Cocos Island,..,..,..
+176,Cocos Island,2704001000,Cocos Island,..,..,..
+176,Cocos Island,2704003000,Cocos Island,..,..,..
+430,Kazakhstan,2701110000,Kazakhstan,..,..,..
+430,Kazakhstan,2701129000,Kazakhstan,..,..,..
+430,Kazakhstan,2701190000,Kazakhstan,..,..,..
+430,Kazakhstan,2701200000,Kazakhstan,..,..,..
+430,Kazakhstan,2703001000,Kazakhstan,..,..,..
+430,Kazakhstan,2704001000,Kazakhstan,..,..,..
+430,Kazakhstan,2704003000,Kazakhstan,..,..,..
+552,Montserrat,2701110000,Montserrat,..,..,..
+552,Montserrat,2701129000,Montserrat,..,..,..
+552,Montserrat,2701190000,Montserrat,..,..,..
+552,Montserrat,2701200000,Montserrat,..,..,..
+552,Montserrat,2703001000,Montserrat,..,..,..
+552,Montserrat,2704001000,Montserrat,..,..,..
+552,Montserrat,2704003000,Montserrat,..,..,..
+810,Turkmenistan,2701110000,Turkmenistan,..,..,..
+810,Turkmenistan,2701129000,Turkmenistan,..,..,..
+810,Turkmenistan,2701190000,Turkmenistan,..,..,..
+810,Turkmenistan,2701200000,Turkmenistan,..,..,..
+810,Turkmenistan,2703001000,Turkmenistan,..,..,..
+810,Turkmenistan,2704001000,Turkmenistan,..,..,..
+810,Turkmenistan,2704003000,Turkmenistan,..,..,..
+348,"Guinea-Bissau, Rep. Of",2701110000,"Guinea-Bissau, Rep. Of",..,..,..
+348,"Guinea-Bissau, Rep. Of",2701129000,"Guinea-Bissau, Rep. Of",..,..,..
+348,"Guinea-Bissau, Rep. Of",2701190000,"Guinea-Bissau, Rep. Of",..,..,..
+348,"Guinea-Bissau, Rep. Of",2701200000,"Guinea-Bissau, Rep. Of",..,..,..
+348,"Guinea-Bissau, Rep. Of",2703001000,"Guinea-Bissau, Rep. Of",..,..,..
+348,"Guinea-Bissau, Rep. Of",2704001000,"Guinea-Bissau, Rep. Of",..,..,..
+348,"Guinea-Bissau, Rep. Of",2704003000,"Guinea-Bissau, Rep. Of",..,..,..
+772,Syrian Arab Republic,2701110000,Syrian Arab Republic,..,..,..
+772,Syrian Arab Republic,2701129000,Syrian Arab Republic,..,..,..
+772,Syrian Arab Republic,2701190000,Syrian Arab Republic,..,..,..
+772,Syrian Arab Republic,2701200000,Syrian Arab Republic,..,..,..
+772,Syrian Arab Republic,2703001000,Syrian Arab Republic,..,..,..
+772,Syrian Arab Republic,2704001000,Syrian Arab Republic,..,..,..
+772,Syrian Arab Republic,2704003000,Syrian Arab Republic,..,..,..
+144,Cayman Islands,2701110000,Cayman Islands,..,..,..
+144,Cayman Islands,2701129000,Cayman Islands,..,..,..
+144,Cayman Islands,2701190000,Cayman Islands,..,..,..
+144,Cayman Islands,2701200000,Cayman Islands,..,..,..
+144,Cayman Islands,2703001000,Cayman Islands,..,..,..
+144,Cayman Islands,2704001000,Cayman Islands,..,..,..
+144,Cayman Islands,2704003000,Cayman Islands,..,..,..
+292,Gabon,2701110000,Gabon,..,..,..
+292,Gabon,2701129000,Gabon,..,..,..
+292,Gabon,2701190000,Gabon,..,..,..
+292,Gabon,2701200000,Gabon,..,..,..
+292,Gabon,2703001000,Gabon,..,..,..
+292,Gabon,2704001000,Gabon,..,..,..
+292,Gabon,2704003000,Gabon,..,..,..
+728,"Somalia, Democratic Rep. Of",2701110000,"Somalia, Democratic Rep. Of",..,..,..
+728,"Somalia, Democratic Rep. Of",2701129000,"Somalia, Democratic Rep. Of",..,..,..
+728,"Somalia, Democratic Rep. Of",2701190000,"Somalia, Democratic Rep. Of",..,..,..
+728,"Somalia, Democratic Rep. Of",2701200000,"Somalia, Democratic Rep. Of",..,..,..
+728,"Somalia, Democratic Rep. Of",2703001000,"Somalia, Democratic Rep. Of",..,..,..
+728,"Somalia, Democratic Rep. Of",2704001000,"Somalia, Democratic Rep. Of",..,..,..
+728,"Somalia, Democratic Rep. Of",2704003000,"Somalia, Democratic Rep. Of",..,..,..
+812,Turks And Caicos Islands,2701110000,Turks And Caicos Islands,..,..,..
+812,Turks And Caicos Islands,2701129000,Turks And Caicos Islands,..,..,..
+812,Turks And Caicos Islands,2701190000,Turks And Caicos Islands,..,..,..
+812,Turks And Caicos Islands,2701200000,Turks And Caicos Islands,..,..,..
+812,Turks And Caicos Islands,2703001000,Turks And Caicos Islands,..,..,..
+812,Turks And Caicos Islands,2704001000,Turks And Caicos Islands,..,..,..
+812,Turks And Caicos Islands,2704003000,Turks And Caicos Islands,..,..,..
+788,Tokelau,2701110000,Tokelau,..,..,..
+788,Tokelau,2701129000,Tokelau,..,..,..
+788,Tokelau,2701190000,Tokelau,..,..,..
+788,Tokelau,2701200000,Tokelau,..,..,..
+788,Tokelau,2703001000,Tokelau,..,..,..
+788,Tokelau,2704001000,Tokelau,..,..,..
+788,Tokelau,2704003000,Tokelau,..,..,..
+584,New Caledonia,2701110000,New Caledonia,..,..,..
+584,New Caledonia,2701129000,New Caledonia,..,..,..
+584,New Caledonia,2701190000,New Caledonia,..,..,..
+584,New Caledonia,2701200000,New Caledonia,..,..,..
+584,New Caledonia,2703001000,New Caledonia,..,..,..
+584,New Caledonia,2704001000,New Caledonia,..,..,..
+584,New Caledonia,2704003000,New Caledonia,..,..,..
+356,Haiti,2701110000,Haiti,..,..,..
+356,Haiti,2701129000,Haiti,..,..,..
+356,Haiti,2701190000,Haiti,..,..,..
+356,Haiti,2701200000,Haiti,..,..,..
+356,Haiti,2703001000,Haiti,..,..,..
+356,Haiti,2704001000,Haiti,..,..,..
+356,Haiti,2704003000,Haiti,..,..,..
+034,Aruba,2701110000,Aruba,..,..,..
+034,Aruba,2701129000,Aruba,..,..,..
+034,Aruba,2701190000,Aruba,..,..,..
+034,Aruba,2701200000,Aruba,..,..,..
+034,Aruba,2703001000,Aruba,..,..,..
+034,Aruba,2704001000,Aruba,..,..,..
+034,Aruba,2704003000,Aruba,..,..,..
+140,Cape Verde,2701110000,Cape Verde,..,..,..
+140,Cape Verde,2701129000,Cape Verde,..,..,..
+140,Cape Verde,2701190000,Cape Verde,..,..,..
+140,Cape Verde,2701200000,Cape Verde,..,..,..
+140,Cape Verde,2703001000,Cape Verde,..,..,..
+140,Cape Verde,2704001000,Cape Verde,..,..,..
+140,Cape Verde,2704003000,Cape Verde,..,..,..
+460,Lesotho,2701110000,Lesotho,..,..,..
+460,Lesotho,2701129000,Lesotho,..,..,..
+460,Lesotho,2701190000,Lesotho,..,..,..
+460,Lesotho,2701200000,Lesotho,..,..,..
+460,Lesotho,2703001000,Lesotho,..,..,..
+460,Lesotho,2704001000,Lesotho,..,..,..
+460,Lesotho,2704003000,Lesotho,..,..,..
+528,Mauritania,2701110000,Mauritania,..,..,..
+528,Mauritania,2701129000,Mauritania,..,..,..
+528,Mauritania,2701190000,Mauritania,..,..,..
+528,Mauritania,2701200000,Mauritania,..,..,..
+528,Mauritania,2703001000,Mauritania,..,..,..
+528,Mauritania,2704001000,Mauritania,..,..,..
+528,Mauritania,2704003000,Mauritania,..,..,..
+874,Vatican City State,2701110000,Vatican City State,..,..,..
+874,Vatican City State,2701129000,Vatican City State,..,..,..
+874,Vatican City State,2701190000,Vatican City State,..,..,..
+874,Vatican City State,2701200000,Vatican City State,..,..,..
+874,Vatican City State,2703001000,Vatican City State,..,..,..
+874,Vatican City State,2704001000,Vatican City State,..,..,..
+874,Vatican City State,2704003000,Vatican City State,..,..,..
+120,Burundi,2701110000,Burundi,..,..,..
+120,Burundi,2701129000,Burundi,..,..,..
+120,Burundi,2701190000,Burundi,..,..,..
+120,Burundi,2701200000,Burundi,..,..,..
+120,Burundi,2703001000,Burundi,..,..,..
+120,Burundi,2704001000,Burundi,..,..,..
+120,Burundi,2704003000,Burundi,..,..,..
+609,Northern Mariana Islands,2701110000,Northern Mariana Islands,..,..,..
+609,Northern Mariana Islands,2701129000,Northern Mariana Islands,..,..,..
+609,Northern Mariana Islands,2701190000,Northern Mariana Islands,..,..,..
+609,Northern Mariana Islands,2701200000,Northern Mariana Islands,..,..,..
+609,Northern Mariana Islands,2703001000,Northern Mariana Islands,..,..,..
+609,Northern Mariana Islands,2704001000,Northern Mariana Islands,..,..,..
+609,Northern Mariana Islands,2704003000,Northern Mariana Islands,..,..,..
+026,Antartica,2701110000,Antartica,..,..,..
+026,Antartica,2701129000,Antartica,..,..,..
+026,Antartica,2701190000,Antartica,..,..,..
+026,Antartica,2701200000,Antartica,..,..,..
+026,Antartica,2703001000,Antartica,..,..,..
+026,Antartica,2704001000,Antartica,..,..,..
+026,Antartica,2704003000,Antartica,..,..,..
+332,Grenada,2701110000,Grenada,..,..,..
+332,Grenada,2701129000,Grenada,..,..,..
+332,Grenada,2701190000,Grenada,..,..,..
+332,Grenada,2701200000,Grenada,..,..,..
+332,Grenada,2703001000,Grenada,..,..,..
+332,Grenada,2704001000,Grenada,..,..,..
+332,Grenada,2704003000,Grenada,..,..,..
+060,Barbados,2701110000,Barbados,..,..,..
+060,Barbados,2701129000,Barbados,..,..,..
+060,Barbados,2701190000,Barbados,..,..,..
+060,Barbados,2701200000,Barbados,..,..,..
+060,Barbados,2703001000,Barbados,..,..,..
+060,Barbados,2704001000,Barbados,..,..,..
+060,Barbados,2704003000,Barbados,..,..,..
+220,Dominica,2701110000,Dominica,..,..,..
+220,Dominica,2701129000,Dominica,..,..,..
+220,Dominica,2701190000,Dominica,..,..,..
+220,Dominica,2701200000,Dominica,..,..,..
+220,Dominica,2703001000,Dominica,..,..,..
+220,Dominica,2704001000,Dominica,..,..,..
+220,Dominica,2704003000,Dominica,..,..,..
+226,Timor-Leste (East Timor),2701110000,Timor-Leste (East Timor),..,..,..
+226,Timor-Leste (East Timor),2701129000,Timor-Leste (East Timor),..,..,..
+226,Timor-Leste (East Timor),2701190000,Timor-Leste (East Timor),..,..,..
+226,Timor-Leste (East Timor),2701200000,Timor-Leste (East Timor),..,..,..
+226,Timor-Leste (East Timor),2703001000,Timor-Leste (East Timor),..,..,..
+226,Timor-Leste (East Timor),2704001000,Timor-Leste (East Timor),..,..,..
+226,Timor-Leste (East Timor),2704003000,Timor-Leste (East Timor),..,..,..
+688,St. Lucia,2701110000,St. Lucia,..,..,..
+688,St. Lucia,2701129000,St. Lucia,..,..,..
+688,St. Lucia,2701190000,St. Lucia,..,..,..
+688,St. Lucia,2701200000,St. Lucia,..,..,..
+688,St. Lucia,2703001000,St. Lucia,..,..,..
+688,St. Lucia,2704001000,St. Lucia,..,..,..
+688,St. Lucia,2704003000,St. Lucia,..,..,..
+316,Gibraltar,2701110000,Gibraltar,..,..,..
+316,Gibraltar,2701129000,Gibraltar,..,..,..
+316,Gibraltar,2701190000,Gibraltar,..,..,..
+316,Gibraltar,2701200000,Gibraltar,..,..,..
+316,Gibraltar,2703001000,Gibraltar,..,..,..
+316,Gibraltar,2704001000,Gibraltar,..,..,..
+316,Gibraltar,2704003000,Gibraltar,..,..,..
+700,"Sao Tome And Principe, Dem. Rep. Of",2701110000,"Sao Tome And Principe, Dem. Rep. Of",..,..,..
+700,"Sao Tome And Principe, Dem. Rep. Of",2701129000,"Sao Tome And Principe, Dem. Rep. Of",..,..,..
+700,"Sao Tome And Principe, Dem. Rep. Of",2701190000,"Sao Tome And Principe, Dem. Rep. Of",..,..,..
+700,"Sao Tome And Principe, Dem. Rep. Of",2701200000,"Sao Tome And Principe, Dem. Rep. Of",..,..,..
+700,"Sao Tome And Principe, Dem. Rep. Of",2703001000,"Sao Tome And Principe, Dem. Rep. Of",..,..,..
+700,"Sao Tome And Principe, Dem. Rep. Of",2704001000,"Sao Tome And Principe, Dem. Rep. Of",..,..,..
+700,"Sao Tome And Principe, Dem. Rep. Of",2704003000,"Sao Tome And Principe, Dem. Rep. Of",..,..,..
+344,Guinea,2701110000,Guinea,..,..,..
+344,Guinea,2701129000,Guinea,..,..,..
+344,Guinea,2701190000,Guinea,..,..,..
+344,Guinea,2701200000,Guinea,..,..,..
+344,Guinea,2703001000,Guinea,..,..,..
+344,Guinea,2704001000,Guinea,..,..,..
+344,Guinea,2704003000,Guinea,..,..,..
+172,Christmas Island,2701110000,Christmas Island,..,..,..
+172,Christmas Island,2701129000,Christmas Island,..,..,..
+172,Christmas Island,2701190000,Christmas Island,..,..,..
+172,Christmas Island,2701200000,Christmas Island,..,..,..
+172,Christmas Island,2703001000,Christmas Island,..,..,..
+172,Christmas Island,2704001000,Christmas Island,..,..,..
+172,Christmas Island,2704003000,Christmas Island,..,..,..
+708,Senegal,2701110000,Senegal,..,..,..
+708,Senegal,2701129000,Senegal,..,..,..
+708,Senegal,2701190000,Senegal,..,..,..
+708,Senegal,2701200000,Senegal,..,..,..
+708,Senegal,2703001000,Senegal,..,..,..
+708,Senegal,2704001000,Senegal,..,..,..
+708,Senegal,2704003000,Senegal,..,..,..
+042,Azerbaijan,2701110000,Azerbaijan,..,..,..
+042,Azerbaijan,2701129000,Azerbaijan,..,..,..
+042,Azerbaijan,2701190000,Azerbaijan,..,..,..
+042,Azerbaijan,2701200000,Azerbaijan,..,..,..
+042,Azerbaijan,2703001000,Azerbaijan,..,..,..
+042,Azerbaijan,2704001000,Azerbaijan,..,..,..
+042,Azerbaijan,2704003000,Azerbaijan,..,..,..
+336,Guadeloupe,2701110000,Guadeloupe,..,..,..
+336,Guadeloupe,2701129000,Guadeloupe,..,..,..
+336,Guadeloupe,2701190000,Guadeloupe,..,..,..
+336,Guadeloupe,2701200000,Guadeloupe,..,..,..
+336,Guadeloupe,2703001000,Guadeloupe,..,..,..
+336,Guadeloupe,2704001000,Guadeloupe,..,..,..
+336,Guadeloupe,2704003000,Guadeloupe,..,..,..
+352,Guyana,2701110000,Guyana,..,..,..
+352,Guyana,2701129000,Guyana,..,..,..
+352,Guyana,2701190000,Guyana,..,..,..
+352,Guyana,2701200000,Guyana,..,..,..
+352,Guyana,2703001000,Guyana,..,..,..
+352,Guyana,2704001000,Guyana,..,..,..
+352,Guyana,2704003000,Guyana,..,..,..
+908,Western Sahara (Spanish Sahara),2701110000,Western Sahara (Spanish Sahara),..,..,..
+908,Western Sahara (Spanish Sahara),2701129000,Western Sahara (Spanish Sahara),..,..,..
+908,Western Sahara (Spanish Sahara),2701190000,Western Sahara (Spanish Sahara),..,..,..
+908,Western Sahara (Spanish Sahara),2701200000,Western Sahara (Spanish Sahara),..,..,..
+908,Western Sahara (Spanish Sahara),2703001000,Western Sahara (Spanish Sahara),..,..,..
+908,Western Sahara (Spanish Sahara),2704001000,Western Sahara (Spanish Sahara),..,..,..
+908,Western Sahara (Spanish Sahara),2704003000,Western Sahara (Spanish Sahara),..,..,..
+272,French Guiana,2701110000,French Guiana,..,..,..
+272,French Guiana,2701129000,French Guiana,..,..,..
+272,French Guiana,2701190000,French Guiana,..,..,..
+272,French Guiana,2701200000,French Guiana,..,..,..
+272,French Guiana,2703001000,French Guiana,..,..,..
+272,French Guiana,2704001000,French Guiana,..,..,..
+272,French Guiana,2704003000,French Guiana,..,..,..
+605,Niue,2701110000,Niue,..,..,..
+605,Niue,2701129000,Niue,..,..,..
+605,Niue,2701190000,Niue,..,..,..
+605,Niue,2701200000,Niue,..,..,..
+605,Niue,2703001000,Niue,..,..,..
+605,Niue,2704001000,Niue,..,..,..
+605,Niue,2704003000,Niue,..,..,..
+148,Central African Republic,2701110000,Central African Republic,..,..,..
+148,Central African Republic,2701129000,Central African Republic,..,..,..
+148,Central African Republic,2701190000,Central African Republic,..,..,..
+148,Central African Republic,2701200000,Central African Republic,..,..,..
+148,Central African Republic,2703001000,Central African Republic,..,..,..
+148,Central African Republic,2704001000,Central African Republic,..,..,..
+148,Central African Republic,2704003000,Central African Republic,..,..,..
+152,Chad,2701110000,Chad,..,..,..
+152,Chad,2701129000,Chad,..,..,..
+152,Chad,2701190000,Chad,..,..,..
+152,Chad,2701200000,Chad,..,..,..
+152,Chad,2703001000,Chad,..,..,..
+152,Chad,2704001000,Chad,..,..,..
+152,Chad,2704003000,Chad,..,..,..
+296,Gambia,2701110000,Gambia,..,..,..
+296,Gambia,2701129000,Gambia,..,..,..
+296,Gambia,2701190000,Gambia,..,..,..
+296,Gambia,2701200000,Gambia,..,..,..
+296,Gambia,2703001000,Gambia,..,..,..
+296,Gambia,2704001000,Gambia,..,..,..
+296,Gambia,2704003000,Gambia,..,..,..
+188,"Congo, Rep. Of",2701110000,"Congo, Rep. Of",..,..,..
+188,"Congo, Rep. Of",2701129000,"Congo, Rep. Of",..,..,..
+188,"Congo, Rep. Of",2701190000,"Congo, Rep. Of",..,..,..
+188,"Congo, Rep. Of",2701200000,"Congo, Rep. Of",..,..,..
+188,"Congo, Rep. Of",2703001000,"Congo, Rep. Of",..,..,..
+188,"Congo, Rep. Of",2704001000,"Congo, Rep. Of",..,..,..
+188,"Congo, Rep. Of",2704003000,"Congo, Rep. Of",..,..,..
+464,Liberia,2701110000,Liberia,..,..,..
+464,Liberia,2701129000,Liberia,..,..,..
+464,Liberia,2701190000,Liberia,..,..,..
+464,Liberia,2701200000,Liberia,..,..,..
+464,Liberia,2703001000,Liberia,..,..,..
+464,Liberia,2704001000,Liberia,..,..,..
+464,Liberia,2704003000,Liberia,..,..,..
+752,Sudan,2701110000,Sudan,..,..,..
+752,Sudan,2701129000,Sudan,..,..,..
+752,Sudan,2701190000,Sudan,..,..,..
+752,Sudan,2701200000,Sudan,..,..,..
+752,Sudan,2703001000,Sudan,..,..,..
+752,Sudan,2704001000,Sudan,..,..,..
+752,Sudan,2704003000,Sudan,..,..,..
+792,Tonga,2701110000,Tonga,..,..,..
+792,Tonga,2701129000,Tonga,..,..,..
+792,Tonga,2701190000,Tonga,..,..,..
+792,Tonga,2701200000,Tonga,..,..,..
+792,Tonga,2703001000,Tonga,..,..,..
+792,Tonga,2704001000,Tonga,..,..,..
+792,Tonga,2704003000,Tonga,..,..,..
+404,Cote D' Ivoire (Ivory Coast),2701110000,Cote D' Ivoire (Ivory Coast),..,..,..
+404,Cote D' Ivoire (Ivory Coast),2701129000,Cote D' Ivoire (Ivory Coast),..,..,..
+404,Cote D' Ivoire (Ivory Coast),2701190000,Cote D' Ivoire (Ivory Coast),..,..,..
+404,Cote D' Ivoire (Ivory Coast),2701200000,Cote D' Ivoire (Ivory Coast),..,..,..
+404,Cote D' Ivoire (Ivory Coast),2703001000,Cote D' Ivoire (Ivory Coast),..,..,..
+404,Cote D' Ivoire (Ivory Coast),2704001000,Cote D' Ivoire (Ivory Coast),..,..,..
+404,Cote D' Ivoire (Ivory Coast),2704003000,Cote D' Ivoire (Ivory Coast),..,..,..
+758,Svalbard And Jan Mayen,2701110000,Svalbard And Jan Mayen,..,..,..
+758,Svalbard And Jan Mayen,2701129000,Svalbard And Jan Mayen,..,..,..
+758,Svalbard And Jan Mayen,2701190000,Svalbard And Jan Mayen,..,..,..
+758,Svalbard And Jan Mayen,2701200000,Svalbard And Jan Mayen,..,..,..
+758,Svalbard And Jan Mayen,2703001000,Svalbard And Jan Mayen,..,..,..
+758,Svalbard And Jan Mayen,2704001000,Svalbard And Jan Mayen,..,..,..
+758,Svalbard And Jan Mayen,2704003000,Svalbard And Jan Mayen,..,..,..
+080,Bhutan,2701110000,Bhutan,..,..,..
+080,Bhutan,2701129000,Bhutan,..,..,..
+080,Bhutan,2701190000,Bhutan,..,..,..
+080,Bhutan,2701200000,Bhutan,..,..,..
+080,Bhutan,2703001000,Bhutan,..,..,..
+080,Bhutan,2704001000,Bhutan,..,..,..
+080,Bhutan,2704003000,Bhutan,..,..,..
+696,St. Vincent And Grenadines,2701110000,St. Vincent And Grenadines,..,..,..
+696,St. Vincent And Grenadines,2701129000,St. Vincent And Grenadines,..,..,..
+696,St. Vincent And Grenadines,2701190000,St. Vincent And Grenadines,..,..,..
+696,St. Vincent And Grenadines,2701200000,St. Vincent And Grenadines,..,..,..
+696,St. Vincent And Grenadines,2703001000,St. Vincent And Grenadines,..,..,..
+696,St. Vincent And Grenadines,2704001000,St. Vincent And Grenadines,..,..,..
+696,St. Vincent And Grenadines,2704003000,St. Vincent And Grenadines,..,..,..
+853,"Yemen, Republic Of",2701110000,"Yemen, Republic Of",..,..,..
+853,"Yemen, Republic Of",2701129000,"Yemen, Republic Of",..,..,..
+853,"Yemen, Republic Of",2701190000,"Yemen, Republic Of",..,..,..
+853,"Yemen, Republic Of",2701200000,"Yemen, Republic Of",..,..,..
+853,"Yemen, Republic Of",2703001000,"Yemen, Republic Of",..,..,..
+853,"Yemen, Republic Of",2704001000,"Yemen, Republic Of",..,..,..
+853,"Yemen, Republic Of",2704003000,"Yemen, Republic Of",..,..,..
+096,British Indian Ocean Territory,2701110000,British Indian Ocean Territory,..,..,..
+096,British Indian Ocean Territory,2701129000,British Indian Ocean Territory,..,..,..
+096,British Indian Ocean Territory,2701190000,British Indian Ocean Territory,..,..,..
+096,British Indian Ocean Territory,2701200000,British Indian Ocean Territory,..,..,..
+096,British Indian Ocean Territory,2703001000,British Indian Ocean Territory,..,..,..
+096,British Indian Ocean Territory,2704001000,British Indian Ocean Territory,..,..,..
+096,British Indian Ocean Territory,2704003000,British Indian Ocean Territory,..,..,..
+202,Curacao,2701110000,Curacao,..,..,..
+202,Curacao,2701129000,Curacao,..,..,..
+202,Curacao,2701190000,Curacao,..,..,..
+202,Curacao,2701200000,Curacao,..,..,..
+202,Curacao,2703001000,Curacao,..,..,..
+202,Curacao,2704001000,Curacao,..,..,..
+202,Curacao,2704003000,Curacao,..,..,..
+025,Anguilla,2701110000,Anguilla,..,..,..
+025,Anguilla,2701129000,Anguilla,..,..,..
+025,Anguilla,2701190000,Anguilla,..,..,..
+025,Anguilla,2701200000,Anguilla,..,..,..
+025,Anguilla,2703001000,Anguilla,..,..,..
+025,Anguilla,2704001000,Anguilla,..,..,..
+025,Anguilla,2704003000,Anguilla,..,..,..
+646,Pitcairn Island,2701110000,Pitcairn Island,..,..,..
+646,Pitcairn Island,2701129000,Pitcairn Island,..,..,..
+646,Pitcairn Island,2701190000,Pitcairn Island,..,..,..
+646,Pitcairn Island,2701200000,Pitcairn Island,..,..,..
+646,Pitcairn Island,2703001000,Pitcairn Island,..,..,..
+646,Pitcairn Island,2704001000,Pitcairn Island,..,..,..
+646,Pitcairn Island,2704003000,Pitcairn Island,..,..,..

@@ -44,9 +44,10 @@ sys.path.insert(0, str(ROOT))
 from infinity_gem import paths                       # noqa: E402
 from infinity_gem.sam import SAM                     # noqa: E402
 
-# Excise tax on petroleum products collected in 2023 by BIR and BOC (₱ bn). SOURCE TO VERIFY: CPBRD Facts in Figures
-# FF2025-42, "Excise Tax on Petroleum Products in the Philippines" (May 2025), as quoted in a search-result snippet on
-# 2 Oct 2026 (the PDF is behind a bot check; to be saved by hand). Status: ATTRIBUTED until the PDF is opened.
+# Excise tax on petroleum products collected in 2023 by BIR and BOC (₱ bn): CPBRD Facts in Figures FF2025-42, "Excise Tax
+# on Petroleum Products in the Philippines" (May 2025), Figure 1 (Bureau of the Treasury data). VERIFIED 24 Oct 2026 in the PDF
+# (a reference copy (not distributed)). Rates x 2023 volumes give about 165-175 bn due: collections are a lower bound
+# (a review note (not included), addendum).
 FUEL_EXCISE_2023 = 139.7
 PETR = list(range(107, 109))
 CHEM = list(range(109, 119))

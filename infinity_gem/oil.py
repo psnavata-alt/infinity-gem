@@ -123,20 +123,27 @@ def lng_cost_shock(m, change: float) -> dict:
     return {"tfp_scale": {"aelec": 1.0 / (1.0 + s * change / float(m.iva[m.A.index("aelec")]))}}
 
 
-def coal_lng_paths() -> pd.DataFrame:
+COAL_LNG_PATHS_PSA = paths.DATA_PROCESSED / "coal_lng_price_paths_2026-2030_psa_coal.csv"   # coal_series="psa" (24 Oct 2026)
+
+
+def coal_lng_paths(coal_series: str = "world_bank") -> pd.DataFrame:
     """Infinity GEM SAM v0.7 (opt-in): world coal and LNG price changes by calendar year, % against their pre-conflict level
     (COAL_LNG_PATHS, written by research/coal_lng_prices/coal_lng_paths.py; its '#' lines give the sources and say whether
-    the World Bank's own coal and LNG series were on disk or a stated proxy was used)."""
-    return pd.read_csv(COAL_LNG_PATHS, comment="#").set_index("year")
+    the World Bank's own coal and LNG series were on disk or a stated proxy was used). coal_series="psa" (opt-in, 24 Oct
+    2026): coal from PSA's Philippine import unit values (HS 2701, CIF/kg) instead of Newcastle, LNG unchanged
+    (COAL_LNG_PATHS_PSA, written by coal_lng_paths.py --coal psa). The default reads exactly what it read before."""
+    if coal_series not in ("world_bank", "psa"):
+        raise ValueError("coal_series must be 'world_bank' (the default: Newcastle) or 'psa' (Philippine coal imports)")
+    return pd.read_csv(COAL_LNG_PATHS_PSA if coal_series == "psa" else COAL_LNG_PATHS, comment="#").set_index("year")
 
 
-def coal_lng_shock(m, year: int, coal: bool = True, lng: bool = True) -> dict:
+def coal_lng_shock(m, year: int, coal: bool = True, lng: bool = True, coal_series: str = "world_bank") -> dict:
     """Infinity GEM SAM v0.7 (opt-in): the coal and LNG part of the oil shock in calendar year `year` (coal_lng_paths()), as CGE
     shock keys to merge with cge_oil_shock's: coal's world import price (pwm_scale) and power plants' gas (lng_cost_shock,
-    tfp_scale). A year the paths do not cover gives no shock. Needs a model with 'ccoal'."""
+    tfp_scale). A year the paths do not cover gives no shock. Needs a model with 'ccoal'. coal_series: as in coal_lng_paths."""
     if "ccoal" not in m.C:
         raise ValueError("coal_lng_shock needs a SAM with coal split from mining ('ccoal': Infinity GEM SAM v0.7)")
-    p = coal_lng_paths()
+    p = coal_lng_paths(coal_series)
     if year not in p.index:
         return {}
     out = {}

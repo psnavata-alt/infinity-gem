@@ -70,8 +70,8 @@ if END is not None:
 # investment's comovement with the rate and output. Outputs and chains carry "_inv"; without obs=inv nothing changes.
 OBS_INV = any(a == "obs=inv" for a in sys.argv[1:])
 if OBS_INV:
-    if MODEL not in ("htmk", "htmki", "htmkf", "htmkw"):
-        raise SystemExit("obs=inv needs model=htmk, model=htmki, model=htmkf or model=htmkw")
+    if MODEL not in ("htmk", "htmki", "htmkf", "htmkw", "htmkwo"):
+        raise SystemExit("obs=inv needs model=htmk, model=htmki, model=htmkf, model=htmkw or model=htmkwo")
     STAG += "_inv"
 RATIO_PRIOR = {"infl": (-0.35, 0.10), "growth": (-0.20, 0.15),       # trough per pp of first-year tightening: mean, s.d.
                "persist": (3.0, 2.0)}                                 # ratio2 only: first-year cumulative rate path per pp of impact
@@ -109,9 +109,11 @@ elif MODEL == "htmkf":       # milestone 25 (22-23 Oct 2026): soe_htmkf.py, soe_
     import soe_htmkf as R    # noqa: E402
 elif MODEL == "htmkw":       # milestone 25b (23 Oct 2026): soe_htmkw.py, soe_htmkf plus sticky nominal (Calvo) wages
     import soe_htmkw as R    # noqa: E402
+elif MODEL == "htmkwo":      # 24 Oct 2026: soe_htmkwo.py, soe_htmkw (sticky wages) plus soe_oilf's oil block
+    import soe_htmkwo as R   # noqa: E402
 else:
     import soe_rot as R      # noqa: E402
-OILM = ("oil", "oilu", "oilw", "oilf")                               # the oil models
+OILM = ("oil", "oilu", "oilw", "oilf", "htmkwo")                     # the oil models (htmkwo: 24 Oct 2026)
 
 EST = [e for e in EM.EST if e[0] not in ("gH", "gF")]
 i_after = [e[0] for e in EST].index("hab") + 1
@@ -120,18 +122,18 @@ if MODEL in ("htm", "htmu", "htmk", "htmki", "htmkf", "htmkw") + OILM:
     EST[i_after + 2:i_after + 2] = [("lam_h", "beta", 0.30, 0.15, 0.0, 0.90), ("kappa", "beta", 0.30, 0.15, 0.0, 0.90)]
 SHOCKS = list(EM.SHOCKS)
 FIXED = {}
-if MODEL in ("htmk", "htmki", "htmkf", "htmkw"):
+if MODEL in ("htmk", "htmki", "htmkf", "htmkw", "htmkwo"):
     # milestone 23 (21 Oct 2026): capital and investment. phi_i (adjustment-cost curvature) with Smets and Wouters' prior; the
     # shares calibrated (soe_htmk.py's docstring: Infinity GEM's own SAM v0.5 gives capital 0.60 of value added incl. mixed income, so 0.5;
     # investment 0.24 of household consumption plus investment; depreciation 2.5% a quarter)
     EST.insert(i_after + 4, ("phi_i", "normal", 4.0, 1.5, 0.5, 15.0))
     EST.insert(i_after + 5, ("psi_u", "beta", 0.50, 0.15, 0.05, 0.95))      # utilisation-cost elasticity, Smets-Wouters' prior
     FIXED = dict(alpha_k=0.5, i_y=0.24, delta=0.025)
-if MODEL in ("htmu", "htmk", "htmki", "htmkf", "htmkw", "oilu", "oilw", "oilf"):  # milestone 19: the cost-push shock's persistence and size (quarterly inflation, %; as sd_v)
+if MODEL in ("htmu", "htmk", "htmki", "htmkf", "htmkw", "htmkwo", "oilu", "oilw", "oilf"):  # milestone 19: the cost-push shock's persistence and size (quarterly inflation, %; as sd_v)
     EST.insert([e[0] for e in EST].index("rho_z") + 1, ("rho_u", "beta", 0.50, 0.20, 0.0, 0.99))
     EST.append(("sd_u", "invgamma", 0.25, 1.0, 1e-3, 10.0))
     SHOCKS.append("u")
-if MODEL in ("htmki", "htmkf", "htmkw"):
+if MODEL in ("htmki", "htmkf", "htmkw", "htmkwo"):
     # milestone 24 (22 Oct 2026): the investment-specific (MEI) shock's persistence and size (% a quarter), with the same loose
     # priors as the other shocks; it enters the investment Euler equation with unit weight (Smets and Wouters 2007, eq. 3)
     EST.insert([e[0] for e in EST].index("rho_u") + 1, ("rho_ei", "beta", 0.50, 0.20, 0.0, 0.99))
@@ -141,7 +143,7 @@ if MODEL in OILM:
     # calibrated, not estimated: oil's direct CPI weight 0.037 (PSA 2018-based weights: LPG 1.27, kerosene 0.04, vehicle fuels
     # 2.39) and its cost share in production 0.030 (refined petroleum's intermediate use over total output, Infinity GEM's own SAM v0.5);
     # low substitution between core goods and oil (0.2; short-run oil demand is inelastic)
-    FIXED = dict(a_o=0.037, s_o=0.030, eps_o=0.2)
+    FIXED = dict(FIXED, a_o=0.037, s_o=0.030, eps_o=0.2)        # 24 Oct 2026: dict(FIXED, ...) keeps htmkwo's capital block ({} before for the other oil models)
     EST.insert([e[0] for e in EST].index("rho_z") + 1, ("rho_o", "beta", 0.80, 0.10, 0.0, 0.99))
     EST.append(("sd_o", "invgamma", 12.0, 6.0, 1e-3, 50.0))
     SHOCKS.append("o")
@@ -151,18 +153,21 @@ if MODEL == "oilf":
     # s_f = their fuel cost share, CPI-weighted, from Infinity GEM's own SAM v0.5 (transport: refined petroleum 16.1% of cost; electricity:
     # refined petroleum 17.1% plus coal and gas 5.0%, the DSGE's one oil price standing for all fossil fuels): 0.19 (oil only 0.17)
     FIXED = dict(FIXED, a_f=0.091, s_f=0.19)
-if MODEL in ("htmkf", "htmkw"):
+if MODEL in ("htmkf", "htmkw", "htmkwo"):
     # milestone 25 (22-23 Oct 2026, night): the same flexible-price, energy-intensive services as milestone 22 (CPI weight a_f =
     # passenger transport services 4.54% + electricity 4.55%, PSA 2018 weights), priced at the economy's marginal cost each
     # quarter (soe_htmkf.py: no oil price in this model, so no fuel share s_f); no new estimated parameter
     FIXED = dict(FIXED, a_f=0.091)
-if MODEL == "htmkw":
+if MODEL == "htmkwo":
+    # 24 Oct 2026: the flexible-price services' fuel cost share, as model=oilf (milestone 22; Infinity GEM's own SAM v0.5, CPI-weighted)
+    FIXED = dict(FIXED, s_f=0.19)
+if MODEL in ("htmkw", "htmkwo"):
     # milestone 25b (23 Oct 2026, night): sticky nominal wages (soe_htmkw.py). The Calvo wage parameter with a prior mean of 0.75,
     # a mean wage duration of one year (Philippine minimum wages are set in pesos by the regional boards about once a year;
     # Smets and Wouters' US prior is beta(0.5, 0.1)); the elasticity of substitution between labour types calibrated (Gali 2015)
     EST.insert([e[0] for e in EST].index("theta_F") + 1, ("theta_w", "beta", 0.75, 0.10, 0.05, 0.97))
     FIXED = dict(FIXED, eps_w=4.5)
-if MODEL in ("oilw", "oilf"):
+if MODEL in ("oilw", "oilf", "htmkwo"):
     # milestone 21: the oil price's loading on world output (o = o_s + chi_o ystar), positive (world booms raise oil prices);
     # gamma with mean 5 and s.d. 4: a 1% world-output gap moves the real oil price by about 1-13%, the range implied by the
     # comovement of Dubai crude with G3 growth (oil changes s.d. about 15%, G3 growth about 0.6%, correlation 0.2-0.5)
@@ -189,7 +194,7 @@ if THETA_FIX is not None:
 # world= (milestone 21 robustness, 20 Oct 2026): "g3" (default, G3 real GDP growth) or "igrea" (Kilian's index)
 WORLD = next((a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("world=")), "g3")
 if WORLD != "g3":
-    if MODEL not in ("oilw", "oilf"):
+    if MODEL not in ("oilw", "oilf", "htmkwo"):
         raise SystemExit("world= applies to model=oilw and model=oilf only")
     STAG += f"_{WORLD}"
 if OBS_INV:                                                    # milestone 23c: investment's measurement error, % a quarter
@@ -219,7 +224,7 @@ def me_kw(theta):
     """kalman_loglik's measurement-error variances: the default 1e-4 for every observable, plus me_inv^2 for investment."""
     if not OBS_INV:
         return {}
-    n_obs = {"oil": 5, "oilu": 5, "oilw": 6, "oilf": 6}.get(MODEL, 4) + 1
+    n_obs = {"oil": 5, "oilu": 5, "oilw": 6, "oilf": 6, "htmkwo": 6}.get(MODEL, 4) + 1
     me = np.full(n_obs, 1e-4)
     me[-1] = dict(zip(NAMES, theta))["me_inv"] ** 2
     return {"me": me}
@@ -237,14 +242,14 @@ def state_space(sol, sds, chi_o=0.0):
     Rbig = np.vstack([Rm, np.zeros((nk, len(SHOCKS)))])
     Q = np.diag((sds / 100.0) ** 2)
     F = sol.F
-    H = np.zeros(({"oil": 5, "oilu": 5, "oilw": 6, "oilf": 6}.get(MODEL, 4) + (1 if OBS_INV else 0), 2 * nk))
+    H = np.zeros(({"oil": 5, "oilu": 5, "oilw": 6, "oilf": 6, "htmkwo": 6}.get(MODEL, 4) + (1 if OBS_INV else 0), 2 * nk))
     if OBS_INV:                                                # milestone 23c: investment growth = inv - inv(-1), the last row
         H[-1, :nk], H[-1, nk:] = F[ixd["inv"]], -F[ixd["inv"]]
     H[0, :nk], H[0, nk:] = F[ixd["y"]], -F[ixd["y"]]
     H[1, :nk], H[2, :nk], H[3, :nk] = F[ixd["pi"]], F[ixd["i"]], F[ixd["de"]]
     if MODEL in OILM:                                          # Dubai crude in dollars: o - o_lag + pistar (states at t)
         H[4, ixk["o"]], H[4, ixk["o_lag"]], H[4, ixk["pistar"]] = 1.0, -1.0, 1.0
-    if MODEL in ("oilw", "oilf"):                              # milestone 21: world output growth = ystar - ystar_lag
+    if MODEL in ("oilw", "oilf", "htmkwo"):                    # milestone 21: world output growth = ystar - ystar_lag
         H[5, ixk["ystar"]], H[5, ixk["ystar_lag"]] = 1.0, -1.0
     return Pbig, Rbig, Q, 100.0 * H
 
@@ -256,6 +261,11 @@ def observables():
         kw["end"] = END
     if GDP_SA == "stl":
         kw["gdp_sa"] = "stl"
+    if MODEL == "htmkwo":                                      # 24 Oct 2026: the oil model's six series plus investment (obs=inv)
+        df = ph_data.observables_oilw(world=WORLD, **kw)[E0.OBS + ["doil", "dystar"]]
+        if OBS_INV:
+            df = df.join(ph_data.observables_inv(**kw)[["dinv"]])
+        return df.to_numpy()
     if MODEL in ("oilw", "oilf"):
         return ph_data.observables_oilw(world=WORLD, **kw)[E0.OBS + ["doil", "dystar"]].to_numpy()
     if MODEL in ("oil", "oilu"):
@@ -332,7 +342,11 @@ def main():
     # chain of the same specification (the first run and its seeds), not only the first run: a first run that mixed badly
     # (2002-2026, STL GDP: acceptance 0.06) gives too narrow a covariance and the seeds then move slowly (R-hat 1.56)
     from_pooled = any(a == "start=pooled" for a in sys.argv[1:])
-    from_latest = from_pooled or any(a == "start=latest" for a in sys.argv[1:])
+    # start=cloud:<file> (24 Oct 2026, the sticky-wage convergence check): as start=latest, but the overdispersed start (mean + 2 x
+    # s.d. x noise) and the proposal covariance come from a saved particle cloud in outputs/ (e.g. an SMC's _particles.npy) of the
+    # same specification, for a model with no Metropolis chains yet; without it nothing changes
+    cloud = next((a.split(":", 1)[1] for a in sys.argv[1:] if a.startswith("start=cloud:")), None)
+    from_latest = from_pooled or cloud is not None or any(a == "start=latest" for a in sys.argv[1:])
     t0 = time.time()
     Z = observables()
     rng = np.random.default_rng(seed)
@@ -340,7 +354,12 @@ def main():
     if from_latest:                                            # convergence check: no mode search; overdispersed start
         ptag = f"_w{w:g}" + PTAG + STAG
         allf = sorted((HERE.parents[1] / "outputs").glob(f"dsge_ph_{MODEL}_draws_*{ptag}*.npy"))
-        if from_pooled:
+        if cloud is not None:
+            Dp = np.load(HERE.parents[1] / "outputs" / cloud)
+            if Dp.shape[1] != len(NAMES):
+                raise SystemExit(f"start=cloud: {cloud} has {Dp.shape[1]} columns, the specification {len(NAMES)}")
+            print(f"cloud start from {cloud} ({Dp.shape[0]:,} rows)", flush=True)
+        elif from_pooled:
             import re
             prev = [f for f in allf if re.search(re.escape(ptag) + r"(_seed\d+)?$", f.stem)]
             Dp = np.vstack([np.load(f) for f in prev])

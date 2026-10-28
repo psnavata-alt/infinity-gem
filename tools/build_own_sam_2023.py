@@ -79,8 +79,8 @@ Version 0.6e (23 Oct 2026; RESEARCH, opt-in, NOT the default; everything else as
   to coal and gas (cmine), with imports carrying the switch (electricity_fuel_mix); research/electricity_fuel_mix/ has the
   evidence; checks/test_own_sam_v06e.py the checks and the oil-shock tests.
 Version 0.5e (23 Oct 2026; RESEARCH, opt-in, NOT the default; VERSION below stays "0.5"): v0.5, the
-  approved default, with the same electricity fuel-mix correction as 0.6e and nothing else of v0.6 (the owner is ready to
-  adopt the correction while v0.6's other blocks still have open issues). In the prior, electricity's oil products (cpetr) =
+  default, with the same electricity fuel-mix correction as 0.6e and nothing else of v0.6 (the correction can be
+  adopted while v0.6's other blocks still have open issues). In the prior, electricity's oil products (cpetr) =
   the same 2023 oil bill (electricity_oil_2023) and the rest of its fuel bill = coal and gas (cmine), imports carrying the
   switch (electricity_fuel_mix with base "0.5"); three balancing controls hold electricity's oil products at that bill, its
   fuel bill (cpetr + cmine) at v0.5's balanced value and the imports of cpetr + cmine at v0.5's (in 0.6e PSA's product-group
@@ -102,6 +102,25 @@ Version 0.7b (24 Oct 2026; RESEARCH, opt-in, NOT the default; VERSION below stay
   goes to the other users of refined petroleum; two controls hold those cells at v0.5e's less S, and the value added of every
   activity stays v0.5e's; then v0.7's coal split, with S solved so that basic metals' coal equals its IEA-consistent 2023 amount
   (build_v07b). Writes the SAM file and CSV tables (main_v07b; no report file). Checks and tests: checks/test_own_sam_v07b.py.
+Version 0.8 (24 Oct 2026, afternoon; RESEARCH, opt-in, NOT the default; VERSION below stays "0.5"): v0.7b with the
+  imported coal and crude oil that PSA's I-O books inside the refined-petroleum row moved back to coal and mining. PSA's 2018 I-O
+  is the Use table under the fixed product-sales structure, so its refined-petroleum row (107-108) carries 27% of every coal
+  flow and 48% of every crude-oil-and-gas flow, imports included (research/coal_lng_prices/refined_row_content_2018.py; its
+  inputs file data/processed/refined_row_content_2018_v0.8_inputs.csv). For every activity whose 2018 purchases from that row
+  hold coal or crude and gas (refining: 98% crude; cement 8% and chemicals 2% coal), electricity (its oil products are the
+  DOE/IEA bill since v0.5e) and basic metals (its coal is held at its IEA level since v0.7b) excepted, the imported part of that
+  content (2018 shares of the v0.7b cell) moves from cpetr to cmine (crude) or ccoal (coal) in its column, and the same amount of
+  imports moves from cpetr to cmine or ccoal (refined_row_content). Column totals, value added, total imports and every other cell
+  stay v0.7b's, so the PSA and FIES controls hold; build("0.8", content=False) is v0.7b. Checks: checks/test_own_sam_v08.py.
+Version 0.9 (24 Oct 2026, afternoon; RESEARCH, opt-in, NOT the default; VERSION below stays "0.5"): a customs-anchored
+  coal and fuel account, built from v0.7 (not v0.7b: v0.7's coal imports matched PSA's customs records, and v0.7b's double-count
+  step removed coal imports customs shows were real). Imports of coal, crude oil, LNG and refined petroleum and the exports of coal
+  are PSA's 2023 customs values (research/coal_lng_prices/customs_inputs_v09.py; data/processed/CUSTOMS_V09); power plants, cement
+  and basic metals buy coal at one price per kgoe at their IEA volumes, the price solved so that the coal account balances
+  (build_v09); gas for power includes the LNG at its customs value; refining buys the customs crude; electricity's oil stays the
+  DOE/IEA bill; each activity's value added stays v0.5e's. So v0.7's ₱77 bn of basic metals' coal (its balancing cell) goes back
+  to power plants (priced near import parity), cement (its IEA volume) and exports (customs), without removing any coal import.
+  build("0.9", customs=False) is v0.7. Checks: checks/test_own_sam_v09.py.
 Outputs: data/processed/InfinityGEM_SAM_PHL_2023_own_v<version>.csv and outputs/own_sam_2023_v<version>_<date>.md (earlier versions'
 files kept). build(version) rebuilds any version: '0.2' leaves out the controls by purpose.
 Run:  py tools/build_own_sam_2023.py [version]     NOT the default SAM: settings sam_variant="own" (with rice=True). Check S6.
@@ -112,6 +131,8 @@ Run:  py tools/build_own_sam_2023.py [version]     NOT the default SAM: settings
       py tools/build_own_sam_2023.py 0.5e      research: v0.5 with the same electricity fuel-mix correction only
       py tools/build_own_sam_2023.py 0.7       research: v0.5e with coal split from mining (acoal, ccoal); checks/test_own_sam_v07.py
       py tools/build_own_sam_2023.py 0.7b      research: v0.7 without the coal double count; checks/test_own_sam_v07b.py
+      py tools/build_own_sam_2023.py 0.8       research: v0.7b with refined-oil's imported coal and crude back in coal and mining
+      py tools/build_own_sam_2023.py 0.9       research: v0.7 with customs-anchored fuel imports and coal account; checks/test_own_sam_v09.py
 """
 from __future__ import annotations
 
@@ -1033,10 +1054,13 @@ def electricity_gas_2023() -> dict:
             "the same with the gas price constant in US$ (₱ bn; not used)": gas18 * gen * fx}
 
 
-def coal_split(t: pd.DataFrame, t5: pd.DataFrame) -> tuple:
+def coal_split(t: pd.DataFrame, t5: pd.DataFrame, over: dict | None = None) -> tuple:
     """Version '0.7': v0.5e's table t with the mining activity and commodity split into coal (acoal, ccoal) and the rest
     (amine, cmine), as described above; t5 = v0.5's table (its mining imports and electricity's mining purchases). Returns
-    the new table (acoal after amine, ccoal after cmine; every other cell is t's) and a dict of tables for the report."""
+    the new table (acoal after amine, ccoal after cmine; every other cell is t's) and a dict of tables for the report.
+    Version '0.9' (build_v09): over = {"imports": coal imports, "exports": coal exports, "gas": electricity's gas, "users": {user:
+    coal}, "basis": {user: text}} sets those cells (coal mining's output then = the I-O's domestic sales + those exports); None
+    (the default) is v0.7's split exactly."""
     io, gas = coal_io_2018(), electricity_gas_2023()
     codes = list(t.index)
     new = [y for c in codes for y in ((c, "acoal") if c == "amine" else (c, "ccoal") if c == "cmine" else (c,))]
@@ -1045,7 +1069,7 @@ def coal_split(t: pd.DataFrame, t5: pd.DataFrame) -> tuple:
     rows, fdm = io["rows"], io["final demand"]
     sh_fd = lambda k: float(fdm.loc[k, "coal"] / fdm.loc[k, "mining"])
     e_oth, e_all = io["electricity: other mining, all mining"]
-    gas23 = gas["gas bought by power plants 2023 (₱ bn)"]
+    gas23 = gas["gas bought by power plants 2023 (₱ bn)"] if over is None else float(over["gas"])   # '0.9': build_v09's gas
     other_el = e_oth / e_all * float(t5.loc["cmine", "aelec"])
     # 1. the mining commodity's row: coal bought by each user
     coal, basis = {}, {}
@@ -1053,7 +1077,11 @@ def coal_split(t: pd.DataFrame, t5: pd.DataFrame) -> tuple:
         v = float(t.loc["cmine", j])
         if j in ("amine", "ametl"):
             continue                                                   # the mining block and the balancing cell (below)
-        if j == "aelec":
+        if over is not None and j in over["users"]:                    # '0.9': e.g. cement's coal at p x its IEA volume
+            coal[j], basis[j] = float(over["users"][j]), over["basis"][j]
+        elif over is not None and j == "row":                          # '0.9': coal exports = PSA customs
+            coal[j], basis[j] = float(over["exports"]), over["basis"]["row"]
+        elif j == "aelec":
             coal[j], basis[j] = v - gas23 - other_el, "v0.5e's fuel bill less gas and other mining (DOE generation)"
         elif j in H:
             coal[j], basis[j] = v * sh_fd("hfce"), "PSA I-O 2018, household consumption"
@@ -1076,6 +1104,11 @@ def coal_split(t: pd.DataFrame, t5: pd.DataFrame) -> tuple:
     dom = out_m * io["output"][0] / io["output"][1]                     # coal mining's output (all of it coal)
     imp5, imp = float(t5.loc["row", "cmine"]), float(t.loc["row", "cmine"])
     imp_k = imp5 * sh_fd("imp") + (imp - imp5)
+    if over is not None:                                               # '0.9': customs coal imports; the extra exports from coal mining
+        dom += float(over["exports"]) - float(t.loc["cmine", "row"]) * sh_fd("exp")
+        imp_k = float(over["imports"])
+        if not 0.0 < imp_k < imp:
+            raise ValueError(f"v0.9: coal imports {imp_k:.2f} must lie between 0 and the mining imports {imp:.2f} (₱ bn)")
     comp = (dom - coal["row"] + imp_k) / (out_m - float(t.loc["cmine", "row"]) + imp)   # coal's share of the composite
     sup = {"acoal": dom, "row": imp_k, **{r: float(t.loc[r, "cmine"]) * comp for r in ("trc", "stax", "mtax")
                                           if r in t.index and float(t.loc[r, "cmine"]) != 0.0}}
@@ -1137,6 +1170,9 @@ def coal_split(t: pd.DataFrame, t5: pd.DataFrame) -> tuple:
                                      "share of mining imports + v0.5e's extra mining imports", **{r: "coal's share of the mining composite "
                                      "(domestic sales + imports)" for r in sup if r not in ("acoal", "row")}}})
     supply["rest (cmine)"] = supply["v0.5e mining (cmine)"] - supply["coal (ccoal)"]
+    if over is not None:                                               # '0.9'
+        supply.loc["acoal", "basis"] = "v0.9: the I-O's domestic sales (coal mining's share of mining output less I-O exports) + customs exports"
+        supply.loc["row", "basis"] = "v0.9: PSA customs 2023, HS 2701-2703 (CIF)"
     supply = supply[["v0.5e mining (cmine)", "coal (ccoal)", "rest (cmine)", "basis"]]
     activity = pd.DataFrame({"v0.5e mining (amine)": {i: float(t.loc[i, "amine"]) for i in list(col) + ["cmine"]},
                              "coal mining (acoal)": {**col, "cmine": cell[("ccoal", "acoal")] + cell[("cmine", "acoal")]}})
@@ -1160,6 +1196,10 @@ def coal_split(t: pd.DataFrame, t5: pd.DataFrame) -> tuple:
               "basic metals' coal at the I-O's share (₱ bn; not used: more than the coal account leaves)": metals_io,
               "imports of the rest of mining (₱ bn) = v0.5's non-coal mining imports": imp - imp_k,
               "aggregation back to v0.5e (max |difference|, ₱ bn)": gap_back, "balance (max row-column gap, ₱ bn)": gap_bal}
+    if over is not None:                                               # '0.9'
+        inputs.update({"v0.9: coal imports = PSA customs 2023 (₱ bn, CIF)": imp_k, "v0.9: coal exports = PSA customs 2023 (₱ bn, FOB)": coal["row"],
+                       "v0.9: coal mining's output = the I-O's domestic sales + customs exports (₱ bn)": dom,
+                       "v0.9: electricity's gas (₱ bn; build_v09)": gas23})
     diag = {"v0.7: electricity's coal, ₱ bn": coal["aelec"], "v0.7: coal imports, ₱ bn": imp_k, "v0.7: domestic coal (acoal output), ₱ bn": dom,
             "v0.7: basic metals' coal (balancing cell), ₱ bn": coal["ametl"], "v0.7: basic metals' coal at the I-O share (not used), ₱ bn": metals_io,
             "v0.7: coal supply = use, ₱ bn": sum(sup.values()), "v0.7: aggregation back to v0.5e, max |difference|": gap_back}
@@ -1297,7 +1337,442 @@ def build_v07b():
     return S7, s78, diag, ctl, ind, fg, psa, dict(extra, **{"coal split": d_b, "coal double count": fix})
 
 
-def build(version: str = VERSION, double_count: float | None = None):
+# ------------------------------------------------------------------------------------------------------------------------------
+# Version '0.8' (24 Oct 2026, afternoon; RESEARCH, opt-in, NOT the default; VERSION stays "0.5"): v0.7b with the imported
+# coal and crude oil inside the refined-petroleum row moved back to the coal and mining accounts.
+# PSA's 2018 I-O is T = D U (research/electricity_fuel_mix/fuel_mix_evidence.py, to 1e-9): every flow of product p is shared out
+# among the industries that produce p, by their shares of its domestic production. PSA's Supply table credits the refining
+# industries with 27.0% of domestic coal and 48.2% of domestic crude oil and natural gas, so the I-O's refined-petroleum row
+# (107-108, the SAM's cpetr) carries those shares of everyone's coal and crude-gas purchases and of their IMPORTS (2018: ₱27.2 bn of
+# coal imports and ₱201.8 bn of crude-gas imports sit in that row's imports). In the CGE that crude takes the fuel-products shock,
+# not crude's, and that coal the oil shock, not coal's.
+# refined_row_content: for each activity j with coal or crude-gas content in its 2018 purchases from the I-O's refined-petroleum rows, 107-108 (content share
+# theta_j, data/processed/REFINED_CONTENT; written by research/coal_lng_prices/refined_row_content_2018.py), the imported part
+# (phi = the content's share in the imports column over its share in total use: coal 0.704, crude and gas 0.841) of that content,
+# m_j = theta_j x phi x cpetr_j (the v0.7b cell), moves from cpetr to ccoal (coal) or cmine (crude and gas) in j's column, and
+# imports of cpetr fall and those of ccoal or cmine rise by the same m_j. Every column total, value added, total imports, taxes,
+# margins and every other cell stay v0.7b's; balance holds by construction. Not moved: electricity (its cpetr is the DOE/IEA oil
+# bill since v0.5e), basic metals (its coal is held at its IEA level since v0.7b: the coal inside its refined-oil purchases, 29%
+# in 2018, is the same misbooked power-plant coal as v0.7b's double count, left as it is), and final demand (exports of cpetr
+# hold coal, crude-gas and nickel ore from the refining industry's own domestic secondary output, which the SAM's one-product
+# activities cannot move without moving that production). The domestic part of the content (refining's secondary output of
+# coal and crude-gas) also stays. Gas cannot be told from crude oil here: PSA's product 040 is "crude petroleum and natural gas"
+# (a separate gas account needs a new commodity and engine entries; not built).
+# The oil shock's crude share of mining imports (infinity_gem.oil.import_shares, PSA 2018) no longer matches cmine's imports on v0.8;
+# the build reports the SAM-consistent share (crude_share_v08), which checks/test_own_sam_v08.py uses inside its own process.
+# ------------------------------------------------------------------------------------------------------------------------------
+REFINED_CONTENT = "refined_row_content_2018_v0.8_inputs.csv"
+V08_NOT_MOVED = ("aelec", "ametl")                                  # see above
+
+
+def refined_row_content(t: pd.DataFrame) -> tuple:
+    """Version '0.8': v0.7b's table t with the imported coal and crude-gas content of each activity's refined-oil purchases moved
+    to ccoal and cmine, and the same imports moved (see above). Returns the new table and a dict of tables for the report."""
+    d = pd.read_csv(paths.DATA_PROCESSED / REFINED_CONTENT, comment="#").set_index("user")
+    tot, imp = d.loc["total use (intermediate and final)"], d.loc["imports (I-O imports column)"]
+    phi = {"ccoal": float(imp["coal (039)"] / tot["coal (039)"]),
+           "cmine": float(imp["crude oil and natural gas (040)"] / tot["crude oil and natural gas (040)"])}
+    share = {"ccoal": "coal share", "cmine": "crude-gas share"}
+    A = [a for a in t.columns if a.startswith("a")]
+    x = t.copy()
+    rows = []
+    for j in A:
+        if j in V08_NOT_MOVED or j not in d.index:
+            continue
+        for dest in ("cmine", "ccoal"):
+            th = float(d.loc[j, share[dest]])
+            if th <= 0.0:
+                continue
+            v = th * phi[dest] * float(t.loc["cpetr", j])
+            x.loc["cpetr", j] -= v
+            x.loc[dest, j] += v
+            x.loc["row", "cpetr"] -= v
+            x.loc["row", dest] += v
+            rows.append({"activity": j, "moved to": dest, "content share 2018 (theta)": th, "imported part (phi)": phi[dest],
+                         "v0.7b cpetr (₱ bn)": float(t.loc["cpetr", j]), "moved (₱ bn)": v,
+                         f"v0.7b {dest} (₱ bn)": float(t.loc[dest, j]), f"v0.8 {dest} (₱ bn)": float(x.loc[dest, j])})
+    moves = pd.DataFrame(rows).set_index(["activity", "moved to"])
+    gap_bal = float(np.abs(x.values.sum(axis=1) - x.values.sum(axis=0)).max())
+    gap_col = float((x[A].sum() - t[A].sum()).abs().max())               # activities: every column total unchanged
+    neg = [(r, c) for r in ("cpetr", "cmine", "ccoal", "row") for c in x.columns if float(x.loc[r, c]) * float(t.loc[r, c]) < 0.0]
+    if gap_bal > 1e-8 or gap_col > 1e-8 or neg:
+        raise ValueError(f"v0.8: the move fails its checks (balance {gap_bal:.1e}, column totals {gap_col:.1e}, sign changes {neg[:5]})")
+    from infinity_gem.oil import import_shares
+    k = import_shares()["crude_in_mining_ex_coal"]
+    m_crude = float(moves.xs("cmine", level="moved to")["moved (₱ bn)"].sum()) if "cmine" in moves.index.get_level_values(1) else 0.0
+    m_coal = float(moves.xs("ccoal", level="moved to")["moved (₱ bn)"].sum()) if "ccoal" in moves.index.get_level_values(1) else 0.0
+    imp7, imp8 = float(t.loc["row", "cmine"]), float(x.loc["row", "cmine"])
+    inputs = {"imported part of the coal content (phi)": phi["ccoal"], "imported part of the crude-gas content (phi)": phi["cmine"],
+              "crude-gas moved to cmine (₱ bn)": m_crude, "coal moved to ccoal (₱ bn)": m_coal,
+              "imports of cpetr v0.7b / v0.8 (₱ bn)": (float(t.loc["row", "cpetr"]), float(x.loc["row", "cpetr"])),
+              "imports of cmine v0.7b / v0.8 (₱ bn)": (imp7, imp8),
+              "imports of ccoal v0.7b / v0.8 (₱ bn)": (float(t.loc["row", "ccoal"]), float(x.loc["row", "ccoal"])),
+              "crude share of cmine imports, PSA 2018 (infinity_gem.oil; v0.7b)": k,
+              "crude share of cmine imports, SAM-consistent on v0.8 (crude_share_v08)": (k * imp7 + m_crude) / imp8,
+              "balance (max row-column gap, ₱ bn)": gap_bal, "activity column totals against v0.7b (max |difference|, ₱ bn)": gap_col}
+    diag = {"v0.8: crude-gas moved from cpetr to cmine, ₱ bn": m_crude, "v0.8: coal moved from cpetr to ccoal, ₱ bn": m_coal,
+            "v0.8: crude share of cmine imports, SAM-consistent": (k * imp7 + m_crude) / imp8}
+    return x, {"moves": moves, "inputs": inputs, "diag": diag}
+
+
+def crude_share_v08(t: pd.DataFrame) -> float:
+    """Version '0.8': crude's share of cmine's imports on a v0.8 table t = (PSA 2018's crude share x v0.7b's cmine imports + the
+    crude-gas moved) / v0.8's cmine imports; v0.7b's cmine imports are v0.8's less the moved crude-gas (refined_row_content)."""
+    from infinity_gem.oil import import_shares
+    t7 = SAM.load(paths.sam_own("0.7b")).table
+    k = import_shares()["crude_in_mining_ex_coal"]
+    imp7, imp8 = float(t7.loc["row", "cmine"]), float(t.loc["row", "cmine"])
+    return (k * imp7 + (imp8 - imp7)) / imp8
+
+
+def build_v08(content: bool = True):
+    """Version '0.8': build_v07b() then refined_row_content (content=False: v0.7b itself, the test that v0.8 adds only this step);
+    build()'s outputs, with extra['refined row content']."""
+    S7, s78, diag, ctl, ind, fg, psa, extra = build_v07b()
+    if not content:
+        return S7, s78, diag, ctl, ind, fg, psa, extra
+    x, doc = refined_row_content(S7.table)
+    S8 = SAM(x, dict(S7.labels), S7.source.replace("version 0.7b (", "version 0.8 (v0.7b with refined oil's imported coal and crude "
+                                                    "moved to coal and mining; ", 1))
+    diag = dict(diag)
+    diag["max row-column gap"] = S8.check(verbose=False)["max_row_col_gap"]
+    diag.update(doc["diag"])
+    return S8, s78, diag, ctl, ind, fg, psa, dict(extra, **{"refined row content": doc})
+
+
+def main_v08():
+    """Version '0.8': writes the SAM file (paths.sam_own('0.8')) and CSV tables in outputs/ (own_sam_2023_v0.8_<stamp>_<table>.csv:
+    the moves, their inputs, the cells changed against v0.7b, the balancing)."""
+    version = "0.8"
+    S, s0, diag, ctl, ind, fg, psa, extra = build(version)
+    path = paths.sam_own(version)
+    write_ifpri_csv(S, path)
+    with open(path, encoding="utf-8-sig") as f:
+        txt = f.read()
+    title = ("Infinity GEM 2023 Social Accounting Matrix for the Philippines, version 0.8 (research, not the default: v0.7b with the "
+             "IMPORTED COAL AND CRUDE OIL that PSA's I-O books inside refined petroleum moved back to coal and mining, with their "
+             "imports; v0.7b = v0.7 without its coal double count; v0.7 = v0.5e with coal split from mining; v0.5e = v0.5 with the "
+             "electricity fuel-mix correction; PSA and FIES controls; IFPRI structure as prior; Infinity GEM 0.3.13)")
+    txt = txt.replace("2023 Social Accounting Matrix for Philippines, petroleum split (Infinity GEM 0.3)", title, 1)
+    with open(path, "w", encoding="utf-8-sig", newline="") as f:
+        f.write(txt)
+    S1 = SAM.load(path)
+    t, t7 = S1.table, SAM.load(paths.sam_own("0.7b")).table
+    doc = extra["refined row content"]
+    stamp = dt.datetime.now()
+    files = []
+
+    def save(df, name: str):
+        f = paths.output_dir() / f"own_sam_2023_v{version}_{stamp:%Y%m%d_%H%M}_{name}.csv"
+        df.to_csv(f)
+        files.append(f)
+    save(doc["moves"], "moves")
+    save(pd.Series({k: (", ".join(f"{z:.6f}" for z in v) if isinstance(v, tuple) else v) for k, v in doc["inputs"].items()}).to_frame("value"), "inputs")
+    dd = (t - t7).stack()
+    dd = dd[dd.abs() > 1e-9]
+    ch = pd.DataFrame({"v0.7b": [float(t7.loc[r, c]) for r, c in dd.index], "v0.8": [float(t.loc[r, c]) for r, c in dd.index],
+                       "v0.8 - v0.7b": dd.values}, index=pd.MultiIndex.from_tuples(dd.index, names=["row", "column"]))
+    save(ch.reindex(ch["v0.8 - v0.7b"].abs().sort_values(ascending=False).index), "cells_changed_vs_v0.7b")
+    save(pd.Series(diag).to_frame("value"), "balancing")
+    pd.set_option("display.width", 250)
+    print(doc["moves"].round(4).to_string()); print(pd.Series(doc["inputs"]).to_string()); print(ch.round(4).to_string())
+    print("saved", path)
+    for f in files:
+        print("saved", f)
+    return S1
+
+
+# ------------------------------------------------------------------------------------------------------------------------------
+# Version '0.9' (24 Oct 2026, afternoon; RESEARCH, opt-in, NOT the default; VERSION stays "0.5"): a customs-anchored coal
+# and fuel account (a review note (not included), section 5).
+# Built from v0.7 (v0.5e with coal split from mining), not v0.7b: v0.7's coal imports already matched PSA's customs records, and
+# v0.7b's double-count step took out ₱65 bn of coal imports that customs shows were real. PSA's 2023 customs records (imports CIF
+# and exports FOB by HS line; data/processed/CUSTOMS_V09, written by research/coal_lng_prices/customs_inputs_v09.py) show where
+# v0.7's ₱77 bn of 'basic metals' coal' (the balancing cell of its coal account) really sits: (1) coal EXPORTS are ₱34.2 bn, not
+# the I-O-share ₱17.0 bn; (2) v0.7 values the power plants' coal at about US$86 a tonne of 5,000 kcal/kg coal (v0.5's 2018-based
+# fuel bill for electricity, held in v0.5e), against PSA's 2023 import unit value of US$112 CIF; (3) cement buys less coal than
+# its IEA volume. With one coal price for the three large users the coal account leaves basic metals about their IEA volume, so no
+# coal import is removed. The steps:
+#   imports (prior and controls of v0.5e's build, at its 112 accounts, where coal is inside cmine; fuel_targets_v09): cpetr =
+#     customs refined and other petroleum (HS 2710, 2711.12-.19 and .29, 2704, 2706-2708, 2712-2715); cmine = customs coal (HS
+#     2701-2703) + crude oil (2709) + natural gas and LNG (2711.11, 2711.21) + the rest of mining (ores, stone: v0.5's non-coal,
+#     non-crude mining imports, as in v0.7). They replace v0.5e's control on the imports of cpetr + cmine (v0.5's ₱1,236.6 bn);
+#     PSA's total imports stay controlled, so the other commodities' imports take up the difference;
+#   one coal price p (₱ per kgoe, purchasers' prices) for power plants, cement (non-metallic minerals) and basic metals, at their
+#     IEA volumes (coal_volumes_2023: GTAP 10A 2014, grown as in metals_coal_2023): electricity's mining purchases = p x its coal
+#     volume + its gas + its other mining (v0.7's); cement's and basic metals' = v0.7's non-coal part + p x their volume;
+#   gas for power (electricity_gas_v09): v0.7's oil-linked estimate for the domestic part, the LNG at its customs value; the LNG's
+#     share of power plants' gas from its energy (customs tonnes x the CIF unit value / the World Bank's 2023 Japan LNG price =
+#     MMBtu per tonne) over DOE's 2023 gas generation x GTAP 2014's Mtoe per GWh;
+#   refining's mining purchases = v0.5e's + customs crude less v0.7's crude imports;
+#   controls kept: electricity's oil products = the DOE/IEA bill (v0.5e); value added of each activity = v0.5e's (v0.7b's
+#     controls); everything else as v0.5e;
+#   coal split (coal_split with over=): coal imports = customs; coal exports = customs; coal mining's output = v0.7's domestic
+#     sales (the I-O's share of mining output less its I-O-share exports) + customs exports, the extra exports coming out of the
+#     rest of mining's (mining's output and exports stay as built; coal mining's capital income takes the extra and the rest of
+#     mining's falls by as much: mining's value added is unchanged); cement's coal = p x its volume; basic metals' coal is the
+#     balancing cell, and p is solved (secant, build_v09) so that it equals p x basic metals' volume.
+# The calorific value of the coal is not needed for the values (only the volumes' shares and the customs pesos are); the build
+# reports the value at which p equals the customs unit value (the SAM-consistent calorific value) and DOE's (PSA's energy table:
+# imported coal in ktoe / customs tonnes, 2022). build("0.9", customs=False) gives v0.7 back. Checks: checks/test_own_sam_v09.py.
+# ------------------------------------------------------------------------------------------------------------------------------
+CUSTOMS_V09 = "fuel_trade_customs_2023_v0.9_inputs.csv"           # data/processed; research/coal_lng_prices/customs_inputs_v09.py
+V09_TOL = 1e-8                                                      # ₱ bn: basic metals' coal within this of p x its volume
+V09_CELLS = {("row", "cpetr"): "imports of refined and other petroleum (cpetr) = customs 2023",
+             ("row", "cmine"): "imports of coal, crude, gas and other mining (cmine) = customs 2023 (+ v0.5's other mining)",
+             ("cmine", "aelec"): "electricity's coal, gas and other mining (cmine) = p x IEA coal volume + gas (LNG at customs) + other",
+             ("cmine", "anmet"): "cement's coal, gas and ores (cmine) = v0.7's non-coal part + p x IEA coal volume",
+             ("cmine", "ametl"): "basic metals' coal, gas and ores (cmine) = v0.7's non-coal part + p x IEA coal volume",
+             ("cmine", "apetr"): "refining's crude and other mining (cmine) = v0.5e's + customs crude less v0.7's crude imports"}
+
+
+def customs_v09() -> pd.Series:
+    """Version '0.9': the customs and energy inputs (data/processed/CUSTOMS_V09; one row per number with its source)."""
+    return pd.read_csv(paths.DATA_PROCESSED / CUSTOMS_V09, comment="#").set_index("key")["value"]
+
+
+def coal_volumes_2023() -> dict:
+    """Version '0.9': coal burnt in 2023 by power plants (DOE's 2023 coal generation x GTAP 10A 2014's Mtoe per GWh), cement (GTAP
+    2014 nmm x PSA real GVA of non-metallic minerals 2023/2014) and basic metals (GTAP 2014 i_s x PSA real GVA of basic metals),
+    Mtoe: metals_coal_2023's volumes."""
+    m = metals_coal_2023(1.0)                                       # its price is then 1 / the power plants' Mtoe
+    pr = float(m["implied coal price 2023 (₱ per kgoe)"])
+    return {"aelec": float(m["power plants' coal 2023 (Mtoe; DOE coal generation x GTAP 2014 Mtoe per GWh)"]),
+            "anmet": float(m["cement's coal 2023 at IEA volumes (₱ bn; not used)"]) / pr,
+            "ametl": float(m["iron and steel's coal 2023 (Mtoe)"])}
+
+
+def electricity_gas_v09(cu: pd.Series) -> dict:
+    """Version '0.9': natural gas bought by power plants in 2023, ₱ bn = the domestic part of v0.7's estimate (electricity_gas_2023,
+    all gas at the oil-linked domestic price) + the LNG at its customs value (all 2023 LNG imports burnt in power plants; LNG
+    imports began in 2023). LNG's share of the gas burnt = its energy (customs tonnes x MMBtu per tonne, the CIF unit value over
+    the World Bank's 2023 Japan LNG price; gross calorific value) / DOE's 2023 gas generation x GTAP 2014's Mtoe per GWh."""
+    g = electricity_gas_2023()
+    d = pd.read_csv(paths.DATA_PROCESSED / ELEC_FUEL_INPUTS, comment="#").set_index("key")["value"]
+    k = "natural gas and LNG (HS 2711.11, 2711.21)"
+    burn = float(d["GTAP 10A 2014 Philippines ely gas Mtoe"]) * float(d["DOE gross generation Natural Gas 2023"]) / \
+        float(d["DOE gross generation Natural Gas 2014"])
+    mmbtu_t = float(cu["customs imports 2023, CIF unit value: natural gas and LNG"]) / float(cu["World Bank Pink Sheet, LNG Japan, 2023 mean"])
+    lng_mtoe = float(cu[f"customs imports 2023, gross weight: {k}"]) * mmbtu_t / float(cu["MMBtu per toe"])
+    share = lng_mtoe / burn
+    v07 = float(g["gas bought by power plants 2023 (₱ bn)"])
+    lng = float(cu[f"customs imports 2023, CIF: {k}"])
+    return {"gas burnt by power plants 2023 (Mtoe; DOE gas generation x GTAP 2014 Mtoe per GWh)": burn,
+            "LNG: MMBtu per tonne (customs CIF unit value / World Bank Japan LNG 2023)": mmbtu_t, "LNG imports 2023 (Mtoe)": lng_mtoe,
+            "LNG's share of power plants' gas": share, "v0.7's gas bill, all gas at the oil-linked price (₱ bn)": v07,
+            "domestic gas (₱ bn) = v0.7's x (1 - LNG share)": v07 * (1 - share), "LNG at its customs value (₱ bn, CIF)": lng,
+            "gas bought by power plants 2023, v0.9 (₱ bn)": v07 * (1 - share) + lng}
+
+
+def fuel_targets_v09(p: float, base: dict) -> dict:
+    """Version '0.9': the six cells (V09_CELLS) of v0.5e's build at the coal price p (₱ per kgoe), from base (build_v09)."""
+    v, cu = base["volumes"], base["customs"]
+    return {("row", "cpetr"): cu["refined"], ("row", "cmine"): cu["coal"] + cu["crude"] + cu["gas"] + base["other mining imports"],
+            ("cmine", "aelec"): p * v["aelec"] + base["gas"] + base["other mining, electricity"],
+            ("cmine", "anmet"): base["rest"]["anmet"] + p * v["anmet"], ("cmine", "ametl"): base["rest"]["ametl"] + p * v["ametl"],
+            ("cmine", "apetr"): base["refining v0.5e"] + cu["crude"] - base["crude imports v0.7"]}
+
+
+def build_v09(customs: bool = True):
+    """Version '0.9': v0.5e's build with the customs-anchored fuel cells (build('0.5e', fuel_targets=...): fuel_targets_v09 into
+    the prior and as controls, with v0.7b's value-added controls) and v0.7's coal split with customs coal imports and exports and
+    cement's coal at p x its volume; p solved by the secant method so that basic metals' coal (the balancing cell) equals p x
+    its volume. customs=False: v0.7 itself (build_v07). build()'s outputs, with extra['coal split'] and extra['customs v0.9']."""
+    if not customs:
+        return build_v07()
+    from infinity_gem.oil import import_shares
+    t5, te = SAM.load(paths.sam_own("0.5")).table, SAM.load(paths.sam_own("0.5e")).table
+    x7, d7 = coal_split(te, t5)                                     # v0.7 as built
+    c = customs_v09()
+    cu = {"coal": float(c["customs imports 2023, CIF: coal (HS 2701-2703)"]), "crude": float(c["customs imports 2023, CIF: crude oil (HS 2709)"]),
+          "gas": float(c["customs imports 2023, CIF: natural gas and LNG (HS 2711.11, 2711.21)"]),
+          "refined": float(c["customs imports 2023, CIF: refined and other petroleum (HS 2710, 2711.12-.19 and .29, 2704, 2706-2708, 2712-2715)"]),
+          "coal exports": float(c["customs exports 2023, FOB: coal (HS 2701-2703)"])}
+    k = import_shares()["crude_in_mining_ex_coal"]
+    gas = electricity_gas_v09(c)
+    vol = coal_volumes_2023()
+    base = {"customs": cu, "volumes": vol, "gas": gas["gas bought by power plants 2023, v0.9 (₱ bn)"],
+            "other mining, electricity": float(d7["inputs"]["electricity: other mining products 2023 (₱ bn; that share of v0.5's mining purchases)"]),
+            "rest": {j: float(d7["users"].loc[j, "rest (cmine)"]) for j in ("anmet", "ametl")},
+            "refining v0.5e": float(te.loc["cmine", "apetr"]), "crude imports v0.7": k * float(x7.loc["row", "cmine"]),
+            "other mining imports": (1 - k) * float(x7.loc["row", "cmine"])}
+    basis = {"anmet": "v0.9: p x cement's IEA volume (GTAP 2014 nmm x PSA real GVA)", "row": "v0.9: PSA customs exports 2023 (HS 2701-2703, FOB)"}
+
+    def run(p):
+        tg = fuel_targets_v09(p, base)
+        out = build("0.5e", fuel_targets=tg)
+        x, doc = coal_split(out[0].table, t5, over={"imports": cu["coal"], "gas": base["gas"], "exports": cu["coal exports"],
+                                                    "users": {"anmet": p * vol["anmet"]}, "basis": basis})
+        return out, x, doc, tg, float(x.loc["ccoal", "ametl"]) - p * vol["ametl"]
+    slope = -sum(vol.values())                                      # d(metals' coal - p x its volume)/dp, about
+    p_a = float(d7["inputs"]["electricity: coal 2023 (₱ bn)"]) / vol["aelec"]   # v0.7's power-plant price
+    o_b, x_b, d_b, tg_b, f_a = run(p_a)
+    hist = [(p_a, f_a)]
+    p_b = p_a - f_a / slope
+    o_b, x_b, d_b, tg_b, f_b = run(p_b)
+    hist.append((p_b, f_b))
+    while abs(f_b) > V09_TOL:
+        if len(hist) >= 12:
+            raise RuntimeError(f"v0.9: the coal price did not converge (basic metals' coal off p x its volume by {f_b:.2e} ₱ bn)")
+        p_a, f_a, p_b = p_b, f_b, p_b - f_b * (p_b - p_a) / (f_b - f_a)
+        o_b, x_b, d_b, tg_b, f_b = run(p_b)
+        hist.append((p_b, f_b))
+    S, s78, diag, ctl, ind, fg, psa, extra = o_b
+    gaps = {"electricity's coal less p x its volume": float(x_b.loc["ccoal", "aelec"]) - p_b * vol["aelec"],
+            "coal imports less customs": float(x_b.loc["row", "ccoal"]) - cu["coal"],
+            "coal exports less customs": float(x_b.loc["ccoal", "row"]) - cu["coal exports"],
+            "refined imports less customs": float(x_b.loc["row", "cpetr"]) - cu["refined"],
+            "crude + gas + other mining imports less customs (+ v0.5's other mining)": float(x_b.loc["row", "cmine"]) - (
+                cu["crude"] + cu["gas"] + base["other mining imports"])}
+    if max(abs(v) for v in gaps.values()) > 1e-6:
+        raise ValueError(f"v0.9: a customs target is missed: {gaps}")
+    S9 = SAM(x_b, {**S.labels, **COAL_LABELS}, S.source.replace(
+        "version 0.5e:", "version 0.9 (v0.5e with customs-anchored fuel imports and coal account, coal split from mining):"))
+    diag = dict(diag)
+    diag["max row-column gap"] = S9.check(verbose=False)["max_row_col_gap"]
+    diag.update({kk.replace("v0.7:", "v0.9:"): vv for kk, vv in d_b["diag"].items()})
+    diag.update({"v0.9: coal price p (₱ per kgoe, purchasers' prices)": p_b, "v0.9: basic metals' coal less p x its volume (₱ bn)": f_b,
+                 "v0.9: builds in the secant": len(hist), **{f"v0.9: {kk} (₱ bn)": vv for kk, vv in gaps.items()}})
+    doc = {"p": p_b, "base": base, "gas": gas, "targets": tg_b, "customs inputs": c, "gaps": gaps, "v0.7": x7,
+           "secant": pd.DataFrame(hist, columns=["p (₱ per kgoe)", "basic metals' coal less p x its volume (₱ bn)"])}
+    return S9, s78, diag, ctl, ind, fg, psa, dict(extra, **{"coal split": d_b, "customs v0.9": doc})
+
+
+def coal_price_report_v09(t: pd.DataFrame, doc: dict) -> pd.Series:
+    """Version '0.9': the coal price p against PSA's 2023 import unit value, the calorific values that reconcile them, and the users'
+    coal at other calorific values (the range of the v0.8 note's cement figures)."""
+    c, p, vol = doc["customs inputs"], doc["p"], doc["base"]["volumes"]
+    fx = float(c["BIS pesos per US$, 2023 mean"])
+    usd_t = float(c["customs imports 2023, CIF unit value: coal (HS 2701)"])
+    php_kg = usd_t * fx / 1000                                      # ₱ per kg of coal, CIF
+    dom_sales = float(t.loc["acoal", "ccoal"]) - float(t.loc["ccoal", "row"])
+    m = float(t.loc[[r for r in ("trc", "stax", "mtax") if r in t.index], "ccoal"].sum()) / (dom_sales + float(t.loc["row", "ccoal"]))
+    doe = float(c["PSA TPES 2022 (DOE): Coal Imported Energy"]) / 1e3 / float(c["customs imports 2022, gross weight: coal (HS 2701)"])
+    r = {"coal price p (₱ per kgoe, purchasers' prices)": p, "pesos per US$ 2023 (BIS)": fx,
+         "PSA import unit value 2023, HS 2701 (US$ per tonne CIF)": usd_t, "the same, ₱ per kg": php_kg,
+         "margins and taxes on coal / coal at basic and CIF prices (domestic sales + imports)": m,
+         "SAM-consistent calorific value, purchasers' prices (kcal/kg: CIF x (1 + margins) / p)": 1e4 * php_kg * (1 + m) / p,
+         "calorific value at which p equals the CIF price alone (kcal/kg)": 1e4 * php_kg / p,
+         "DOE: imported coal 2022, PSA energy table (ktoe) / customs 2022 tonnes (kcal/kg; different energy convention from GTAP's IEA volumes)": doe * 1e4,
+         "v0.7's power-plant price (₱ per kgoe)": float(doc["secant"].iloc[0, 0])}
+    for kcal in (4500, 5000, 5500, 6000):
+        pk = php_kg * 1e4 / kcal                                    # ₱ per kgoe, CIF
+        r[f"CIF price at {kcal:,} kcal/kg (₱ per kgoe)"] = pk
+        r[f"cement's coal at the CIF price, {kcal:,} kcal/kg (₱ bn)"] = vol["anmet"] * pk
+        r[f"power plants' coal at the CIF price, {kcal:,} kcal/kg (₱ bn)"] = vol["aelec"] * pk
+    r.update({f"IEA volume 2023, {j} (Mtoe)": v for j, v in vol.items()})
+    r.update({f"v0.9 coal bought by {j} (₱ bn)": float(t.loc["ccoal", j]) for j in vol})
+    return pd.Series(r)
+
+
+def main_v09():
+    """Version '0.9': writes the SAM file (paths.sam_own('0.9')) and CSV tables in outputs/ (own_sam_2023_v0.9_<stamp>_<table>.csv):
+    fuel imports against customs and v0.7, v0.7b and v0.8; the coal account by user and supply; the coal price and calorific
+    values; the gas bill; the secant; the six targets; every cell changed against v0.7; activity totals and value added against
+    v0.7; the balancing and its controls."""
+    version = "0.9"
+    S, s0, diag, ctl, ind, fg, psa, extra = build(version)
+    path = paths.sam_own(version)
+    write_ifpri_csv(S, path)
+    with open(path, encoding="utf-8-sig") as f:
+        txt = f.read()
+    title = ("Infinity GEM 2023 Social Accounting Matrix for the Philippines, version 0.9 (research, not the default: CUSTOMS-ANCHORED COAL "
+             "AND FUEL ACCOUNT: coal, crude, LNG and refined-petroleum imports and coal exports at PSA's 2023 customs records, one coal "
+             "price for power plants, cement and basic metals at IEA volumes; built on v0.7 = v0.5e with coal split from mining; "
+             "v0.5e = v0.5 with the electricity fuel-mix correction; PSA and FIES controls; IFPRI structure as prior; "
+             "Infinity GEM 0.3.13)")
+    txt = txt.replace("2023 Social Accounting Matrix for Philippines, petroleum split (Infinity GEM 0.3)", title, 1)
+    with open(path, "w", encoding="utf-8-sig", newline="") as f:
+        f.write(txt)
+    S1 = SAM.load(path)
+    t = S1.table
+    doc, cs = extra["customs v0.9"], extra["coal split"]
+    sams = {f"v{v}": SAM.load(paths.sam_own(v)).table for v in ("0.7", "0.7b", "0.8") if paths.sam_own(v).exists()}
+    sams["v0.9"] = t
+    t7 = sams["v0.7"]
+    c = doc["customs inputs"]
+    stamp = dt.datetime.now()
+    files = []
+
+    def save(df, name: str):
+        f = paths.output_dir() / f"own_sam_2023_v{version}_{stamp:%Y%m%d_%H%M}_{name}.csv"
+        df.to_csv(f)
+        files.append(f)
+    from infinity_gem.oil import import_shares
+    k = import_shares()["crude_in_mining_ex_coal"]
+    imp = {}
+    for v, tb in sams.items():
+        cm = float(tb.loc["row", "cmine"])
+        if v == "v0.9":
+            crude = cm - doc["base"]["other mining imports"] - doc["base"]["customs"]["gas"]
+        elif v == "v0.8":
+            crude = crude_share_v08(tb) * cm
+        else:
+            crude = k * cm
+        imp[v] = {"coal (ccoal)": float(tb.loc["row", "ccoal"]), "crude oil (in cmine)": crude,
+                  "LNG (in cmine)": doc["base"]["customs"]["gas"] if v == "v0.9" else 0.0,
+                  "refined and other petroleum (cpetr)": float(tb.loc["row", "cpetr"]),
+                  "other mining (in cmine)": cm - crude - (doc["base"]["customs"]["gas"] if v == "v0.9" else 0.0),
+                  "fuel and mining imports (cpetr + cmine + ccoal)": float(tb.loc["row", ["cpetr", "cmine", "ccoal"]].sum()),
+                  "imports, all commodities": float(tb.loc["row", [x for x in tb.columns if x.startswith("c")]].sum())}
+    imp = pd.DataFrame(imp)
+    cuk = doc["base"]["customs"]
+    imp.insert(0, "PSA customs 2023 (CIF)", [cuk["coal"], cuk["crude"], cuk["gas"], cuk["refined"], np.nan,
+                                             cuk["coal"] + cuk["crude"] + cuk["gas"] + cuk["refined"], np.nan])
+    save(imp, "fuel_imports_vs_customs")
+    F_ = list(P.LABOUR + P.NONLAB)
+    cells = {"electricity buys refined oil (cpetr)": ("cpetr", "aelec"), "electricity buys coal (ccoal)": ("ccoal", "aelec"),
+             "electricity buys gas and other mining (cmine)": ("cmine", "aelec"), "cement buys coal (ccoal)": ("ccoal", "anmet"),
+             "cement buys refined oil (cpetr)": ("cpetr", "anmet"), "cement buys gas and ores (cmine)": ("cmine", "anmet"),
+             "basic metals buy coal (ccoal)": ("ccoal", "ametl"), "basic metals buy ores (cmine)": ("cmine", "ametl"),
+             "basic metals buy refined oil (cpetr)": ("cpetr", "ametl"), "refining buys crude and other mining (cmine)": ("cmine", "apetr"),
+             "coal exports (ccoal, row)": ("ccoal", "row"), "coal mining's output (acoal)": ("acoal", "ccoal"),
+             "rest of mining's exports (cmine, row)": ("cmine", "row")}
+    key = pd.DataFrame({v: {**{n: float(tb.loc[r, cc]) for n, (r, cc) in cells.items()},
+                            **{f"output: {a}": float(tb[a].sum()) for a in ("aelec", "anmet", "ametl", "apetr", "amine", "acoal")},
+                            **{f"value added: {a}": float(tb.loc[F_, a].sum()) for a in ("aelec", "anmet", "ametl", "apetr", "amine", "acoal")},
+                            "coal account (supply = use)": float(tb["ccoal"].sum())} for v, tb in sams.items()})
+    save(key, "key_cells")
+    save(coal_price_report_v09(t, doc).to_frame("value"), "coal_price_and_calorific_value")
+    save(pd.Series(doc["gas"]).to_frame("value"), "gas_for_power")
+    save(doc["secant"], "secant")
+    save(pd.Series({V09_CELLS[kk]: vv for kk, vv in doc["targets"].items()}).to_frame("target (₱ bn)"), "targets")
+    acts = [a for a in t.columns if a.startswith("a")]
+    tot = pd.DataFrame({"output v0.7": t7[acts].sum(), "output v0.9": t[acts].sum(),
+                        "value added v0.7": t7.loc[F_, acts].sum(), "value added v0.9": t.loc[F_, acts].sum()})
+    tot["output v0.9 - v0.7"] = tot["output v0.9"] - tot["output v0.7"]
+    tot["value added v0.9 - v0.7"] = tot["value added v0.9"] - tot["value added v0.7"]
+    save(tot.reindex(tot["output v0.9 - v0.7"].abs().sort_values(ascending=False).index), "activity_totals_vs_v0.7")
+    d = (t - t7).stack()
+    d = d[d.abs() > 0.05]
+    ch = pd.DataFrame({"v0.7": [float(t7.loc[r, cc]) for r, cc in d.index], "v0.9": [float(t.loc[r, cc]) for r, cc in d.index],
+                       "v0.9 - v0.7": d.values}, index=pd.MultiIndex.from_tuples(d.index, names=["row", "column"]))
+    save(ch.reindex(ch["v0.9 - v0.7"].abs().sort_values(ascending=False).index), "cells_changed_vs_v0.7")
+    for kk in ("users", "supply", "activity"):
+        save(cs[kk], f"coal_{kk}")
+    save(pd.Series(cs["inputs"]).to_frame("value"), "coal_inputs")
+    save(pd.Series(diag).to_frame("value"), "balancing")
+    save(ctl, "controls")
+    pd.set_option("display.width", 250)
+    print(imp.round(2).to_string()); print(key.round(2).to_string()); print(coal_price_report_v09(t, doc).to_string())
+    print(pd.Series(doc["gas"]).to_string()); print(doc["secant"].to_string())
+    print("saved", path)
+    for f in files:
+        print("saved", f)
+    return S1
+
+
+def build(version: str = VERSION, double_count: float | None = None, content: bool = True, customs: bool = True,
+          fuel_targets: dict | None = None):
+    # customs: '0.9' only (build_v09): False leaves out v0.9's steps, giving v0.7
+    if version == "0.9":                                            # '0.9': customs-anchored fuel imports and coal account
+        return build_v09(customs)
+    # fuel_targets: '0.9' only (build_v09 calls build("0.5e", fuel_targets=...)): v0.5e's build with the six cells of V09_CELLS
+    if fuel_targets is not None and (version != "0.5e" or double_count is not None):
+        raise ValueError("fuel_targets is the '0.9' change of v0.5e's build only")
+    # content: '0.8' only (build_v08): False leaves out v0.8's step, giving v0.7b
+    if version == "0.8":                                            # '0.8': v0.7b with refined oil's imported coal and crude moved
+        return build_v08(content)
     # double_count: '0.7b' only (build_v07b calls build("0.5e", double_count=S)): v0.5e's build without the coal double count
     if version == "0.7":                                            # '0.7': v0.5e with coal split from mining (build_v07)
         return build_v07()
@@ -1314,6 +1789,9 @@ def build(version: str = VERSION, double_count: float | None = None):
     if version == "0.5e":
         el_fix = electricity_fuel_mix(t0, base="0.5")
     dc = double_count_prior(t0, double_count, A0) if double_count is not None else None   # '0.7b' (build_v07b) only
+    if fuel_targets is not None:                                    # '0.9' (build_v09): the customs-anchored cells in the prior
+        for (r_, c_), v_ in fuel_targets.items():
+            t0.loc[r_, c_] = float(v_)
     codes = list(t0.index)
     ix = {c: i for i, c in enumerate(codes)}
     n = len(codes)
@@ -1423,10 +1901,11 @@ def build(version: str = VERSION, double_count: float | None = None):
     if el_fix is not None:                                          # '0.6e': electricity's fuel mix
         tg_ = el_fix["targets"]
         controls += [("electricity's oil products (cpetr) = DOE/IEA-consistent 2023 oil bill", mask(["cpetr"], ["aelec"]),
-                      float(tg_["cpetr"])),
-                     (f"electricity's coal, gas and other mining (cmine) = v{el_base}'s fuel bill less the oil bill",
-                      mask(["cmine"], ["aelec"]), float(tg_["cmine"]))]
-    if version == "0.5e":   # '0.5e': v0.5 has no trade-by-product controls, so hold the two accounts' imports at v0.5's
+                      float(tg_["cpetr"]))]
+        if fuel_targets is None:                                    # '0.9' sets electricity's cmine itself (below)
+            controls += [(f"electricity's coal, gas and other mining (cmine) = v{el_base}'s fuel bill less the oil bill",
+                          mask(["cmine"], ["aelec"]), float(tg_["cmine"]))]
+    if version == "0.5e" and fuel_targets is None:   # '0.5e': v0.5 has no trade-by-product controls, so hold the two accounts' imports at v0.5's
         controls.append(("imports of cpetr + cmine = v0.5's (imports carry the switch)", mask(["row"], ["cpetr", "cmine"]),
                          float(el_fix["imports of cpetr + cmine v0.5 (₱ bn)"])))
     if dc is not None:      # '0.7b' (build_v07b): basic metals' mining purchases and mining imports at v0.5e's less the double count
@@ -1443,6 +1922,17 @@ def build(version: str = VERSION, double_count: float | None = None):
             for a in a_:
                 if a not in (big, "apetr"):                         # apetr: v0.5's refining control already holds it
                     controls.append((f"value added: {a} = v0.5e's (v0.7b)", mask(F_, [a]), float(te_.loc[F_, a].sum())))
+    if fuel_targets is not None:   # '0.9' (build_v09): the customs-anchored cells, and each activity's value added at v0.5e's (as 0.7b)
+        te_ = SAM.load(paths.sam_own("0.5e")).table
+        for (r_, c_), v_ in fuel_targets.items():
+            controls.append((f"{V09_CELLS[(r_, c_)]} (v0.9)", mask([r_], [c_]), float(v_)))
+        F_ = list(P.LABOUR + P.NONLAB)
+        for k, acts in PSA_INDUSTRIES.items():
+            a_ = [a for a in acts if a in ix and float(te_.loc[F_, a].sum()) > 0.0]
+            big = max(a_, key=lambda z: float(te_.loc[F_, z].sum())) if a_ else None   # follows from the industry's controls
+            for a in a_:
+                if a not in (big, "apetr"):                         # apetr: v0.5's refining control already holds it
+                    controls.append((f"value added: {a} = v0.5e's (v0.9)", mask(F_, [a]), float(te_.loc[F_, a].sum())))
     abroad = float(t0.loc[H, "row"].sum())
     for h in H:
         for x in P.LABOUR:
@@ -1488,12 +1978,18 @@ def build(version: str = VERSION, double_count: float | None = None):
     if dc is not None:                                              # '0.7b' (build_v07b)
         extra["coal double count"] = dc
         diag["v0.7b: double-counted coal taken out in the prior and the controls, ₱ bn"] = dc["double count (₱ bn)"]
+    if fuel_targets is not None:                                    # '0.9' (build_v09)
+        extra["fuel targets v0.9"] = dict(fuel_targets)
     return S, s78, diag, ctl, ind, fg, psa, extra
 
 
 def main(version: str = VERSION):
     if version == "0.7b":                                           # '0.7b': the SAM file and CSV tables only (main_v07b)
         return main_v07b()
+    if version == "0.8":                                            # '0.8': the SAM file and CSV tables only (main_v08)
+        return main_v08()
+    if version == "0.9":                                            # '0.9': the SAM file and CSV tables only (main_v09)
+        return main_v09()
     S, s0, diag, ctl, ind, fg, psa, extra = build(version)
     path = paths.sam_own(version)
     write_ifpri_csv(S, path)

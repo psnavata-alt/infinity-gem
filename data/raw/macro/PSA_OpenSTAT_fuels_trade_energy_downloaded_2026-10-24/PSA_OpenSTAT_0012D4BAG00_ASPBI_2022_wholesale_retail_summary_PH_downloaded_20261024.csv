@@ -1,0 +1,22 @@
+# PSA OpenSTAT 2D/2022/0012D4BAG00.px: Summary Statistics for Wholesale and retail trade; repair of motor vehicles and motorcycles Establishments by Geolocation, Industry Description, Year and Data Items; https://openstat.psa.gov.ph/PXWeb/api/v1/en/DB/2D/2022/0012D4BAG00.px; downloaded 2026-10-24 13:21 (PXWeb API, POST, browser User-Agent); selection {'Geolocation': 'PHILIPPINES'}
+"Geolocation","Industry Description","2022 Number of Establishments","2022 Total Employment a/","2022 Paid Employees a/","2022 Workers on Sub-Contract Agreement  or Under Manpower Agencies/Contractors a/","2022 Total Revenue","2022 Total  Expense","2022 Compensation","2022 Other Expense","2022 Gross Margin","2022 Gross Additions to Tangible Fixed Assets","2022 Change in Inventories","2022 Sales from E-Commerce Transactions","2022 Subsidies"
+"PHILIPPINES","Wholesale and retail trade; repair of motor vehicles and motorcycles",125257,1211342,1193820,129045,6883441889,6493134807,288149325,6204985482,1271046637,77967431,11136976,43238512,6387643
+"PHILIPPINES","..Sale of motor vehicles",1495,40023,39914,3096,459032593,445928359,11355360,434573000,51513813,2354153,-5848528,-,-
+"PHILIPPINES","..Maintenance and repair of motor vehicles",2420,17117,16541,156,24623291,22267767,2113813,20153954,-,846391,314977,-,-
+"PHILIPPINES","..Sale of motor vehicle parts and accessories",4196,31906,31049,1958,91095914,87079347,6035531,81043816,16063268,1141392,-3632550,-,-
+"PHILIPPINES","..Sale, maintenance and repair of motorcycles and related parts and accessories",9611,62305,61706,1677,185557144,176591485,9607309,166984176,34205236,6845261,284108,-,-
+"PHILIPPINES","..Wholesale on a fee or contract basis",407,9762,9736,359,59930082,57633394,3891241,53742153,-,335591,526852,-,-
+"PHILIPPINES","..Wholesale of agricultural raw materials and live animals",1628,17854,17327,1328,104739213,97860947,2905613,94955334,18233432,655492,2586421,-,-
+"PHILIPPINES","..Wholesale of food, beverages and tobacco",2905,72444,71876,6767,630440131,597572367,22209353,575363014,111507080,2765673,-11913390,722542,6262857
+"PHILIPPINES","..Wholesale of household goods",4600,89053,88601,6942,584922754,557211372,33586345,523625027,131127475,6028857,-1197531,1237923,7925
+"PHILIPPINES","..Wholesale of machinery, equipment and supplies",2253,45978,45806,5524,330093102,314995019,16702789,298292230,55452699,4009976,-10120623,244643,33
+"PHILIPPINES","..Other specialized wholesale",3646,69035,68217,5307,541601604,517017366,17658177,499359189,97067693,8202732,7196685,-,-
+"PHILIPPINES","..Non-specialized wholesale trade",45,638,638,10,2398206,2276441,115740,2160701,350371,365,-17815,750,-
+"PHILIPPINES","..Retail sale in non-specialized stores",14124,222086,219041,33824,1392095189,1313613233,42846880,1270766353,238652685,5262568,1674038,276730,88339
+"PHILIPPINES","..Retail sale of food, beverages and tobacco in specialized stores",9500,50010,48872,2292,107669258,101213831,7750010,93463821,32026284,3428919,-619585,18346,27245
+"PHILIPPINES","..Retail sale of automotive fuel in specialized stores",8265,66517,66212,5430,473208536,454332339,10679165,443653175,43428766,2748363,8265818,-,-
+"PHILIPPINES","..Retail sale of information and communications equipment in specialized stores",6627,34761,34452,1071,177437531,167545935,7897563,159648372,31840501,439130,3089306,641,-
+"PHILIPPINES","..Retail sale of other household equipment in specialized stores",16173,163529,158784,17130,646737397,584596176,30348903,554247273,140557101,8747122,-5896419,1354186,-
+"PHILIPPINES","..Retail sale of cultural and recreation goods in specialized stores",2836,18772,18352,835,38996645,35406109,2979389,32426721,13253533,296591,780402,-,-
+"PHILIPPINES","..Retail sale of other goods in specialized stores",34280,193618,190830,35313,978963743,906615374,56807396,849807977,245248878,23353179,25092640,2043483,1243
+"PHILIPPINES","..Retail trade not in stores, stalls or markets",247,5933,5866,25,53899557,53377944,2658748,50719196,10517820,505677,572171,37339269,-

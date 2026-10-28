@@ -1,6 +1,6 @@
 """Standalone tests of the opt-in typhoon draw in the stochastic outlook (23 Oct 2026; research).
 
-Not part of checks/run_all_checks.py (its owner adds a check if wanted; proposed text in the 23 Oct 2026 findings). Reads only;
+Not part of checks/run_all_checks.py (a check can be added; a proposed text is in the 23 Oct 2026 review notes, not included). Reads only;
 writes nothing. Exit code 0 = all tests pass. About 3 minutes.
 Run:  py validation/stochastic_disasters/test_disaster_draw.py
 

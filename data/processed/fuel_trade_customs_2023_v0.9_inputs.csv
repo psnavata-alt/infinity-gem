@@ -1,0 +1,27 @@
+# Inputs for tools/build_own_sam_2023.py version '0.9' (customs-anchored coal and fuel account). RESEARCH, NOT FOR CITATION.
+# Written by research/coal_lng_prices/customs_inputs_v09.py on 2026-10-24 15:11 from files on disk only; each row names its source.
+key,value,unit,source
+"customs imports 2023, CIF: coal (HS 2701-2703)",226.9976019584262,₱ bn,"PSA OpenSTAT AVI/0032L4DMFD2 (imports 2023, CIF), PSA_OpenSTAT_0032L4DMFD2_imports_HS27_by_country_annual_2023_downloaded_20261024.csv; x BIS 2023 pesos per US$"
+"customs imports 2023, gross weight: coal (HS 2701-2703)",36.42797037329,Mt,"PSA OpenSTAT AVI/0032L4DMFD2 (imports 2023, CIF), PSA_OpenSTAT_0032L4DMFD2_imports_HS27_by_country_annual_2023_downloaded_20261024.csv"
+"customs imports 2023, CIF: crude oil (HS 2709)",233.721172452416,₱ bn,"PSA OpenSTAT AVI/0032L4DMFD2 (imports 2023, CIF), PSA_OpenSTAT_0032L4DMFD2_imports_HS27_by_country_annual_2023_downloaded_20261024.csv; x BIS 2023 pesos per US$"
+"customs imports 2023, gross weight: crude oil (HS 2709)",7.182787805,Mt,"PSA OpenSTAT AVI/0032L4DMFD2 (imports 2023, CIF), PSA_OpenSTAT_0032L4DMFD2_imports_HS27_by_country_annual_2023_downloaded_20261024.csv"
+"customs imports 2023, CIF: natural gas and LNG (HS 2711.11, 2711.21)",24.459280077008415,₱ bn,"PSA OpenSTAT AVI/0032L4DMFD2 (imports 2023, CIF), PSA_OpenSTAT_0032L4DMFD2_imports_HS27_by_country_annual_2023_downloaded_20261024.csv; x BIS 2023 pesos per US$"
+"customs imports 2023, gross weight: natural gas and LNG (HS 2711.11, 2711.21)",0.567716911,Mt,"PSA OpenSTAT AVI/0032L4DMFD2 (imports 2023, CIF), PSA_OpenSTAT_0032L4DMFD2_imports_HS27_by_country_annual_2023_downloaded_20261024.csv"
+"customs imports 2023, CIF: refined and other petroleum (HS 2710, 2711.12-.19 and .29, 2704, 2706-2708, 2712-2715)",696.6254925376111,₱ bn,"PSA OpenSTAT AVI/0032L4DMFD2 (imports 2023, CIF), PSA_OpenSTAT_0032L4DMFD2_imports_HS27_by_country_annual_2023_downloaded_20261024.csv; x BIS 2023 pesos per US$"
+"customs imports 2023, gross weight: refined and other petroleum (HS 2710, 2711.12-.19 and .29, 2704, 2706-2708, 2712-2715)",16.10162773223,Mt,"PSA OpenSTAT AVI/0032L4DMFD2 (imports 2023, CIF), PSA_OpenSTAT_0032L4DMFD2_imports_HS27_by_country_annual_2023_downloaded_20261024.csv"
+"customs imports 2023, CIF unit value: coal (HS 2701)",111.98986508122367,US$ per tonne,"PSA OpenSTAT AVI/0032L4DMFD2 (imports 2023, CIF), PSA_OpenSTAT_0032L4DMFD2_imports_HS27_by_country_annual_2023_downloaded_20261024.csv"
+"customs imports 2023, CIF unit value: natural gas and LNG",774.3556647372795,US$ per tonne,"PSA OpenSTAT AVI/0032L4DMFD2 (imports 2023, CIF), PSA_OpenSTAT_0032L4DMFD2_imports_HS27_by_country_annual_2023_downloaded_20261024.csv"
+"customs exports 2023, FOB: coal (HS 2701-2703)",34.186677046303195,₱ bn,"PSA OpenSTAT AVE/0032L4DXFD2 (exports 2023, FOB), PSA_OpenSTAT_0032L4DXFD2_exports_HS27_by_country_annual_2023.csv; x BIS 2023 pesos per US$"
+"customs exports 2023, gross weight: coal (HS 2701-2703)",8.151075621,Mt,"PSA OpenSTAT AVE/0032L4DXFD2 (exports 2023, FOB), PSA_OpenSTAT_0032L4DXFD2_exports_HS27_by_country_annual_2023.csv"
+"customs exports 2023, FOB: crude oil (HS 2709)",9.408881603419912,₱ bn,"PSA OpenSTAT AVE/0032L4DXFD2 (exports 2023, FOB), PSA_OpenSTAT_0032L4DXFD2_exports_HS27_by_country_annual_2023.csv; x BIS 2023 pesos per US$"
+"customs exports 2023, gross weight: crude oil (HS 2709)",0.289273896,Mt,"PSA OpenSTAT AVE/0032L4DXFD2 (exports 2023, FOB), PSA_OpenSTAT_0032L4DXFD2_exports_HS27_by_country_annual_2023.csv"
+"customs exports 2023, FOB: natural gas and LNG (HS 2711.11, 2711.21)",0.0,₱ bn,"PSA OpenSTAT AVE/0032L4DXFD2 (exports 2023, FOB), PSA_OpenSTAT_0032L4DXFD2_exports_HS27_by_country_annual_2023.csv; x BIS 2023 pesos per US$"
+"customs exports 2023, gross weight: natural gas and LNG (HS 2711.11, 2711.21)",0.0,Mt,"PSA OpenSTAT AVE/0032L4DXFD2 (exports 2023, FOB), PSA_OpenSTAT_0032L4DXFD2_exports_HS27_by_country_annual_2023.csv"
+"customs imports 2022, gross weight: coal (HS 2701)",31.5765261574,Mt,"PSA OpenSTAT AVI/0042L4DMFD1 (imports 2022), PSA_OpenSTAT_0042L4DMFD1_imports_HS27_by_country_annual_2022.csv"
+PSA TPES 2022 (DOE): Coal Imported Energy,11445.0,ktoe,"PSA OpenSTAT 0012F2BPES1 (Table 14.1a), PSA_OpenSTAT_0012F2BPES1_primary_energy_supply_by_source_2014-2022_downloaded_20261024.csv"
+PSA TPES 2022 (DOE): Coal Indegenous Energy,7631.0,ktoe,"PSA OpenSTAT 0012F2BPES1 (Table 14.1a), PSA_OpenSTAT_0012F2BPES1_primary_energy_supply_by_source_2014-2022_downloaded_20261024.csv"
+"customs imports 2023, CIF: salt, sulphur, earths and stone (HS 25 less 2522 lime and 2523 cement)",10.442881871736894,₱ bn,"PSA OpenSTAT AVI/0032L4DMFD2 (imports 2023, CIF), PSA_OpenSTAT_0032L4DMFD2_imports_HS25-26_by_country_annual_2023.csv; x BIS 2023 pesos per US$"
+"customs imports 2023, CIF: ores, slag and ash (HS 26)",222.43009440592007,₱ bn,"PSA OpenSTAT AVI/0032L4DMFD2 (imports 2023, CIF), PSA_OpenSTAT_0032L4DMFD2_imports_HS25-26_by_country_annual_2023.csv; x BIS 2023 pesos per US$"
+"BIS pesos per US$, 2023 mean",55.637980666666664,₱ per US$,"data/raw/macro/BIS_WS_XRU_PHP_per_USD_monthly_average.csv (M.PH.PHP.A), mean of the 12 months"
+"World Bank Pink Sheet, LNG Japan, 2023 mean",14.386666666666665,US$ per MMBtu,"data/raw/macro/WorldBank_PinkSheet_coal_lng_monthly.csv, mean of the 12 months"
+MMBtu per toe,39.68320164995981,MMBtu,unit definitions: 1 toe = 41.868 GJ (IEA); 1 MMBtu = 1.055056 GJ

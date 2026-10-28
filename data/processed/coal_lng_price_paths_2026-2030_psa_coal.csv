@@ -1,0 +1,15 @@
+# Coal and LNG price changes by calendar year, % against the January-February 2026 level (the pre-conflict level), for the
+# opt-in coal and LNG part of the oil shock on Infinity GEM SAM v0.7/v0.7b: OPTION 'psa' (infinity_gem.oil.coal_lng_paths(coal_series='psa')).
+# Coal: what the Philippines pays: PSA OpenSTAT monthly imports of HS 2701 (every coal line and country; PSA from Bureau of Customs
+# entries), unit value = CIF value (US$) / gross weight (kg), files in PSA_OpenSTAT_coal_imports_HS2701-2704_downloaded_2026-10-24/ (2025 and 2026 CIF and gross-kilo
+# tables). Latest month on disk: 2026-08 (preliminary). Jan-Feb 2026 level US$71.46 a tonne CIF.
+# LNG: as in coal_lng_price_paths_2026-2030.csv (World Bank Pink Sheet, 'Liquefied natural gas, Japan'; latest month 2026-09).
+# Rule: preshock/shock_paths.py (calendar-year average of actual months, then no change from the latest month, against the
+# pre-conflict level). Last column: the default file's Newcastle coal, for comparison (not read by the model).
+# Written 2026-10-24 12:56 by research/coal_lng_prices/coal_lng_paths.py --coal psa. RESEARCH, NOT FOR CITATION.
+year,coal,lng,basis,newcastle coal (the default file; not used)
+2026,14.929343224934154,17.39734034780067,"coal: PSA imports HS 2701 (CIF/kg), 8 actual months, the rest no change; LNG: World Bank, 9 actual months, the rest no change",18.945370
+2027,23.118256770541223,24.945199473914936,"coal: PSA imports HS 2701 (CIF/kg), 0 actual months, the rest no change; LNG: World Bank, 0 actual months, the rest no change",28.921998
+2028,23.118256770541223,24.945199473914936,"coal: PSA imports HS 2701 (CIF/kg), 0 actual months, the rest no change; LNG: World Bank, 0 actual months, the rest no change",28.921998
+2029,23.118256770541223,24.945199473914936,"coal: PSA imports HS 2701 (CIF/kg), 0 actual months, the rest no change; LNG: World Bank, 0 actual months, the rest no change",28.921998
+2030,23.118256770541223,24.945199473914936,"coal: PSA imports HS 2701 (CIF/kg), 0 actual months, the rest no change; LNG: World Bank, 0 actual months, the rest no change",28.921998
