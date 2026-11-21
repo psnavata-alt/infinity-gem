@@ -1,0 +1,57 @@
+# Inputs for tools/build_own_sam_2023.py version '1.0' (fuel tax row from data; PSA 2023 GVA anchors for coal mining; evidence on ore imports). RESEARCH, NOT FOR CITATION.
+# Written by research/coal_lng_prices/v10_inputs.py on 2026-10-25 01:54 from files on disk only; each row names its source.
+key,value,unit,source
+BESF 2023: BIR excise on fuel and oils,0.007,PHP bn,"DBM BESF 2025 Table C.3, 2023 actual (data/raw/fiscal/DBM_BESF_C3_tax_revenue_by_source_2023-2024_actual.csv), line 'Selective Excises on Goods: Fuel and Oils'"
+"BESF 2023: BOC excise tax, all imported excisable goods",228.56,PHP bn,"DBM BESF 2025 Table C.3, 2023 actual (data/raw/fiscal/DBM_BESF_C3_tax_revenue_by_source_2023-2024_actual.csv), line BOC 'Excise Tax' (no product split)"
+BESF 2023: BIR VAT net of refunds,475.244,PHP bn,"DBM BESF 2025 Table C.3, 2023 actual (data/raw/fiscal/DBM_BESF_C3_tax_revenue_by_source_2023-2024_actual.csv), line 'Gen. Sales, Turnover or VAT (Net of VAT Refunds)'"
+BESF 2023: BOC VAT on imports,532.013,PHP bn,"DBM BESF 2025 Table C.3, 2023 actual (data/raw/fiscal/DBM_BESF_C3_tax_revenue_by_source_2023-2024_actual.csv), line 'VAT on Imports' (gross; credited by VAT-registered importers)"
+BESF 2023: customs duties and fees,122.64,PHP bn,"DBM BESF 2025 Table C.3, 2023 actual (data/raw/fiscal/DBM_BESF_C3_tax_revenue_by_source_2023-2024_actual.csv), lines 'Import Duties and Taxes' + 'Other Fees'"
+"petroleum excise 2023, BIR + BOC collections (the SAM's excise)",139.7,PHP bn,"CPBRD Facts in Figures FF2025-42 (May 2025), Figure 1, Bureau of the Treasury data; PDF in a reference copy (not distributed) verified 24 Oct 2026 (tools/build_sam_petroleum_split.FUEL_EXCISE_2023)"
+"petroleum excise 2023, BOC part implied",139.69299999999998,PHP bn,CPBRD total less the BESF BIR line
+"petroleum excise 2023 due at statutory rates x OIMB volumes, six products (reference, not used)",173.812,PHP bn,"RA 10963 Sec. 43 rates (10, 6, 4, 6, 5 pesos per litre; 3 per kg) x CPBRD FF2025-42 Table 2 demand 2023 (gasoline 8,008; diesel 11,090; avturbo 2,492; fuel oil 1,101; kerosene 59 million litres; LPG 3,441 million kg); before exemptions (international aviation, feedstock) and 'other products'"
+VAT statutory rate,0.12,share,NIRC Sec. 106-107 (RA 9337): 12% of the selling price before VAT = 12/112 of the purchasers' value
+"fuel (cpetr) bought by households, v0.9",450.83277986150006,PHP bn,"Infinity GEM SAM v0.9 (data/processed/InfinityGEM_SAM_PHL_2023_own_v0.9.csv), purchasers' values: PSA 2023 HFCE by purpose through COICOP_BRIDGE"
+"fuel (cpetr) bought by government, v0.9",52.4376264672,PHP bn,"Infinity GEM SAM v0.9 (data/processed/InfinityGEM_SAM_PHL_2023_own_v0.9.csv), purchasers' values"
+"fuel (cpetr) bought by VAT-exempt activities, v0.9 (non-deductible share = 1 - VAT_WEIGHT of their output)",291.3303957945,PHP bn,"Infinity GEM SAM v0.9 (data/processed/InfinityGEM_SAM_PHL_2023_own_v0.9.csv), purchasers' values; weights tools/build_own_sam_2023.VAT_WEIGHT (agriculture and fishing, rice milling, education, health, finance, public administration 1.0; transport and real estate 0.5)"
+"VAT base of fuel (final and VAT-exempt purchases), v0.9",794.6008021232001,PHP bn,sum of the three rows above
+VAT on fuel 2023 = 12/112 x that base (the SAM's VAT on cpetr),85.1358002274857,PHP bn,statutory rate (fuel is sold by VAT-registered oil companies; BESF gives no VAT by product); v0.9's VAT part was the economy-wide effective rate x the final-demand base (tools/build_own_sam_2023.tax_block)
+"taxes on fuel products (stax, cpetr) 2023 = excise + VAT (the v1.0 target)",224.8358002274857,PHP bn,the two rows above
+"taxes on fuel products (stax, cpetr) in v0.5 to v0.9",165.0553728814,PHP bn,"Infinity GEM SAM v0.9 (data/processed/InfinityGEM_SAM_PHL_2023_own_v0.9.csv), purchasers' values"
+PSA GVA 2023: coal mining,37.308,PHP bn,"PSA OpenSTAT 0422B5BMQA1, GVA in mining and quarrying by industry, current prices (PSA_OpenSTAT_0422B5BMQA1_GVA_mining_quarrying_by_industry_annual_2000-2025.csv)"
+PSA GVA 2023: crude oil and natural gas extraction,24.429,PHP bn,"PSA OpenSTAT 0422B5BMQA1, GVA in mining and quarrying by industry, current prices (PSA_OpenSTAT_0422B5BMQA1_GVA_mining_quarrying_by_industry_annual_2000-2025.csv)"
+PSA GVA 2023: precious metal ores,54.126,PHP bn,"PSA OpenSTAT 0422B5BMQA1, GVA in mining and quarrying by industry, current prices (PSA_OpenSTAT_0422B5BMQA1_GVA_mining_quarrying_by_industry_annual_2000-2025.csv)"
+PSA GVA 2023: nickel ores,43.018,PHP bn,"PSA OpenSTAT 0422B5BMQA1, GVA in mining and quarrying by industry, current prices (PSA_OpenSTAT_0422B5BMQA1_GVA_mining_quarrying_by_industry_annual_2000-2025.csv)"
+PSA GVA 2023: copper ores,14.099,PHP bn,"PSA OpenSTAT 0422B5BMQA1, GVA in mining and quarrying by industry, current prices (PSA_OpenSTAT_0422B5BMQA1_GVA_mining_quarrying_by_industry_annual_2000-2025.csv)"
+PSA GVA 2023: stone quarrying and other mining,59.191,PHP bn,"PSA OpenSTAT 0422B5BMQA1, GVA in mining and quarrying by industry, current prices (PSA_OpenSTAT_0422B5BMQA1_GVA_mining_quarrying_by_industry_annual_2000-2025.csv)"
+"PSA GVA 2023: mining and quarrying, total",232.171,PHP bn,"PSA OpenSTAT 0422B5BMQA1, GVA in mining and quarrying by industry, current prices (PSA_OpenSTAT_0422B5BMQA1_GVA_mining_quarrying_by_industry_annual_2000-2025.csv)"
+PSA GVA 2018: coal mining,21.065,PHP bn,"PSA OpenSTAT 0422B5BMQA1, GVA in mining and quarrying by industry, current prices (PSA_OpenSTAT_0422B5BMQA1_GVA_mining_quarrying_by_industry_annual_2000-2025.csv)"
+PSA GVA 2018: crude oil and natural gas extraction,38.716,PHP bn,"PSA OpenSTAT 0422B5BMQA1, GVA in mining and quarrying by industry, current prices (PSA_OpenSTAT_0422B5BMQA1_GVA_mining_quarrying_by_industry_annual_2000-2025.csv)"
+PSA GVA 2023 at constant 2018 prices: crude oil and natural gas extraction,20.076,PHP bn,"PSA OpenSTAT 0422B5BMQA1, GVA in mining and quarrying by industry, constant 2018 prices (PSA_OpenSTAT_0422B5BMQA1_GVA_mining_quarrying_by_industry_annual_2000-2025.csv)"
+PSA implicit price of crude oil and gas extraction 2023 / 2018,1.2168260609683204,ratio,"current / constant 2018 prices, 2023 (the same table)"
+"PSA I-O 2018: crude petroleum and natural gas (040), value added / output",0.8631503379876478,share,data/raw/io/240-Industry20Table202018.xlsx (tools/build_sam_petroleum_split.load_psa)
+"PSA I-O 2018: coal and lignite (039), value added / output",0.6610472042493879,share,the same table
+"PSA I-O 2018: coal and lignite (039), output",31.865349218938004,PHP bn,the same table
+"customs imports 2023, CIF: ores, slag and ash (HS 26)",222.43009440592007,PHP bn,data/processed/fuel_trade_customs_2023_v0.9_inputs.csv (PSA OpenSTAT AVI/0032L4DMFD2)
+"customs imports 2023, CIF: salt, sulphur, earths and stone (HS 25 less lime and cement)",10.442881871736894,PHP bn,the same file
+PSA national accounts imports of goods 2018: metalliferous ores and metal scrap,57.455,PHP bn,"PSA OpenSTAT 0302B5BIGA1 (PSA_OpenSTAT_0302B5BIGA1_imports_of_goods_annual.csv), current prices (BPM6 basis: goods changing ownership)"
+PSA national accounts imports of goods 2023: metalliferous ores and metal scrap,90.05,PHP bn,"PSA OpenSTAT 0302B5BIGA1 (PSA_OpenSTAT_0302B5BIGA1_imports_of_goods_annual.csv), current prices (BPM6 basis: goods changing ownership)"
+PSA I-O 2018 imports: gold and other precious metal ores (041),0.7502211380368791,PHP bn,the 240-industry I-O's imports column
+PSA I-O 2018 imports: nickel ores (042),0.1980511929743616,PHP bn,the 240-industry I-O's imports column
+PSA I-O 2018 imports: copper ores (043),3.7797510296571857,PHP bn,the 240-industry I-O's imports column
+"PSA I-O 2018 imports: quarrying of stone, clay, gravel and sand (044)",13.792307947475624,PHP bn,the 240-industry I-O's imports column
+PSA I-O 2018 imports: other mining and quarrying (045),10.440921586243743,PHP bn,the 240-industry I-O's imports column
+"PSA I-O 2018 imports: non-fuel mining, rows 041-045",28.96125289438779,PHP bn,the five rows above
+PSA Supply table 2018 imports of goods: copper ores (043),6.550294193854628,PHP bn,"data/raw/io/2018 Supply and Use Tables.xlsx, sheet 240_Supply"
+PSA Supply table 2018 domestic production: copper ores (043),31.023045669039597,PHP bn,"data/raw/io/2018 Supply and Use Tables.xlsx, sheet 240_Supply (all producing industries)"
+PSA Supply table 2018 imports of goods: gold and other precious metal ores (041),0.0,PHP bn,"data/raw/io/2018 Supply and Use Tables.xlsx, sheet 240_Supply"
+PSA Supply table 2018 domestic production: gold and other precious metal ores (041),32.9965372180324,PHP bn,"data/raw/io/2018 Supply and Use Tables.xlsx, sheet 240_Supply (all producing industries)"
+PSA Supply table 2018 imports of goods: coal and lignite (039),100.585,PHP bn,"data/raw/io/2018 Supply and Use Tables.xlsx, sheet 240_Supply"
+PSA Supply table 2018 domestic production: coal and lignite (039),42.19734921893801,PHP bn,"data/raw/io/2018 Supply and Use Tables.xlsx, sheet 240_Supply (all producing industries)"
+PSA Supply table 2018 imports of goods: crude petroleum and natural gas (040),418.977,PHP bn,"data/raw/io/2018 Supply and Use Tables.xlsx, sheet 240_Supply"
+PSA Supply table 2018 domestic production: crude petroleum and natural gas (040),79.2342248457229,PHP bn,"data/raw/io/2018 Supply and Use Tables.xlsx, sheet 240_Supply (all producing industries)"
+"CPBI 2023: electric power generation (D35101), total revenue",623.1638644,PHP bn,"PSA, 2023 Census of Philippine Business and Industry, Section D (Preliminary Results), 28 October 2025; PSA_2023_CPBI_SectionD_Attachment_Tables_Suppressed_01Oct2025.xlsx (thousand pesos), Table 1"
+"CPBI 2023: electric power generation (D35101), other expense (all but compensation)",496.72320535,PHP bn,"PSA, 2023 Census of Philippine Business and Industry, Section D (Preliminary Results), 28 October 2025; PSA_2023_CPBI_SectionD_Attachment_Tables_Suppressed_01Oct2025.xlsx (thousand pesos), Table 1"
+"CPBI 2023: electric power generation (D35101), compensation",16.85358277,PHP bn,"PSA, 2023 Census of Philippine Business and Industry, Section D (Preliminary Results), 28 October 2025; PSA_2023_CPBI_SectionD_Attachment_Tables_Suppressed_01Oct2025.xlsx (thousand pesos), Table 1"
+"CPBI 2023: electric power distribution (D35103), total revenue",980.59142365,PHP bn,"PSA, 2023 Census of Philippine Business and Industry, Section D (Preliminary Results), 28 October 2025; PSA_2023_CPBI_SectionD_Attachment_Tables_Suppressed_01Oct2025.xlsx (thousand pesos), Table 1"
+"CPBI 2023: Section D total revenue (generation, transmission, distribution, gas)",1658.26880293,PHP bn,"PSA, 2023 Census of Philippine Business and Industry, Section D (Preliminary Results), 28 October 2025; PSA_2023_CPBI_SectionD_Attachment_Tables_Suppressed_01Oct2025.xlsx (thousand pesos), Table 3"
+CPBI 2023: Section D total expense,1449.5411548499999,PHP bn,"PSA, 2023 Census of Philippine Business and Industry, Section D (Preliminary Results), 28 October 2025; PSA_2023_CPBI_SectionD_Attachment_Tables_Suppressed_01Oct2025.xlsx (thousand pesos), Table 3"

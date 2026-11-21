@@ -11,6 +11,10 @@ family its OWN inflation from its own spending mix.
     pi = ml.family_inflation(link)             # % per FIES family, its own basket
     ml.poverty(link, pi); ml.deciles(link, pi) # new poor and deciles with family inflation (HouseholdDetail rules)
     ml.write(link, "outputs/Infinity_GEM_micro_link_<scenario>_<date>.xlsx")
+    MicroLink(model, base="fies2025")          # 0.4.2 (18 Nov 2026): PSA's FIES 2025 file and 2025 lines
+                                               # (infinity_gem/fies_base.py, check FB1); THE DEFAULT since the decision of
+                                               # 18 Nov 2026, about 6:15 AM (base=None; INFINITY_GEM_FIES_BASE overrides it)
+    MicroLink(model, base="fies2023")          # FIES 2023: every figure published before 18 Nov 2026; the LFS link
 
 Link variables (sheets of the workbook; same names as the CSV files):
   fies_categories  FIES 2023 spending categories: national spending, budget share, price change (%) and the SAM
@@ -53,7 +57,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from . import paths
+from . import fies_base, paths
 from .household import HouseholdDetail, NET_SELLER, PSA16
 
 # FIES 2023 categories (Household Sum file) -> SAM commodities they can contain. RENT and UTILITIES are derived (above).
@@ -118,9 +122,15 @@ def category_map(commodities, fuel_split_map: bool = True) -> dict:
     return out
 
 
-def fies_spending(puf=None) -> pd.DataFrame:
-    """FIES 2023 family spending by CATEGORIES (₱ a year), rows in the order of HouseholdDetail().f."""
-    s = pd.read_csv(puf or paths.FIES_PUF, usecols=_RAW)
+def fies_spending(puf=None, base: str | None = None) -> pd.DataFrame:
+    """FIES family spending by CATEGORIES (₱ a year), rows in the order of HouseholdDetail(base=base).f.
+    base="fies2025" (0.4.2, 18 Nov 2026): the FIES 2025 file, in the 2023 names (infinity_gem/fies_base.py); "fies2023": the FIES
+    2023 file; None = fies_base.default() ("fies2025" since 18 Nov 2026, about 6:15 AM)."""
+    base = fies_base.resolve(base)
+    if base == "fies2025":
+        s = fies_base.households_2025(puf)[_RAW]
+    else:
+        s = pd.read_csv(puf or paths.FIES_PUF, usecols=_RAW)
     s["RENT"] = s["RENTVAL"].clip(lower=0)
     s["UTILITIES"] = (s["HOUSING_WATER"] - s["RENTVAL"]).clip(lower=0)
     return s[CATEGORIES].clip(lower=0)
@@ -131,9 +141,16 @@ def _pct(new, old):
 
 
 class MicroLink:
-    def __init__(self, model, hd: HouseholdDetail | None = None, puf=None, fuel_split_map: bool = True):
-        self.hd = hd or HouseholdDetail(puf=puf)
-        self.spend = fies_spending(puf)
+    def __init__(self, model, hd: HouseholdDetail | None = None, puf=None, fuel_split_map: bool = True, base: str | None = None):
+        """base (0.4.2, 18 Nov 2026): "fies2023" (every figure published before 18 Nov 2026) or "fies2025"
+        (PSA's FIES 2025 public-use file and 2025 lines; infinity_gem/fies_base.py; check FB1); None = fies_base.default() ("fies2025"
+        since 18 Nov 2026; INFINITY_GEM_FIES_BASE overrides it). A given hd sets the base; a base named
+        beside an hd of another base is refused (no silent switch)."""
+        if hd is not None and base is not None and fies_base.check(base) != getattr(hd, "base", "fies2023"):
+            raise ValueError(f"MicroLink: base={base!r} but the HouseholdDetail given is on {getattr(hd, 'base', 'fies2023')!r}")
+        self.hd = hd or HouseholdDetail(puf=puf, base=base)
+        self.base = getattr(self.hd, "base", "fies2023")
+        self.spend = fies_spending(puf, base=self.base)
         if len(self.spend) != len(self.hd.f):
             raise ValueError("FIES spending and HouseholdDetail rows differ")
         self.C = list(model.C)
@@ -219,7 +236,8 @@ class MicroLink:
         conc = conc[conc.weight_sam_units > 1e-12]
         conc["share_of_category"] = conc.weight_sam_units / conc.groupby("fies_category").weight_sam_units.transform("sum")
         meta = {"scenario": scenario, "settings": settings, "created": dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
-                "model_solved": bool(getattr(sim, "ok", True)), "fies": "FIES 2023 public-use file (PSA), Household Sum"}
+                "model_solved": bool(getattr(sim, "ok", True)),
+                "fies": fies_base.DESCRIPTION[self.base]}               # 0.4.2 (18 Nov 2026): by base
         return {"fies_categories": fc, "commodities": com, "industries": self.industries(model, base, sim),
                 "household_groups": grp, "factors": self.factors(model, base, sim).to_frame(), "net_seller": ns.to_frame(),
                 "concordance": conc, "_g": g, "_meta": meta}
@@ -291,7 +309,8 @@ class MicroLink:
                                         "How to use", "Not for citation"],
                                "value": ["Infinity GEM macro-micro link file: what one CGE run hands to a FIES-LFS microsimulation",
                                          m["scenario"], m["settings"], m["created"], str(m["model_solved"]), m["fies"],
-                                         "All changes in % against the no-shock baseline (pp for inflation); FIES 2023 pesos",
+                                         "All changes in % against the no-shock baseline (pp for inflation); "
+                                         + ("FIES 2025 pesos" if self.base == "fies2025" else "FIES 2023 pesos"),
                                          "Stata: a Stata do-file (not included) reads the CSV files in the folder beside this workbook",
                                          "Model results for one year, not forecasts; not for citation"]})
         with pd.ExcelWriter(xlsx) as w:

@@ -13,6 +13,11 @@ its SAM group's inflation (the group's own budget shares) and its group's nomina
   Price effect  = family spending (TOTEX) x group inflation: the extra cost of the same basket.
   Income effect = family income (TOINC) x the fall in the group's nominal income YH (lost wages, profits, transfers).
   Total loss    = price effect + income effect. FIES 2023 pesos, one year.
+Base (0.4.2, 18 Nov 2026): HouseholdDetail(base="fies2025") runs every rule below on PSA's FIES 2025
+public-use file and PSA's 2025 lines (FIES 2025 pesos; infinity_gem/fies_base.py; check FB1). Since 18 Nov
+2026, that is the DEFAULT (base=None = fies_base.default(): INFINITY_GEM_FIES_BASE, else settings.DEFAULT_FIES_BASE);
+base="fies2023" gives the FIES 2023 families, pesos and lines of every figure published before then. The LFS link stays FIES 2023
+only (no FIES-LFS 2025 member file): on the 2025 base it raises an error saying to pass base="fies2023", never a silent fallback.
 Poverty uses the same real-consumption factor as infinity_gem.microsim (spending EH over the group price index), so the
 persons count equals Infinity GEM's published "new poor"; families are counted with RFACT, persons with MEM_RFACT.
 Deciles: PSA's per-person income deciles (NPCINC) by default; ranking="total_income" ranks families by total income
@@ -103,13 +108,20 @@ def weighted_deciles(x: pd.Series, w: pd.Series, q: int = 10) -> pd.Series:
 
 
 class HouseholdDetail:
-    def __init__(self, puf=None, povlines=None):
-        f = pd.read_csv(puf or paths.FIES_PUF, usecols=COLS)
-        p = pd.read_csv(povlines or paths.FIES_POVLINES, usecols=["w_prov", "toinc", "pline_2023", "fline_2023"])
-        if len(f) != len(p) or (f["W_PROV"].values != p["w_prov"].values).any() or np.abs(f["TOINC"].values - p["toinc"].values).max() > 1e-6:
-            raise ValueError("The FIES household file and the poverty-line extract are not in the same order")
-        f["PLINE"], f["FLINE"] = p["pline_2023"].values, p["fline_2023"].values
-        f["PCI"] = f["TOINC"] / f["FSIZE"]
+    def __init__(self, puf=None, povlines=None, base: str | None = None):
+        """base (0.4.2, 18 Nov 2026): "fies2023" or "fies2025" (PSA's FIES 2025 public-use file and PSA's
+        2025 lines; infinity_gem/fies_base.py; check FB1); None = fies_base.default() ("fies2025" since 18 Nov 2026, about 6:15 AM; environment INFINITY_GEM_FIES_BASE overrides it). puf/povlines: other files of that base."""
+        from . import fies_base
+        self.base = base = fies_base.resolve(base)
+        if base == "fies2025":
+            f = fies_base.households_2025(puf, povlines)[COLS + ["PLINE", "FLINE", "PCI"]].copy()
+        else:
+            f = pd.read_csv(puf or paths.FIES_PUF, usecols=COLS)
+            p = pd.read_csv(povlines or paths.FIES_POVLINES, usecols=["w_prov", "toinc", "pline_2023", "fline_2023"])
+            if len(f) != len(p) or (f["W_PROV"].values != p["w_prov"].values).any() or np.abs(f["TOINC"].values - p["toinc"].values).max() > 1e-6:
+                raise ValueError("The FIES household file and the poverty-line extract are not in the same order")
+            f["PLINE"], f["FLINE"] = p["pline_2023"].values, p["fline_2023"].values
+            f["PCI"] = f["TOINC"] / f["FSIZE"]
         f["grp"] = np.where(f["URB"] == 1, "hhd-u", "hhd-r") + np.ceil(f["NPCINC"] / 2).astype(int).astype(str)
         f["dec_total"] = weighted_deciles(f["TOINC"], f["RFACT"])
         self.f = f
@@ -122,6 +134,9 @@ class HouseholdDetail:
 
     def members(self) -> pd.DataFrame:
         """PSA FIES-LFS 2023 household members (licensed; read from paths.FIES_LFS_DIR), with PSA-16 industry index."""
+        if getattr(self, "base", "fies2023") != "fies2023":     # 18 Nov 2026: members of FIES-LFS 2023 never meet 2025 households
+            from . import fies_base
+            raise ValueError(fies_base.lfs_refusal(self.base))
         if not self.lfs_available():
             raise FileNotFoundError(f"PSA's FIES-LFS member file is not on this computer ({paths.FIES_LFS_MEMBERS}); "
                                     "download it from PSADA (FIES-LFS Merge, 2023) and set INFINITY_GEM_FIES_LFS")
@@ -142,6 +157,9 @@ class HouseholdDetail:
         notes for the allocation of wages and entrepreneurial income."""
         if self._earn is not None:
             return self._earn
+        if getattr(self, "base", "fies2023") != "fies2023":     # 0.4.2 (18 Nov 2026): the member file is FIES-LFS 2023;
+            from . import fies_base                              # refused with the remedy, never a silent switch of survey year
+            raise ValueError(fies_base.lfs_refusal(self.base))
         f, m = self.f, self.members()
         key = ["W_REGN", "W_PROV", "SEQ_NO"]
         hid = pd.Series(np.arange(len(f)), index=pd.MultiIndex.from_frame(f[key].astype(int)))
@@ -292,7 +310,8 @@ class HouseholdDetail:
 
     def _before_after(self, pci) -> pd.DataFrame:
         b, s = self._counts(self.f["PCI"]), self._counts(pci)
-        return pd.DataFrame({"Baseline (FIES 2023)": b, "After the shock": s,
+        lab = "FIES 2025" if getattr(self, "base", "fies2023") == "fies2025" else "FIES 2023"   # 0.4.2: the base's year
+        return pd.DataFrame({f"Baseline ({lab})": b, "After the shock": s,
                              "Change": {k: s[k] - b[k] for k in b}})
 
     # ------------------------------------------------------------------ I-O runs: earnings only (LFS link)

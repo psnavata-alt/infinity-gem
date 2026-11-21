@@ -292,6 +292,63 @@ Checks
       path, Simulator short-run CGE and poverty) equal those of Infinity GEM 0.2, the version behind every result
       published up to 7 Oct 2026 (frozen in checks/reference_live.json, computed with 0.2 on 1 Oct 2026;
       0.2 itself is kept in an archived copy of the earlier version). Upgrades must be opt-in.
+      0.4.0 (13 Nov 2026): R0 is pinned to the setting it was built for, "0.2 published": its results are the engine's code
+      defaults (CGE.from_sam(), DynamicCGE(); = "0.2 published" by check S2) and the Simulator's run_cge with its own default
+      setting "0.2 published"; R0 now also asserts both pins, so the new settings.DEFAULT ("0.4 recommended") cannot reach it.
+  R4  (0.4.0, 13 Nov 2026) The default setting "0.4 recommended" (option (c) of the short-run calibration at the T15 point on Infinity GEM SAM v1.0, margin
+      floor -1, the PAMPh-type BSP rule at theta 1.5; checks/test_04_reference.py): its values are the T15 file's and the floor
+      run's; 0.4 = 0.3 + exactly the option (c) keys (static CGE as 0.3); the INFINITY_GEM_SETTING switch; and the 0.4 central case's main results (GDP gap 2026/2027, growth effect, inflation, policy-rate gap 2026/2027, new poor 2026/2027, multiplier)
+      equal checks/reference_04_central.json (tolerance 1e-9, as R0).
+  EF1 (0.4.0, 13 Nov 2026) The engine fallback for "the employment cap did not settle" (checks/test_cap_fallback.py): a research case that failed on 12 Nov 2026 still fails with the fallback off, solves with it on (that year with the smooth cap,
+      logged), agrees with the smooth cap in every year, and a run that settled before is unchanged to 1e-9.
+  R41 (0.4.1, 13 Nov 2026) The default setting "0.4.1 recommended"
+      (checks/test_041_reference.py): DEFAULT and SETTINGS; OPTION_C_041 = OPTION_C_04 plus exactly sr_markup_ceiling 1 and the
+      rule's expected="lag"; dynamic_kwargs differ from 0.4's in exactly those two keys; the INFINITY_GEM_SETTING switch; the 0.4.1 central
+      case equals checks/reference_041_central.json (1e-9). R4 keeps checking "0.4 recommended" (its T2/T3 no longer assert that
+      0.4 is the default).
+  MT1 (0.4.1, 13 Nov 2026) The BSP rule's opt-in conventions (checks/test_monetary_timing.py): quarterly_rule =
+      annual_rule at equal targets; the QPM's expected-inflation forms (lead, lag); the BSP's observed 2026 gap from the BIS file
+      equals the gap computed by hand from its decisions; quarter weights; on a small dynamic case, zero lead/lag and equal weights
+      reproduce the rule, an observed year is applied exactly and the rule continues from its end value, and the lead rule's fixed
+      point satisfies its rule.
+  MC1 (0.4.1, 13 Nov 2026) A ceiling on the markup gap rule's pass-through (checks/test_markup_ceiling.py; cge.py
+      'mk_ceiling', DynamicCGE sr_markup_ceiling): without it the static oil +30% test at s 0.5 has a boom solution beside the
+      slump; with the ceiling 1 (the proportional markup) the solve is unique from every start tried and homogeneous, the slump is
+      unchanged (0.0), guards refuse bad values, and in a dynamic slump the ceiling changes nothing.
+  ACC1 (0.4.2, 14 Nov 2026) The opt-in short-run private-investment accelerator (checks/test_accelerator.py;
+      DynamicCGE sr_accelerator): off = the engine before the option to the bit (a frozen copy,
+      checks/reference_dynamic_pre_acc_042.py, SHA-256 checked), with and without the BSP rule; a = 0 = off to the bit; a zero
+      shock with it on = the baseline; the fixed point and the investment factors recomputed by hand; Walras and the GDP identity;
+      homogeneity (the baseline at twice the numeraire); two tampers caught; guards.
+  CET1 (0.4.2, 14-15 Nov 2026 item P3) The opt-in short-run export (CET) elasticity
+      (checks/test_cet_short_run.py; DynamicCGE sr_cet, cge.py 'cet_sr'; estimate preshock/export_elasticity_sr_estimate.py): off = the
+      engine before the option to the bit (frozen cge.py and dynamic.py, SHA-256 checked), flexible and markup pricing; a zero shock
+      with it on = the baseline; the long-run omega given as the short-run one = off; the re-centred CET and the markup exporters' rule
+      by hand; a smaller export fall with lower elasticities; two tampers caught; guards; the constants = the estimate file.
+  IS1 (0.4.2, 14-15 Nov 2026) The industry-slope target restated on the shock's basis
+      (checks/test_industry_slope_restated.py; data only): the 2026 statistic = the short-run calibration's; the restatement file = a fresh
+      recomputation; the evidence (negative only with mining; positive in normal years and on the shock's basis); the scoring reads
+      the target from the file; slope and s.e. = statsmodels.
+  ERP1 (0.4.2, 14-15 Nov 2026) The estimated within-year peso pass-through into non-oil import
+      prices for sr_erpt (checks/test_erpt_estimate.py; dynamic.SR_ERPT_ESTIMATE; preshock/import_price_erpt_estimate.py): the estimate
+      re-run from the data = the file; phi derived from it and the SAM's import shares; the engine moves non-oil import prices by
+      1.01 ** phi and oil by 1.01; the CPI's within-year response inside the BSP's band and import prices' below 1.
+  R42 (0.4.2, 15 Nov 2026, overnight) The OPT-IN setting "0.4.2 candidate" (checks/test_042_candidate.py;
+      settings.OPTION_C_042C; NOT the default): its values equal their source files (the eval-11 re-fit point's json, the CET and
+      peso pass-through estimate files); it is 0.4.1 plus exactly six keys (hoarding, sr_consumption, sr_markup_gap, sr_oil_pass,
+      sr_cet, sr_erpt); the INFINITY_GEM_SETTING switch; settings.DEFAULT is still "0.4.1 recommended" and the engine's own defaults keep the
+      two options off; its central case and peso diagnostic equal checks/reference_042c_central.json (1e-9) and the re-fit's evaluation of the same point (1e-6).
+  RG1 (0.4.2, 18 Nov 2026, overnight; opt-in research) Regional Phase 0, research/regional/topdown.py
+      (checks/test_regional_topdown.py, 7 tests): GRDP shares sum to 1 and the 18 regions to PSA's Philippines table; a zero shock
+      gives zeros; value added, output and jobs shared out to regions add up to the national results (1e-9); baseline poverty
+      by region = PSA 2023 Table 2; new poor by region sum to the national microsimulation; boundary recode (NIR, Sulu). NOT RUN
+      when the regional tables or the FIES 2023 file are absent. Phase 0 keeps the FIES 2023 base (named; 18 Nov 2026).
+  R41F (0.4.2, 18 Nov 2026) The default
+      FIES base (checks/test_041F_reference.py; settings.DEFAULT_FIES_BASE, infinity_gem/fies_base.py): with INFINITY_GEM_FIES_BASE removed every
+      class and scenario helper is on FIES 2025 and the switch INFINITY_GEM_FIES_BASE=fies2023 works; the LFS link is refused on the default
+      with its remedy; the R41 central case on FIES 2025 equals checks/reference_041F_central.json (1e-9) and its model rows (GDP,
+      growth, policy rate, multiplier) equal R41's reference. Every OTHER check runs with INFINITY_GEM_FIES_BASE=fies2023 (set at the top of
+      this file and of each standalone test), because every published and frozen reference is on the FIES 2023 base.
 """
 from __future__ import annotations
 
@@ -307,6 +364,14 @@ import numpy as np
 warnings.filterwarnings("ignore")
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
+# 0.4.2 (Wed 18 Nov 2026, about 6:15 AM: "yes, FIES 2025 becomes the default base for poverty figures";
+# settings.DEFAULT_FIES_BASE): every check below reproduces a published or frozen result, and every reference file was computed on the
+# FIES 2023 base, so the suite PINS it here, for this process and every standalone test it starts (each of those also pins it at its
+# top). Checks that test the new default name it themselves: FB1 (the FIES 2025 base and the default's value) and R41F (the R41
+# central case on the default base, in a process with INFINITY_GEM_FIES_BASE removed, against checks/reference_041F_central.json).
+import os                                                      # noqa: E402
+SUITE_FIES_BASE = "fies2023"
+os.environ["INFINITY_GEM_FIES_BASE"] = SUITE_FIES_BASE
 if hasattr(sys.stdout, "reconfigure"):   # 0.3.4 (14 Oct 2026): a '₱' in a detail line crashed the run when output went to a file
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
@@ -348,12 +413,30 @@ _UNDISTRIBUTED = {
     "ELEC-FUEL": ([lambda: paths.DATA_PROCESSED / "electricity_fuel_mix_inputs_2014-2023.csv"],
                   "the electricity fuel-mix inputs of own SAM v0.6e and later (they include GTAP 10A energy volumes, which the "
                   "GTAP licence does not allow us to distribute; research/electricity_fuel_mix/fuel_mix_evidence.py writes them)"),
-    "SAM-TESTS": ([lambda v=v: ROOT / "checks" / f"test_own_sam_v{v}.py" for v in ("05e", "06", "06e", "07", "07b", "08", "09")],
+    "SAM-TESTS": ([lambda v=v: ROOT / "checks" / f"test_own_sam_v{v}.py" for v in ("05e", "06", "06e", "07", "07b", "08", "09", "10")],
                   "the own SAM's standalone rebuild tests (not in this repository: they rebuild the SAM files from the "
                   "licensed FIES and FIES-LFS aggregates; the SAM files themselves are in data/processed)"),
     "PAGASA": ([lambda: paths.DATA_RAW / "disasters" / "PAGASA_ARTC_typhoon_damage_events_and_seasons_2017-2023.csv"],
                "a table of typhoon damage compiled from PAGASA's Annual Reports on Philippine Tropical Cyclones (PAGASA's terms "
                "ask for written permission to reproduce them; data/raw/disasters/README.md)"),
+    # 0.4.2 (21 Nov 2026): the FIES 2025 base and the standalone tests of 0.3.13-0.4.2 that are not in this release
+    "FIES25": ([lambda: paths.FIES_2025_PUF, lambda: paths.FIES_2025_POVLINES, lambda: ROOT / "tools" / "build_fies2025_poverty_lines.py"],
+               "PSA's FIES 2025 public-use file (Volume 1, licensed by PSA to each user), the 2025 poverty thresholds by province "
+               "and urban/rural built from PSA's 2025 Table 16, and the tool that builds and checks them (not in this repository; "
+               "data/raw/fies/README.md)"),
+    "CENTRAL-TESTS": ([lambda f=f: ROOT / "checks" / f for f in ("test_04_reference.py", "test_041_reference.py",
+                                                               "test_042_candidate.py", "test_041F_reference.py")],
+                      "the reference tests of the central 2026 case under the 0.4 settings and their reference results (not in "
+                      "this release; docs/STATUS.md)"),
+    "RUN-OUTPUTS": ([lambda f=f: ROOT / "checks" / f for f in ("test_cap_fallback.py", "test_cet_short_run.py",
+                                                             "test_industry_slope_restated.py", "test_erpt_estimate.py")],
+                    "standalone tests that compare with saved results of earlier runs and with estimation scripts that are not "
+                    "in this release (docs/STATUS.md)"),
+    "REGIONAL": ([lambda: ROOT / "research" / "regional" / "topdown.py", lambda: ROOT / "checks" / "test_regional_topdown.py"],
+                 "the regional research code and its test (not in this release)"),
+    "RESEARCH-TESTS": ([lambda f=f: ROOT / "checks" / f for f in ("test_row126_127_shock_sizes.py", "test_row111_forecast_tools.py",
+                                                                "test_row96_closeout.py", "test_row94_overlay.py", "test_markup_floor.py")],
+                       "the standalone tests of a research batch of 12 Nov 2026, whose scripts are not in this release"),
 }
 _NEEDS = {"P1": ["FIES"], "V1": ["MACRO-Q"], "I1": ["IO80"], "I2": ["IO80", "LFS-IND"], "A1": ["FIES"],
           "I3": ["IO80"], "I4": ["IO80"], "I5": ["IO80", "IO16", "LFS-IND"], "S1": ["IO240"], "H2": ["FIES", "REF-H2"],
@@ -364,7 +447,14 @@ _NEEDS = {"P1": ["FIES"], "V1": ["MACRO-Q"], "I1": ["IO80"], "I2": ["IO80", "LFS
           "S7": ["FIES", "FIES-LFS", "IO240", "SAM-TESTS"], "S10": ["FIES", "FIES-LFS", "IO240", "ELEC-FUEL", "SAM-TESTS"],
           "S11": ["FIES", "FIES-LFS", "IO240", "ELEC-FUEL", "SAM-TESTS"], "SD1": ["PAGASA"],
           # 25 Oct 2026 (0.3.13.dev4): S12 runs the own SAM v0.9's test (v0.9 is built from v0.7, which has the fuel-mix correction)
-          "S12": ["FIES", "FIES-LFS", "IO240", "ELEC-FUEL", "SAM-TESTS"]}
+          "S12": ["FIES", "FIES-LFS", "IO240", "ELEC-FUEL", "SAM-TESTS"],
+          # 0.4.2 (21 Nov 2026): S13 runs the own SAM v1.0's test (as S12); FB1 and R41F the FIES 2025 base; the central case's
+          # reference tests, the tests that read saved results of earlier runs, the regional research and the research batch
+          # are not in this release
+          "S13": ["FIES", "FIES-LFS", "IO240", "ELEC-FUEL", "SAM-TESTS"], "FB1": ["FIES", "FIES25"],
+          "R4": ["FIES", "CENTRAL-TESTS"], "R41": ["FIES", "CENTRAL-TESTS"], "R42": ["FIES", "CENTRAL-TESTS"],
+          "R41F": ["FIES", "FIES25", "CENTRAL-TESTS"], "EF1": ["FIES", "RUN-OUTPUTS"], "CET1": ["RUN-OUTPUTS"],
+          "IS1": ["RUN-OUTPUTS"], "ERP1": ["RUN-OUTPUTS"], "RG1": ["FIES", "REGIONAL"], "RB1": ["RESEARCH-TESTS"]}
 
 
 def _missing_inputs(code):
@@ -582,7 +672,7 @@ def y1():
 @check("P1", "microsimulation baseline = PSA official poor")
 def p1():
     from infinity_gem.microsim import Microsim, OFFICIAL_POOR_2023
-    b = Microsim().baseline()
+    b = Microsim(base="fies2023").baseline()                   # 18 Nov 2026: the FIES 2023 base named (PSA 2023's count)
     return abs(b["poor"] / OFFICIAL_POOR_2023 - 1) < 0.001, f"{b['poor']/1e6:.3f}M poor ({b['rate_pct']:.2f}%) vs PSA 17.54M"
 
 
@@ -643,6 +733,11 @@ def r0():
     import json
     sys.path.insert(0, str(ROOT / "checks"))
     from regression_reference import compute, compare, REF
+    import inspect
+    from app import engines as E                     # 0.4.0 (13 Nov 2026): R0 is pinned to "0.2 published", not to settings.DEFAULT
+    from infinity_gem import settings as ST
+    pin = (inspect.signature(E.run_cge).parameters["setting"].default == "0.2 published"
+           and ST.cge_kwargs("0.2 published") == {"path": None} and ST.dynamic_kwargs("0.2 published") == {"hybrid": False, "transfer_scaling": "legacy"})
     ref = json.loads(REF.read_text(encoding="utf-8"))
     got = compute(ROOT)
     # public version: results whose inputs are not distributed (PSA's input-output tables, the FIES microdata) are not
@@ -650,8 +745,9 @@ def r0():
     skipped = [k for k in ref if k not in got]
     bad = compare({k: v for k, v in ref.items() if k in got}, got)
     note = f"; not computed on this computer (inputs not distributed): {', '.join(skipped)}" if skipped else ""
-    return (not bad and len(got) > 0), (f"{len(ref) - len(skipped)} of {len(ref)} results compared (relative tolerance 1e-9); "
-                                        f"differing: {bad or 'none'}{note}")
+    return (not bad and pin and len(got) > 0), (f"{len(ref) - len(skipped)} of {len(ref)} results compared (relative tolerance "
+                                                f"1e-9); differing: {bad or 'none'}{note}; pinned to '0.2 published' (engine code "
+                                                f"defaults, Simulator default): {pin}; settings.DEFAULT is {ST.DEFAULT!r} (not used here)")
 
 
 @check("I3", "I-O identity: primary inputs +10% gives every price +10%")
@@ -1073,7 +1169,7 @@ def h2():
     from infinity_gem.household import HouseholdDetail
     from infinity_gem.microsim import Microsim
     from infinity_gem.cge import CGE
-    hd = HouseholdDetail()
+    hd = HouseholdDetail(base="fies2023")                      # 18 Nov 2026: named (an earlier and an earlier FIES 2023 runs)
     pv0 = hd._counts(hd.f["PCI"])
     base_ok = round(pv0["Poor families"]) == 2_992_013 and round(pv0["Poor persons"]) == 17_538_864
     ref = ROOT / "validation" / "household_detail"
@@ -1086,7 +1182,7 @@ def h2():
     b = m.solve()
     s = m.solve({"qinv_scale": {"ccons": 0.8}})
     ge = hd.group_effects(m, b, s)
-    pov_gap = abs(float(hd.poverty(ge).loc["Poor persons", "Change"]) - Microsim().from_cge(m, b, s)["new_poor"])
+    pov_gap = abs(float(hd.poverty(ge).loc["Poor persons", "Change"]) - Microsim(base="fies2023").from_cge(m, b, s)["new_poor"])
     ns = abs(hd.deciles(ge, net_seller=True).loc["All families", "Total loss: total (₱ million)"]
              - hd.deciles(ge).loc["All families", "Total loss: total (₱ million)"])
     r = hd.price_only(0.0154, 0.0164)
@@ -1106,7 +1202,7 @@ def h2():
 def h3():
     import pandas as pd
     from infinity_gem.household import HouseholdDetail, NEC, ENTREPRENEURIAL
-    hd = HouseholdDetail()
+    hd = HouseholdDetail(base="fies2023")                      # 18 Nov 2026: the LFS link exists on FIES-LFS 2023 only (pinned)
     if not hd.lfs_available():
         return None, ("NOT RUN on this computer: PSA's FIES-LFS 2023 member file is licensed to the person who downloaded it "
                       f"and is not here ({paths.FIES_LFS_MEMBERS.name}).")
@@ -1334,7 +1430,7 @@ def ml1():
     m = CGE.from_sam(**{k: (tuple(v) if isinstance(v, list) else v) for k, v in d["closure"].items()})
     b = m.solve()
     s = m.solve(d["spec"])
-    ml = MicroLink(m)
+    ml = MicroLink(m, base="fies2023")                         # 18 Nov 2026: named (the earlier analysis's 1,995,889 is on FIES 2023)
     cover = abs(ml.W.values.sum() / ml.hh_cons.sum() - 1)                      # all household consumption is attributed
     # homogeneity: every consumer price +10% -> every category and every family +10%
     fake = {"PQ": b["PQ"] * 1.1}
@@ -1346,8 +1442,8 @@ def ml1():
     fam10 = float((ml.family_inflation(link10) - 10).abs().max())
     # group method = Infinity GEM's published new poor; the reconciled national basket = the SAM's household CPI (spending-weighted)
     pov = float(ml.hd.poverty(link["_g"]).loc["Poor persons", "Change"])
-    ms = Microsim().from_cge(m, b, s)["new_poor"]
-    sam_cpi = float(ml.hh_cons.values @ ((s["PQ"] / b["PQ"] - 1) * 100) / ml.hh_cons.sum())
+    ms = Microsim(base="fies2023").from_cge(m, b, s)["new_poor"]
+    sam_cpi =float(ml.hh_cons.values @ ((s["PQ"] / b["PQ"] - 1) * 100) / ml.hh_cons.sum())
     fam_cpi = float(np.average(pi, weights=(ml.spend.values * ml.lam.reindex(CATEGORIES).values).sum(axis=1) * ml.hd.f["RFACT"]))   # reconciled spending
     # export: CSV values = the tables
     with tempfile.TemporaryDirectory() as tmp:
@@ -1361,6 +1457,100 @@ def ml1():
     return ok, (f"household consumption attributed {1 - cover:.12f}; all prices +10% -> categories {cat10:.1e}, families {fam10:.1e}; "
                 f"September 2026 five shocks: new poor {pov:,.0f} (microsim {ms:,.0f}); reconciled family CPI {fam_cpi:.4f} vs SAM household "
                 f"CPI {sam_cpi:.4f} pp; CSV round trip {rt:.1e}; all 8 tables written")
+
+
+@check("FB1", "the FIES 2025 base (0.4.2, 18 Nov 2026; the default since the decision, about 6:15 AM): lines = PSA's "
+              "workbook; before any shock = PSA's 2025 poverty (6.4% of families, 9.7% of persons); the default and its override; "
+              "MicroLink rules hold on 2025; the LFS link refused with its remedy")
+def fb1():
+    import pandas as pd
+    from infinity_gem import fies_base
+    from infinity_gem.cge import CGE
+    from infinity_gem.household import HouseholdDetail
+    from infinity_gem.microlink import MicroLink
+    from infinity_gem.microsim import Microsim
+    sys.path.insert(0, str(ROOT / "tools"))
+    import build_fies2025_poverty_lines as BL
+    # (a) the thresholds: every value typed in an earlier .ado = PSA's workbook; the processed file = the .ado
+    names, vals, codes, lookup = BL.parse_ado()
+    n_chk, bad, miss = BL.verify(names, vals)
+    proc = fies_base.poverty_lines_2025()
+    j = proc.merge(lookup, on=["w_prov", "urban"], suffixes=("", "_ado"))
+    dl = float(max((j["pline_2025"] - j["pline_2025_ado"]).abs().max(), (j["fline_2025"] - j["fline_2025_ado"]).abs().max()))
+    ok_lines = n_chk == 88 and not bad and not miss and len(j) == len(lookup) == len(proc) == 238 and dl < 0.005
+    # (b) before any shock: PSA's published 2025 figures (fies_base.OFFICIAL; thousands to 2 decimals = within 10 people)
+    h = HouseholdDetail(base="fies2025")
+    c = h._counts(h.f["PCI"])
+    off = fies_base.OFFICIAL["fies2025"]
+    dev = {k: abs(c[k] - off[k]) for k in ("Poor persons", "Poor families", "Food-poor persons", "Food-poor families")}
+    pop_inc = c["Poor persons"] / h.f["MEM_RFACT"].sum() * 100
+    fam_inc = c["Poor families"] / h.f["RFACT"].sum() * 100
+    ok_psa = (max(dev.values()) < 10 and round(pop_inc, 1) == off["incidence, population (%)"]
+              and round(fam_inc, 1) == off["incidence, families (%)"] and len(h.f) == 170_916)
+    ms25 = Microsim(base="fies2025")
+    ok_ms = abs(ms25.baseline()["poor"] - c["Poor persons"]) < 0.01
+    # (c) the default (18 Nov 2026): settings.DEFAULT_FIES_BASE = "fies2025"; with INFINITY_GEM_FIES_BASE removed a
+    # class built without a base is on FIES 2025; INFINITY_GEM_FIES_BASE="fies2023" (the suite's pin) gives FIES 2023, 17.54 M poor; a bad
+    # value is refused. The environment is restored to the suite's pin afterwards.
+    import os
+    from infinity_gem import settings as ST
+    saved = os.environ.pop(fies_base.ENV, None)
+    try:
+        h_def = HouseholdDetail()
+        ok_unset = (ST.DEFAULT_FIES_BASE == "fies2025" and fies_base.default() == "fies2025" and h_def.base == "fies2025"
+                    and Microsim().base == "fies2025" and fies_base.DEFAULT == "fies2025"
+                    and abs(h_def._counts(h_def.f["PCI"])["Poor persons"] - c["Poor persons"]) < 0.01)
+        os.environ[fies_base.ENV] = "fies2023"
+        h23 = HouseholdDetail()
+        p23 = h23._counts(h23.f["PCI"])["Poor persons"]
+        ok_env = h23.base == "fies2023" and abs(p23 - 17_538_864) < 1 and Microsim().base == "fies2023"
+        os.environ[fies_base.ENV] = "fies2024"
+        try:
+            fies_base.default()
+            ok_bad = False
+        except ValueError:
+            ok_bad = True
+    finally:
+        os.environ.pop(fies_base.ENV, None)
+        if saved is not None:
+            os.environ[fies_base.ENV] = saved
+    ok_default = ok_unset and ok_env and ok_bad
+    # (d) MicroLink on the 2025 base: all household consumption attributed; all prices +10% -> every family +10%; no shock = no
+    # change; group method = Microsim on the same base; the LFS link refused (no FIES-LFS 2025 member file)
+    m = CGE.from_sam()
+    b = m.solve()
+    s = m.solve({"pwm_scale": {c_: 1.3 for c_ in m.C if c_ in ("cchem", "cpetr")}})
+    ml = MicroLink(m, base="fies2025")
+    cover = abs(ml.W.values.sum() / ml.hh_cons.sum() - 1)
+    link = ml.link_variables(m, b, s, scenario="FB1")
+    link10 = dict(link)
+    link10["fies_categories"] = link["fies_categories"].assign(price_change_pct=10.0)
+    fam10 = float((ml.family_inflation(link10) - 10).abs().max())
+    zero = ml.link_variables(m, b, b)
+    z = float(ml.poverty(zero, ml.family_inflation(zero)).loc["Poor persons", "Change"])
+    grp = float(ml.hd.poverty(link["_g"]).loc["Poor persons", "Change"])
+    msn = ms25.from_cge(m, b, s)["new_poor"]
+    try:
+        ml.hd.earnings_by_industry()
+        lfs_refused = False
+    except ValueError as e:                                    # 18 Nov 2026: refused with the remedy, never a silent fallback
+        lfs_refused = 'base="fies2023"' in str(e)
+    try:
+        MicroLink(m, hd=h23, base="fies2025")                  # a base beside an hd of another base: refused
+        mixed_refused = False
+    except ValueError:
+        mixed_refused = True
+    ok_ml = (ml.base == "fies2025" and cover < 1e-9 and fam10 < 1e-9 and abs(z) < 1e-6 and abs(grp - msn) < 0.01 and lfs_refused
+             and MicroLink(m, hd=h23).base == "fies2023" and mixed_refused)
+    ok = ok_lines and ok_psa and ok_ms and ok_default and ok_ml
+    return ok, (f"thresholds: {n_chk} of 88 PSA rows = workbook, {len(bad)} differences, processed file = .ado ({dl:.1e}); 2025 before any "
+                f"shock: {c['Poor families'] / 1e3:,.2f} thousand poor families ({fam_inc:.2f}%, PSA 6.4), {c['Poor persons'] / 1e3:,.2f} thousand "
+                f"poor persons ({pop_inc:.2f}%, PSA 9.7), food-poor {c['Food-poor families'] / 1e3:,.2f} / {c['Food-poor persons'] / 1e3:,.2f} "
+                f"thousand (largest gap to PSA {max(dev.values()):.1f} people); Microsim = HouseholdDetail ({ok_ms}); default "
+                f"{ST.DEFAULT_FIES_BASE} with {fies_base.ENV} unset ({ok_unset}), FIES 2023 {p23:,.0f} poor with {fies_base.ENV}=fies2023 "
+                f"({ok_env}), bad value refused ({ok_bad}); MicroLink 2025: consumption attributed {1 - cover:.12f}, +10% -> families "
+                f"{fam10:.1e}, no shock {z:.1e}, group method {grp:,.0f} = Microsim {msn:,.0f} (fuel +30% test), LFS link refused with "
+                f"its remedy {lfs_refused}, mixed bases refused {mixed_refused}")
 
 
 @check("LP1", "local projections (Jorda 2005): recover a known impulse response; equal OLS (0.3.5)")
@@ -1909,7 +2099,16 @@ def x3():
               "test_milestone23c.py",                     # 21 Oct 2026, about 11:30 PM: investment data as an observable (obs=inv)
               "test_milestone24.py",                      # 22 Oct 2026, about 5:05 PM: the investment-specific shock (soe_htmki.py)
               "test_milestone25.py",                      # 22-23 Oct 2026, night: a flexible-price share of the CPI (soe_htmkf.py)
+              "test_milestone26.py",                      # 24 Oct 2026 (added to X3 12 Nov): sticky wages plus oil (soe_htmkwo.py)
+              "test_milestone27.py",                      # 12 Nov 2026, about 6 AM: wage indexation, CES oil (soe_htmkwoi.py)
+              "test_milestone28.py",                      # 12 Nov 2026, about 6:10 AM: dollar pricing of exports (soe_htmkwod.py)
+              "test_milestone30.py",                      # 12 Nov 2026, about 8:50 AM: the oil system prior (estimate_rot oilprior=lp)
               "test_smc.py"):                             # 21 Oct 2026, about 1:05 AM: the sequential Monte Carlo sampler (smc.py)
+        if t == "test_milestone30.py" and not sorted((ROOT / "outputs").glob(
+                "dsge_smc_*_htmkwo_w1_ratio2_long_stl_inv_n*_particles.npy")):     # public version (see docs/STATUS.md)
+            out.append((t, True, "NOT RUN (it needs an estimation run's SMC particle cloud in outputs/ and Kanzig's oil "
+                                 "supply news shocks, which are not in this repository)"))
+            continue
         r = subprocess.run([sys.executable, "-I", str(d / t)], capture_output=True, text=True, cwd=str(d), timeout=600)
         last = [l for l in r.stdout.splitlines() if l.strip()][-1] if r.stdout.strip() else "no output"
         out.append((t, r.returncode == 0, last))
@@ -2216,6 +2415,9 @@ def mk1():
     mf, mm = CGE.from_sam(path, **base), CGE.from_sam(path, **base, pricing="markup")
     acts = [a for i, a in enumerate(mm.A) if mm.isMK[i]]
     farm = tuple(PSA_INDUSTRIES["Agriculture, forestry, and fishing"]) == MARKET_PRICE_ACTS and "amach" not in acts
+    # 12 Nov 2026 (11 Nov 2026): coal mining (acoal, 72.6% exported on SAM v1.0) takes the world price
+    # by default (cge.WORLD_PRICE_ACTS); a SAM without it (v0.5) has nothing to test here
+    coal = "acoal" not in acts
     # (1) zero shock: the benchmark and the SAM; the dynamic hybrid with markup and sectoral stickiness (option (c)) = its baseline
     res0 = float(np.abs(mm.evaluate(mm.x0(), mm.make_shocks())[0]).max())
     b = mm.solve()
@@ -2241,6 +2443,7 @@ def mk1():
     kl = mm.F.index("flnd")
     every = [a for i, a in enumerate(mm.A) if mm.hasD[int(np.argmax(mm.theta[i]))] and mm.QF0[kl, i] == 0]
     me = CGE.from_sam(path, **base, pricing="markup", markup_acts=every)
+    coal = coal and ("acoal" not in mm.A or bool(me.isMK[me.A.index("acoal")]))     # an explicit list may still name coal
     gap_io, cpi = 0.0, {}
     for m_, lam in ((mm, 1.0), (me, 1.0), (mm, 0.0)):
         dpwm = np.zeros(len(m_.C)); dpwm[j] = 1.0
@@ -2288,8 +2491,11 @@ def mk1():
         refused += 1
     ok = (farm and res0 < 1e-7 and rep < 1e-5 and zd < 1e-9 and s1.ok and s2.ok and hq < 1e-9 and hp < 1e-9 and gap_io < 1e-6
           and gap_dem < 1e-6 and dmax > 0.01 and s.ok and walras < 1e-9 and gid < 1e-6 and imb < 1e-9 and imb_t > 1e-6 and dirn
-          and refused == 3 and fc.ok and mc.ok)
-    return ok, (f"{len(acts)} markup activities (farms flexible: {farm}; amach, a pure exporter, flexible); benchmark residual {res0:.1e}, "
+          and refused == 3 and fc.ok and mc.ok and coal)
+    return ok, (f"{len(acts)} markup activities (farms flexible: {farm}; amach, a pure exporter, flexible; coal a world-price "
+                f"taker by default, still allowed in a list: {coal}; homogeneity solve "
+                f"{'from the second start' if s2.message.startswith('solved from the benchmark') else 'from the benchmark'}); "
+                f"benchmark residual {res0:.1e}, "
                 f"SAM reproduced {rep:.1e}; dynamic zero shock with sectoral stickiness {zd:.1e}; homogeneity after oil +30%: "
                 f"quantities {hq:.1e}, prices {hp:.1e}; cost push = I-O price model (markup, and mk_pass 0 = plain I-O): largest gap "
                 f"{gap_io:.1e} (largest response {dmax:.3f}); demand moves markup prices only through flexible prices: {gap_dem:.1e}; "
@@ -2306,7 +2512,7 @@ def cs1():
     from infinity_gem.dynamic import DynamicCGE
     from infinity_gem.oil import cge_oil_shock
     from infinity_gem.settings import dynamic_kwargs
-    kw = dynamic_kwargs("0.3 recommended", rice=True, land="fixed")       # Infinity GEM's own SAM v0.5 (the default), the 2026 scenarios' engine:
+    kw = dynamic_kwargs("0.3 recommended", rice=True, land="fixed")       # Infinity GEM's own SAM (the default: v1.0 since 6 Nov 2026), the 2026 scenarios' engine:
     kw.update(wage_curve=10.5, hoarding=0.85, short_run_years=(2026,))    # wage curve at about its central beta, hoarding 0.85
     d = DynamicCGE(**kw)
     b = d.baseline()
@@ -3300,7 +3506,7 @@ def op1():
     return ok, "; ".join(out)
 
 
-@check("S7", "Infinity GEM's own 2023 SAM v0.6 (research, opt-in): rebuild, PSA sector accounts, FIES shares, CGE reproduces it; v0.5 still default")
+@check("S7", "Infinity GEM's own 2023 SAM v0.6 (research, opt-in): rebuild, PSA sector accounts, FIES shares, CGE reproduces it; v1.0 the default")
 def s7():
     import os
     import subprocess                                      # 0.3.13 (23 Oct 2026): the standalone test, as check X3 runs its tests
@@ -3340,6 +3546,84 @@ def s12():
     return r.returncode == 0, (lines[-1] if lines else "no output")
 
 
+@check("S13", "Infinity GEM's own 2023 SAM v1.0 (the default since 6 Nov 2026): fuel tax row and coal GVA; rebuilds, targets, CGE, default oil shock")
+def s13():
+    import os
+    import subprocess                                      # 6 Nov 2026: the standalone test, in S12's pattern
+    r = subprocess.run([sys.executable, str(ROOT / "checks" / "test_own_sam_v10.py")], capture_output=True, text=True, encoding="utf-8",
+                       errors="replace", cwd=str(ROOT), timeout=2400, env={**os.environ, "PYTHONIOENCODING": "utf-8"})
+    lines = [l for l in r.stdout.splitlines() if l.strip()]
+    return r.returncode == 0, (lines[-1] if lines else "no output")
+
+
+@check("TS1", "a scenario's amounts in the dynamic CGE grow with the baseline (transfer_scaling, 11 Nov 2026): share, deficit, "
+              "legacy = pre-fix, no amount no change, leakage, keys, refusals")
+def ts1():
+    import os
+    import subprocess                                      # 11 Nov 2026: the standalone test, in SD1's pattern (10 tests, T1-T7)
+    p = subprocess.run([sys.executable, str(ROOT / "checks" / "test_transfer_scaling.py")], capture_output=True, text=True,
+                       encoding="utf-8", errors="replace", cwd=str(ROOT), timeout=1800, env={**os.environ, "PYTHONIOENCODING": "utf-8"})
+    res = [l for l in p.stdout.splitlines() if l.startswith(("[PASS]", "[FAIL]"))]
+    ok = p.returncode == 0 and len(res) == 10 and all(l.startswith("[PASS]") for l in res)
+    return ok, f"{sum(l.startswith('[PASS]') for l in res)} of 10 pass; " + "; ".join(l[:70] for l in res if l.startswith("[FAIL]"))
+
+
+@check("OL1", "public oil data (12 Nov 2026): MBIE weekly table read; = the tracker's MBIE columns; World Bank "
+              "Dubai; = an independently built public table; default = public MBIE (12 Nov); refusals")
+def ol1():
+    sys.path.insert(0, str(ROOT / "preshock"))
+    import shock_paths as SP
+    # (1) MBIE's weekly table: weeks by starting Tuesday, one value a week, to the week of Fri 30 Oct 2026 (release of 4 Nov 2026);
+    # US cents per litre = NZ c/L x USD/NZD per week
+    w = SP.mbie_weekly()
+    w25 = w.loc["2025-01-01":]
+    conv = float(np.max(np.abs(w25["diesel"] - w25["diesel_nzc_l"] * w25["usd_per_nzd"]))) + \
+        float(np.max(np.abs(w25["gasoline"] - w25["petrol_nzc_l"] * w25["usd_per_nzd"])))
+    weekly_ok = (bool((w.index.dayofweek == 1).all()) and not w.index.duplicated().any() and str(w.index.max().date()) == "2026-10-27"
+                 and bool(w25[["dubai", "diesel", "gasoline"]].notna().all().all()) and conv == 0.0)
+    # (2) the two public variants; (3) against an independently built public table (11 Nov 2026: World Bank Dubai, MBIE importer costs), values copied from its CSV
+    mb, wb = SP.oil_public_monthly("mbie"), SP.oil_public_monthly("worldbank")
+    psr = {"2026-03": (91.9, 152.059439556073, 97.7782896855066), "2026-10": (102.7, 123.034661841754, 103.095372161224),
+           "2025-01": (80.1, 64.0164954274582, 57.8904116299291)}
+    gap_psr = max(abs(float(wb.loc[m, c]) / v - 1) for m, vals in psr.items() for c, v in zip(("dubai", "diesel", "gasoline"), vals))
+    same_products = float(np.max(np.abs(mb[["diesel", "gasoline"]].values - wb[["diesel", "gasoline"]].values)))
+    last = (str(mb.dropna().index.max()), str(wb.dropna().index.max()))
+    # (4) the compiled weekly tracker (not distributed): its Dubai and MBIE columns = MBIE's, Jan 2025 to Aug 2026 (later weeks
+    # were revised by MBIE or not yet in the tracker)
+    tracker = ""
+    t_ok = True
+    if (getattr(SP.O, "TRACKER", None) is not None and SP.O.TRACKER.exists()):
+        tr = SP.oil_actual_monthly().loc["2025-01":"2026-08"]
+        dt_ = float(np.max(np.abs(tr.values - mb.loc["2025-01":"2026-08"].values)))
+        t_ok = dt_ < 1e-9 and len(tr) == 20
+        tracker = f"tracker = public MBIE, 20 months Jan 2025-Aug 2026: largest difference {dt_:.1e}; "
+    else:
+        tracker = "tracker not on this computer (comparison not run); "
+    # (5) the default (12 Nov 2026: MBIE's series): oil_paths() is the public MBIE paths, bit for bit; the World Bank's
+    # and (where the compiled tracker exists) the tracker's paths still run on request
+    pm, pw = SP.oil_paths(source="public-mbie"), SP.oil_paths(source="public-worldbank")
+    default_ok = SP.DEFAULT_OIL_SOURCE == "public-mbie" and SP.oil_paths().equals(pm)
+    p0 = SP.oil_paths(source="tracker") if (getattr(SP.O, "TRACKER", None) is not None and SP.O.TRACKER.exists()) else pm
+    paths_ok = bool(np.isfinite(pm.values.astype(float)).all() and np.isfinite(pw.values.astype(float)).all()) and \
+        pm.attrs["latest"] == pw.attrs["latest"] == "2026-10"
+    # (6) refusals
+    refused = 0
+    for bad in (lambda: SP.oil_monthly("public"), lambda: SP.oil_paths(source="MBIE"), lambda: SP.oil_public_monthly("brent")):
+        try:
+            bad()
+        except ValueError:
+            refused += 1
+    ok = weekly_ok and gap_psr < 1e-12 and same_products == 0.0 and last == ("2026-10", "2026-10") and t_ok and default_ok and paths_ok \
+        and refused == 3
+    return ok, (f"MBIE weekly table: {len(w)} weeks to {w.index.max():%d %b %Y} (Tuesdays, one a week, US c/L = NZ c/L x USD/NZD: "
+                f"{weekly_ok}); World Bank variant = an independently built public table (3 months, 9 values): relative {gap_psr:.1e}; same "
+                f"MBIE products in both variants: {same_products:.1e}; latest month {last[0]}; {tracker}default = public MBIE: "
+                f"{default_ok}; 2026 crude +{pm.loc[2026, 'crude (Dubai)']:.1f}% (MBIE Dubai) vs +{pw.loc[2026, 'crude (Dubai)']:.1f}% "
+                f"(World Bank Dubai), fuel products +{pm.loc[2026, 'fuel products, weighted']:.1f}% vs "
+                f"+{pw.loc[2026, 'fuel products, weighted']:.1f}% (tracker +{p0.loc[2026, 'crude (Dubai)']:.1f}%, "
+                f"+{p0.loc[2026, 'fuel products, weighted']:.1f}%); refused {refused}/3")
+
+
 @check("SD1", "stochastic outlook: opt-in typhoon draw: off by default, calibration, mapping, refusals")
 def sd1():
     import subprocess                                      # 0.3.13 (23 Oct 2026): the standalone test, as check X3 runs its tests
@@ -3350,7 +3634,115 @@ def sd1():
     return ok, f"{sum(l.startswith('[PASS]') for l in res)} of 9 pass; " + "; ".join(l[:70] for l in res if l.startswith("[FAIL]"))
 
 
-EXTRA = [i3, i4, c8, y2, y3, v2, v3, e1, y4, y5, l1, h1, s1, v4, i5, v5, s2, h2, h3, a2, w1, v6, v7, m2, d3, w2, x1, ml1, lp1, sh1, cr1, s3, y6, pk1, sr1, wc1, ex1, vd1, ic1, ps1, s4, lg1, e2, x2, s5, s6, ml2, pc1, hd1, x3, en1, en2, st1, ir1, vn1, mp1, mk1, cs1, er1, mg1, sl1, ec1, s7, sd1, op1, s10, s11, s12]    # checks added in 0.3 (S12: 0.3.13, 24 Oct 2026, Infinity GEM SAM v0.9, customs-anchored coal and fuel account; S11: 0.3.13, 24 Oct 2026, Infinity GEM SAM v0.7b, v0.7 without the coal double count; S10: 0.3.13, 24 Oct 2026, Infinity GEM SAM v0.7, coal split from mining; OP1: 0.3.13, 23 Oct 2026, a within-year share of the world oil price reaching domestic prices; EC1: 0.3.13, 23 Oct 2026, an employment cap that settles; SL1: 0.3.13, 23 Oct 2026, slack at the start of short-run years; S7, SD1: 0.3.13, 23 Oct 2026; MG1: 0.3.13, P6, a markup pass-through that depends on the output gap; ER1: 0.3.13, P2(b), incomplete pass-through of the peso to import prices; CS1: 0.3.13, the short-run consumption rule; MK1: 0.3.13; MP1: 0.3.12; VN1: 0.3.12; IR1: 0.3.11; ST1: 0.3.11, sectoral stickiness; EN1, EN2: 0.3.11; HD1, X3: 0.3.11; S5, S6, ML2: 0.3.9; E2, X2: 0.3.9; LG1: 0.3.9; IC1, PS1, S4: 0.3.8; S3, Y6, PK1, SR1, WC1, EX1, VD1: 0.3.7; CR1: 0.3.6; ML1, LP1, SH1: 0.3.5; V4, I5, V5, S2, H2, H3: 0.3.1; W1: 0.3.2; D3: 0.3.3; W2: 0.3.4)
+@check("RB1", "research batch of 12 Nov 2026: standalone tests RS1, forecasting tools, fuel-mix close-out, "
+              "disaster overlay, MF1 markup floor; all opt-in, defaults untouched")
+def rb1():
+    import subprocess
+    out = []
+    for t in ("test_row126_127_shock_sizes.py", "test_row111_forecast_tools.py", "test_row96_closeout.py", "test_row94_overlay.py",
+              "test_markup_floor.py"):
+        r = subprocess.run([sys.executable, "-I", str(ROOT / "checks" / t)], capture_output=True, text=True, cwd=str(ROOT), timeout=3600)
+        last = [l for l in r.stdout.splitlines() if l.strip()][-1] if r.stdout.strip() else "no output"
+        out.append((t, r.returncode == 0, last[:90]))
+    return all(ok for _, ok, _ in out), "; ".join(f"{t}: {'ok' if ok else 'FAIL'} ({l})" for t, ok, l in out)
+
+
+def _standalone(name, n_tests, timeout):
+    """0.4.0 (13 Nov 2026): run a standalone test file in its own process (its own environment variables), as S13 and RB1 do."""
+    import os
+    import subprocess
+    p = subprocess.run([sys.executable, "-I", "-X", "utf8", str(ROOT / "checks" / name)], capture_output=True, text=True,
+                       encoding="utf-8", errors="replace", cwd=str(ROOT), timeout=timeout, env={**os.environ, "PYTHONIOENCODING": "utf-8"})
+    res = [l for l in p.stdout.splitlines() if l.startswith(("[PASS]", "[FAIL]"))]
+    ok = p.returncode == 0 and len(res) == n_tests and all(l.startswith("[PASS]") for l in res)
+    tail = [l for l in (p.stdout + p.stderr).splitlines() if l.strip()][-1:] if not res else []
+    return ok, (f"{sum(l.startswith('[PASS]') for l in res)} of {n_tests} pass; " + "; ".join(l[:160] for l in res)
+                + (f"; {tail[0][:160]}" if tail else ""))
+
+
+@check("R4", "the default setting '0.4 recommended' (option (c) at T15 on SAM v1.0, floor -1, BSP rule): values = T15 and the floor run; "
+             "0.4 = 0.3 + option (c); INFINITY_GEM_SETTING switch; the 0.4 central case equals its reference (1e-9)")
+def r4():
+    return _standalone("test_04_reference.py", 4, 7200)
+
+
+@check("R41", "the default setting '0.4.1 recommended' (13 Nov 2026): 0.4 + exactly the gap "
+              "rule's ceiling 1 and the lag-form BSP rule; the INFINITY_GEM_SETTING switch; the 0.4.1 central case equals its reference (1e-9)")
+def r41():
+    return _standalone("test_041_reference.py", 3, 7200)
+
+
+@check("EF1", "engine fallback (13 Nov 2026): 'the employment cap did not settle' re-solved with the smooth cap for that year only; "
+              "the 12 Nov failing case solves, agrees with the smooth cap, settled runs unchanged")
+def ef1():
+    return _standalone("test_cap_fallback.py", 4, 5400)
+
+
+@check("MT1", "the BSP rule's opt-in conventions (0.4.1, 13 Nov 2026): quarterly rule = annual at equal targets; lead/lag "
+              "expected inflation; the BSP's observed 2026 gap (BIS); an observed year applied exactly, the rule from its end value")
+def mt1():
+    return _standalone("test_monetary_timing.py", 7, 3600)
+
+
+@check("MC1", "a ceiling on the markup gap rule's pass-through (0.4.1, 13 Nov 2026): the static boom branch at s 0.5 is gone "
+              "with the ceiling 1; the slump is unchanged; guards; a dynamic slump unchanged")
+def mc1():
+    return _standalone("test_markup_ceiling.py", 6, 3600)
+
+
+@check("ACC1", "a short-run private-investment accelerator (0.4.2, 14 Nov 2026; opt-in): off = the engine before it "
+               "(bit for bit), a = 0 = off, zero shock = baseline, the fixed point by hand, accounts close, homogeneity, tampers, guards")
+def acc1():
+    return _standalone("test_accelerator.py", 7, 3600)
+
+
+@check("CET1", "a short-run export (CET) elasticity (0.4.2, 14-15 Nov 2026; opt-in): off = the engine "
+               "before it (bit for bit), zero shock = baseline, long-run omega = off, the CET by hand, direction, tampers, guards, estimates")
+def cet1():
+    return _standalone("test_cet_short_run.py", 11, 3600)
+
+
+@check("IS1", "the industry-slope target restated on the shock's basis (0.4.2, 14-15 Nov 2026; data "
+              "only): same 2026 statistic, file = recomputation, the evidence, the scoring reads the file, OLS")
+def is1():
+    return _standalone("test_industry_slope_restated.py", 5, 1800)
+
+
+@check("ERP1", "the estimated peso pass-through into non-oil import prices (0.4.2, 14-15 Nov 2026; "
+               "for opt-in sr_erpt): estimate = file, phi derived, the engine applies it, the evidence")
+def erp1():
+    return _standalone("test_erpt_estimate.py", 4, 1800)
+
+
+@check("R42", "the OPT-IN setting '0.4.2 candidate' (0.4.2, 15 Nov 2026, overnight; not the default): values = their "
+              "source files; 0.4.1 + exactly the eval-11 point, sr_cet and sr_erpt; the switch; DEFAULT still 0.4.1; central case = reference")
+def r42():
+    return _standalone("test_042_candidate.py", 4, 7200)
+
+
+@check("R41F", "the DEFAULT FIES base (0.4.2; 18 Nov 2026: FIES 2025 the default for poverty figures): "
+               "the default and its switch; the LFS link refused with its remedy; the R41 central case on FIES 2025 equals its "
+               "reference (1e-9) and its model rows equal R41's")
+def r41f():
+    return _standalone("test_041F_reference.py", 2, 7200)     # the test removes the suite's FIES 2023 pin in its own process
+
+
+@check("RG1", "regional Phase 0 (opt-in research, 18 Nov 2026; research/regional/topdown.py): national results shared out to "
+              "18 regions add up exactly (value added, output, jobs, new poor); zero shock = zeros; GRDP shares; baseline regional "
+              "poverty = PSA 2023; boundary recode")
+def rg1():
+    # NOT RUN (None) when the regional tables (data/raw/regional) or the FIES 2023 household file are not on this computer; the
+    # FIES-LFS member file is optional (without it the jobs base falls back to LFS Table 11.8 and the model's skill mix)
+    reg = ROOT / "data" / "raw" / "regional"
+    need = [reg / "SOURCE.md", reg / "PSA_OpenSTAT_0091B2BEPR0_LFS_employed_by_region_and_industry_2019-2023_2026-07-21.csv",
+            reg / "PSA_OpenSTAT_2B_GP_IN_GRDP_by_industry_levels_2026-08-05", paths.FIES_PUF, paths.FIES_POVLINES]
+    missing = [p.name for p in need if not p.exists()]
+    if missing:
+        return None, f"NOT RUN: missing {', '.join(missing)}"
+    return _standalone("test_regional_topdown.py", 7, 3600)
+
+
+EXTRA = [i3, i4, c8, y2, y3, v2, v3, e1, y4, y5, l1, h1, s1, v4, i5, v5, s2, h2, h3, a2, w1, v6, v7, m2, d3, w2, x1, ml1, lp1, sh1, cr1, s3, y6, pk1, sr1, wc1, ex1, vd1, ic1, ps1, s4, lg1, e2, x2, s5, s6, ml2, pc1, hd1, x3, en1, en2, st1, ir1, vn1, mp1, mk1, cs1, er1, mg1, sl1, ec1, s7, sd1, op1, s10, s11, s12, s13, ts1, ol1, rb1, r4, r41, ef1, mt1, mc1, acc1, cet1, is1, erp1, r42, fb1, rg1, r41f]    # checks added in 0.3 (R41F: 0.4.2, 18 Nov 2026, FIES 2025 the default base; RG1: 0.4.2, 18 Nov 2026, regional Phase 0, opt-in research; FB1: 0.4.2, 18 Nov 2026, the opt-in FIES 2025 base;R42: 0.4.2, 15 Nov 2026, overnight, the opt-in "0.4.2 candidate" setting; CET1, IS1, ERP1: 0.4.2, 14-15 Nov 2026, its three open items, all opt-in; ACC1: 0.4.2, 14 Nov 2026, the opt-in private-investment accelerator; R41: 0.4.1, 13 Nov 2026, the 0.4.1 default; MT1, MC1: 0.4.1, 13 Nov 2026, the 0.4 misses; R4, EF1: 0.4.0, 13 Nov 2026, the 0.4 default switch; OL1: 12 Nov 2026, public oil data; S13, TS1: put in the run list 11 Nov 2026; S13 was defined on 6 Nov but not listed, TS1 was standalone; S12: 0.3.13, 24 Oct 2026, Infinity GEM SAM v0.9, customs-anchored coal and fuel account; S11: 0.3.13, 24 Oct 2026, Infinity GEM SAM v0.7b, v0.7 without the coal double count; S10: 0.3.13, 24 Oct 2026, Infinity GEM SAM v0.7, coal split from mining; OP1: 0.3.13, 23 Oct 2026, a within-year share of the world oil price reaching domestic prices; EC1: 0.3.13, 23 Oct 2026, an employment cap that settles; SL1: 0.3.13, 23 Oct 2026, slack at the start of short-run years; S7, SD1: 0.3.13, 23 Oct 2026; MG1: 0.3.13, P6, a markup pass-through that depends on the output gap; ER1: 0.3.13, P2(b), incomplete pass-through of the peso to import prices; CS1: 0.3.13, the short-run consumption rule; MK1: 0.3.13; MP1: 0.3.12; VN1: 0.3.12; IR1: 0.3.11; ST1: 0.3.11, sectoral stickiness; EN1, EN2: 0.3.11; HD1, X3: 0.3.11; S5, S6, ML2: 0.3.9; E2, X2: 0.3.9; LG1: 0.3.9; IC1, PS1, S4: 0.3.8; S3, Y6, PK1, SR1, WC1, EX1, VD1: 0.3.7; CR1: 0.3.6; ML1, LP1, SH1: 0.3.5; V4, I5, V5, S2, H2, H3: 0.3.1; W1: 0.3.2; D3: 0.3.3; W2: 0.3.4)
 
 
 if __name__ == "__main__":

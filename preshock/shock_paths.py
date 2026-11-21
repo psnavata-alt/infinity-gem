@@ -25,6 +25,11 @@ Oil (crude = Dubai; fuel products = diesel and gasoline import costs, weighted b
               January-February 2026 cost x (65 / January-February Dubai), i.e. at pre-conflict margins.
   Cross-check (not used): EIA's own pre-conflict forecast (STEO of 5 Feb 2026) had Brent at US$57.8 in 2026 and 53.0 in
               2027, below the DBCC's range, which would make the shock larger.
+  Public data (0.3.13, 12 Nov 2026; OPT-IN, the default is unchanged): oil_paths(..., source=...) and
+              oil_monthly(source) also take "public-mbie" (MBIE's weekly Dubai and importer costs, the public series the
+              tracker's columns turned out to be) or "public-worldbank" (the World Bank Pink Sheet's monthly Dubai Fateh with
+              MBIE's importer costs). Files and SOURCE notes: data/raw/oil/public/_SOURCE_NOTE.md; check OL1. Which public
+              Dubai becomes the default is the decision (comparison of the two Dubai series and their effect on the central 2026 case: a working note (not included), 12 Nov 2026; scenarios/public_oil_compare_2026.py).
 World rice (Viet Nam 5%) and urea: World Bank Pink Sheet monthly (agri_price_shock_size.prices()); no official forecast
   exists, so the no-change forecast from the latest month for every later month and year; no conflict = the January-
   February 2026 level (the pre-conflict no-change forecast).
@@ -84,10 +89,93 @@ def oil_actual_monthly() -> pd.DataFrame:
     return d[d["dubai"].notna() & d["diesel"].notna() & d["gasoline"].notna()]
 
 
-def oil_paths(no_conflict="central", forecast="EIA") -> pd.DataFrame:
+# 0.3.13 (12 Nov 2026; opt-in): the same three columns from public data only. SOURCE notes:
+# data/raw/oil/public/_SOURCE_NOTE.md (MBIE) and the header lines of the World Bank file (DATA_INVENTORY.md rows). Check OL1.
+OIL_SOURCES = ("tracker", "public-mbie", "public-worldbank")
+# 12 Nov 2026, about 10:10 PM: the default is MBIE's public series. Checked first
+# in a browser against MBIE's own weekly-table.csv (mbie.govt.nz, last modified 10 Nov 2026): 382 of 384 values for 2025w01-2026w44
+# identical, every Dubai price included; the 2 differences are MBIE's later revision of the provisional 2026w44 importer costs
+# (diesel 219.30 vs 220.14, petrol 178.34 vs 181.37 NZD c/L). MBIE does not define its Dubai price beyond Figure.NZ's "a medium
+# sour crude oil extracted from Dubai" (data from Envisory, formerly Hale & Twomey): a caveat, not asked. The World Bank's Dubai
+# is the stated sensitivity; "tracker" was the default before 12 Nov 2026 (in this repository it reads public World Bank and EIA series instead).
+DEFAULT_OIL_SOURCE = __import__("os").environ.get("INFINITY_GEM_OIL_SOURCE", "") or "public-mbie"   # INFINITY_GEM_OIL_SOURCE=tracker: runs before 12 Nov
+if DEFAULT_OIL_SOURCE not in OIL_SOURCES:
+    raise ValueError(f"INFINITY_GEM_OIL_SOURCE must be one of {OIL_SOURCES}, not {DEFAULT_OIL_SOURCE!r}")
+MBIE_WEEKLY = paths.DATA_RAW / "oil" / "public" / "MBIE_Weekly_Fuel_Price_Monitoring_4_November_2026_via_FigureNZ.csv"
+WB_CRUDE_MONTHLY = (paths.DATA_RAW / "macro" / "inflation_forecast_downloads_2026-11-05"
+                    / "WorldBank_PinkSheet_crude_oil_monthly_1960-2026.csv")
+
+
+def mbie_weekly(path=MBIE_WEEKLY) -> pd.DataFrame:
+    """MBIE Weekly Fuel Price Monitoring (New Zealand), one row per week: MBIE's weekly Dubai (USD/bbl), the importer costs of
+    diesel and regular petrol (NZD c/L), the exchange rate (USD per NZD) and MBIE's status flag, indexed by the week's starting
+    Tuesday (MBIE dates a week by its Friday; the tracker's "Week starting (Tue)" = that Friday - 3 days), with the importer
+    costs in US cents per litre (per week NZ c/L x USD/NZD, as oil_actual_monthly() converts the tracker's MBIE columns)."""
+    t = pd.read_csv(path)
+    t["Date"] = pd.to_datetime(t["Date"])
+
+    def ser(fuel, var, unit):
+        s = t[(t["Variable"] == var) & (t["Unit"] == unit) & ((t["Fuel"] == fuel) if fuel else t["Fuel"].isna())]
+        if s["Date"].duplicated().any():
+            raise ValueError(f"MBIE weekly table: more than one value a week for {fuel} {var} ({unit})")
+        return s.set_index("Date")
+
+    fx = ser(None, "Exchange rate", "USD/NZD")
+    w = pd.DataFrame({"week": fx["Week"], "status": fx["Status"], "usd_per_nzd": fx["Value"]})
+    w["dubai"] = ser(None, "Dubai crude price", "USD/bbl")["Value"]
+    w["diesel_nzc_l"] = ser("Diesel", "Importer cost", "NZD c/L")["Value"]
+    w["petrol_nzc_l"] = ser("Regular Petrol", "Importer cost", "NZD c/L")["Value"]
+    start = w.index - pd.Timedelta(days=3)
+    if not (start.dayofweek == 1).all():
+        raise ValueError("MBIE weekly table: a week's date is not a Friday")
+    w.index = pd.DatetimeIndex(start, name="week_starting_tue")
+    w["diesel"] = w["diesel_nzc_l"] * w["usd_per_nzd"]
+    w["gasoline"] = w["petrol_nzc_l"] * w["usd_per_nzd"]
+    return w.sort_index()
+
+
+def worldbank_dubai_monthly(path=WB_CRUDE_MONTHLY) -> pd.Series:
+    """World Bank Pink Sheet, monthly 'Crude oil, Dubai' (Dubai Fateh 32 API; US$/bbl), as a monthly PeriodIndex series."""
+    wb = pd.read_csv(path, comment="#")
+    s = pd.Series(pd.to_numeric(wb["crude_dubai_usd_bbl"], errors="coerce").values,
+                  index=pd.PeriodIndex(wb["month"], freq="M"), name="dubai")
+    return s.dropna()
+
+
+def oil_public_monthly(dubai="mbie") -> pd.DataFrame:
+    """Monthly Dubai (US$/bbl) and diesel and gasoline importer costs (US cents per litre), 2025 on, from public data only:
+    the columns and units of oil_actual_monthly(). dubai="mbie": MBIE's weekly Dubai, monthly mean of its weeks (the series the
+    tracker's Dubai column equals); dubai="worldbank": the World Bank Pink Sheet's monthly Dubai. Diesel and gasoline: MBIE's
+    importer costs either way. Each column is the mean of the weeks of the month (by starting Tuesday) that have it; a month
+    with no World Bank value has a missing Dubai (oil_paths() drops it)."""
+    if dubai not in ("mbie", "worldbank"):
+        raise ValueError(f"oil_public_monthly: dubai must be 'mbie' or 'worldbank', not {dubai!r}")
+    w = mbie_weekly()
+    w["month"] = w.index.to_period("M")
+    g = w.groupby("month")
+    d = pd.DataFrame({"dubai": g["dubai"].mean(), "diesel": g["diesel"].mean(), "gasoline": g["gasoline"].mean()})
+    if dubai == "worldbank":
+        d["dubai"] = worldbank_dubai_monthly().reindex(d.index)
+    d.index.name = "month"
+    return d.loc["2025-01":]
+
+
+def oil_monthly(source=None) -> pd.DataFrame:
+    """The monthly oil prices oil_paths() uses: source "tracker" (DEFAULT_OIL_SOURCE; oil_actual_monthly()), "public-mbie" or
+    "public-worldbank" (oil_public_monthly). None = DEFAULT_OIL_SOURCE."""
+    source = DEFAULT_OIL_SOURCE if source is None else source
+    if source not in OIL_SOURCES:
+        raise ValueError(f"oil source must be one of {OIL_SOURCES}, not {source!r}")
+    if source == "tracker":
+        return oil_actual_monthly()
+    return oil_public_monthly("mbie" if source == "public-mbie" else "worldbank")
+
+
+def oil_paths(no_conflict="central", forecast="EIA", source=None) -> pd.DataFrame:
     """% shocks by year: crude (Dubai) and fuel products (weighted). forecast: 'EIA' (central) or
-    'no change' (prices stay at the latest actual month through 2027: the stochastic model's centre)."""
-    act = oil_actual_monthly().dropna()
+    'no change' (prices stay at the latest actual month through 2027: the stochastic model's centre).
+    source (12 Nov 2026; opt-in): None or "tracker" = as before; "public-mbie" or "public-worldbank" (oil_monthly)."""
+    act = oil_monthly(source).dropna()
     last = act.index.max()
     eia = eia_monthly()
     months = pd.period_range("2026-01", "2027-12", freq="M")

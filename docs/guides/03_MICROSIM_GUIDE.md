@@ -1,5 +1,7 @@
 # 3. Poverty microsimulation (FIES 2023)
 
+> **The base since 18 Nov 2026 (development version 0.4.2; the decision, about 6:15 AM): FIES 2025.** The steps below are the same on both bases. By default the model now uses PSA's FIES 2025 households (170,916 families) and PSA's 2025 poverty lines by province and urban or rural (11.08 million poor, 9.7%; check FB1), so new new-poor figures are **"on the FIES 2025 base"**. Every figure published before 18 Nov 2026 used the FIES 2023 households and 2023 lines described below (17.54 million poor; check P1) and keeps **"on the FIES 2023 base"**; reproduce it with `INFINITY_GEM_FIES_BASE=fies2023` or `base="fies2023"` (`infinity_gem/fies_base.py`). The LFS earnings link and the Simulator stay on FIES 2023.
+
 ## What it does
 
 Economy-wide models speak about ten household groups; policy-makers ask about poor Filipinos. The microsimulation connects the two: it takes each group's change in real consumption from the CGE (or in income from the SAM multiplier) and applies it to every one of the 163,268 FIES 2023 households in that group, then counts how many people fall below PSA's official poverty line.

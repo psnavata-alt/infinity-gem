@@ -35,7 +35,8 @@ PW_FALL_2026 = 2.21          # the 2026 public-construction fall, % of GDP (outp
 
 
 def row(h, beta):
-    R = CR.Runs("low", wage_curve=beta, **({"hoarding": h} if h else {}))
+    R = CR.Runs("low", wage_curve=beta, fies_base="fies2023", **({"hoarding": h} if h else {}))   # 18 Nov 2026: the LFS column
+    #                                       needs FIES-LFS 2023 members, and the grid compares it with the group column: one survey
     piece, _ = R.pieces()
     clean, sim = R.run(set(), piece=piece), R.run(set(CR.SHOCKS), piece=piece)
     pw = R.run({"public works"}, piece=piece)

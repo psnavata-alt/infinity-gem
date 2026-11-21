@@ -58,6 +58,14 @@ DEFAULT_ELASTICITIES = {"sigma_va": 0.8, "sigma_q": 2.0, "omega_t": 2.0}
 # fisheries; the same list as dynamic.PSA_INDUSTRIES, which check MK1 compares). Every other activity sets a markup price.
 MARKET_PRICE_ACTS = ("amaiz", "arice", "apuls", "aoils", "aroot", "avege", "asugr", "atoba", "acott", "afrui", "acoff", "aocrp",
                      "acatt", "apoul", "aoliv", "afore", "afish")
+# 0.3.13 (12 Nov 2026 (2); the decision, 11 Nov 2026, about 7:55 PM: "Yes for your recommendation on
+# the two decisions"): activities that take the world price under pricing='markup', as the pure exporter amach does, so the
+# default markup set leaves them out (zero-profit price, exports at world prices). Coal mining (acoal; Infinity GEM SAM v0.7 and later):
+# SOURCE Infinity GEM SAM v1.0 (InfinityGEM_SAM_PHL_2023_own_v1.0.csv): exports QE0 34.2 of output QX0 47.1, 72.6% of its output, the only
+# markup activity of the default SAM that exports more than half (next: metals, ametl, 40.3%); coal is priced in US$ on world
+# markets (dynamic.ERPT_FULL lists ccoal). An explicit `markup_acts` list may still name it (research). Only the
+# markup-pricing option (research) is affected; a SAM without the activity (v0.5) is unchanged.
+WORLD_PRICE_ACTS = ("acoal",)
 
 
 def _by_code(value, codes, default):
@@ -180,7 +188,8 @@ class CGE:
         short-run price setting): the structuralist short run, flex-price farms and fix-price industry and services (Taylor 1983,
         Structuralist Macroeconomics; Dervis, de Melo and Robinson 1982, ch. 6; in the Philippines C. Bautista's 1987 UPSE model,
         reviewed in Cororaton 1994, PIDS DP 94-03, pp. 70-76). The activities in `markup_acts` (default: every activity except
-        agriculture, forestry and fishing, MARKET_PRICE_ACTS, and except pure exporters) set the price of their home sales as a
+        agriculture, forestry and fishing, MARKET_PRICE_ACTS, except pure exporters, and, since 12 Nov 2026, except the world-price
+        takers WORLD_PRICE_ACTS: coal mining, 72.6% of its output exported on SAM v1.0) set the price of their home sales as a
         markup over unit variable cost,
             PDS (1 - ta) = (1 + mu) x AVC,   AVC = sum over labour types of W x (labour per unit of output) + sum over inputs of PQ x ica,
         mu being the shock key 'markup' ({activity: mu}; default the benchmark's capital income / variable cost). For an activity
@@ -524,7 +533,9 @@ class CGE:
         if pricing == "markup":
             if home != "market":
                 raise NotImplementedError("pricing='markup' is not combined with home='separate' yet")
-            acts = [a for a in A if a not in MARKET_PRICE_ACTS] if markup_acts is None else list(markup_acts)
+            # 12 Nov 2026: the default also leaves out the world-price takers (WORLD_PRICE_ACTS: coal mining)
+            acts = ([a for a in A if a not in MARKET_PRICE_ACTS and a not in WORLD_PRICE_ACTS] if markup_acts is None
+                    else list(markup_acts))
             bad = [a for a in acts if a not in A]
             if bad:
                 raise ValueError(f"markup_acts: not activities of this SAM: {bad}")
@@ -692,6 +703,12 @@ class CGE:
         rt = self.rt
         denom = np.ones(nC)
         denom[both] = self.at[both] * (self.gam[both] * r[both] ** rt[both] + self.gamc[both]) ** (1 / rt[both])
+        cs = sh["cet_sr"]                       # 0.4.2 (15 Nov 2026, check CET1): a CET re-centred on a reference
+        if cs is not None:                      # solution with its own (short-run) elasticity for the listed commodities (make_shocks)
+            k_ = cs["mask"]
+            u_ = ((PE[k_] / _pos(PDS[k_])) / cs["pb"]) ** cs["w"]          # relative price against the reference's, to the power w
+            r[k_] = cs["rb"] * u_                                          # QE / QD = reference ratio x u (the CET's first-order condition)
+            denom[k_] = cs["QXr"] / cs["QDr"] * (cs["se"] * u_ ** cs["rho"] + cs["sd"]) ** (1 / cs["rho"])   # QD = QX / denom
         QDs[both] = QX[both] / denom[both]
         QE[both] = r[both] * QDs[both]
         onlyD = self.hasD & ~self.hasE
@@ -703,6 +720,12 @@ class CGE:
             qd_ = self.QD0 if sh["mk_qd"] is None else sh["mk_qd"]          # the rest of its output (the CET inverted)
             QE[mc] = r[mc] * qd_[mc]
             QDs[mc] = _pos(((QX[mc] / self.at[mc]) ** rt[mc] - self.gam[mc] * QE[mc] ** rt[mc]) / self.gamc[mc]) ** (1 / rt[mc])
+            if cs is not None:                  # 0.4.2 (P3): the re-centred CET inverted, in quantities relative to the reference
+                kk = mc[cs["mask"]]             # (no overflow at the high exponents of a low elasticity)
+                j_ = np.flatnonzero(cs["mask"])[kk]
+                rho_ = cs["rho"][kk]
+                QDs[j_] = cs["QDr"][kk] * _pos(((QX[j_] / cs["QXr"][kk]) ** rho_ - cs["se"][kk] * (QE[j_] / cs["QEr"][kk]) ** rho_)
+                                               / cs["sd"][kk]) ** (1 / rho_)
         PX = np.ones(nC)
         m = self.hasX
         PX[m] = (PE[m] * QE[m] + PDS[m] * QDs[m]) / _pos(QX[m])
@@ -896,6 +919,12 @@ class CGE:
         if self.pricing == "markup" and sh["mk_gap"] != 0.0:   # 0.3.13 (P6, check MG1): the pass-through lam + s x output gap (%)
             YR = float(QH.sum() + QHA.sum() + QG.sum() + (QINV + self.qdst).sum() + QE.sum() - QM.sum())   # real GDP, as gdp()
             lam_e = lam + sh["mk_gap"] * self._output_gap(YR, sh)
+            if sh["mk_floor"] is not None:     # 0.3.13 (12 Nov 2026, check MF1): lam_e kept at or above the floor f by
+                y_ = sh["mk_floor"] - lam_e    # a C1-smoothed max(0, f - lam_e) (exact when lam_e >= f; eps 1e-4, bias <= eps / 2)
+                lam_e = lam_e + np.where(y_ <= 0, 0.0, np.where(y_ < 1e-4, y_ * y_ / (2 * 1e-4), y_ - 1e-4 / 2))
+            if sh["mk_ceiling"] is not None:   # 0.4.1 (13 Nov 2026, check MC1): lam_e kept at or below the ceiling c by
+                y_ = lam_e - sh["mk_ceiling"]  # the same C1-smoothed max (exact when lam_e <= c); c = 1: the proportional markup
+                lam_e = lam_e - np.where(y_ <= 0, 0.0, np.where(y_ < 1e-4, y_ * y_ / (2 * 1e-4), y_ - 1e-4 / 2))
             MG = mu_ * (lam_e * AVC + (1 - lam_e) * A_ / (1 + mu_))
             CM = np.where(mk, AVC + MG, UCOST)
             z = (A_ - CM) / A_
@@ -1003,7 +1032,10 @@ class CGE:
                     mk_pass=1.0,
                     erpt=None, exr_ref=1.0,                     # 0.3.13 (P2(b)): None = full pass-through of the peso (as before)
                     mk_gap=0.0, mk_gdp=None,                    # 0.3.13 (P6): 0 = mk_pass as given (as before); None = benchmark GDP
-                    oil_pass=None, oil_ref=np.ones(nC))         # 0.3.13: None = the world price in full (as before)
+                    mk_floor=None,                              # 0.3.13 (12 Nov 2026, MF1): None = no floor on the gap rule (as before)
+                    mk_ceiling=None,                            # 0.4.1 (13 Nov 2026, MC1): None = no ceiling on the gap rule (as before)
+                    oil_pass=None, oil_ref=np.ones(nC),         # 0.3.13: None = the world price in full (as before)
+                    cet_sr=None)                                # 0.4.2 (15 Nov 2026, CET1): None = the SAM's CET (as before)
 
     def make_shocks(self, spec=None):
         """Translate a readable shock spec into arrays. Keys:
@@ -1017,7 +1049,9 @@ class CGE:
         'remit_scale': factor or {household: factor}   remittances (foreign currency)
         'trg_scale': factor   all government transfers (real);  'trg_h_scale': {household: factor}
         'trg_h_add': {household: ₱ bn}   additional real government transfers (negative = a cut), e.g. an Ayuda change;
-                     needed because the SAM records only ₱103.7 bn of transfers to households
+                     needed because the SAM records only ₱103.7 bn of transfers to households. In a DynamicCGE scenario this
+                     amount (and 'sav_add', 'grow_out_add') is multiplied by the year's baseline index (dynamic.py
+                     transfer_scaling, 11 Nov 2026); here, in the one-year model, it is used as given
         'tins_scale': factor or {household: factor}   household direct-tax rates
         'ta_scale': factor or {activity: factor}   activity-tax rates (2018 SAM only; 0.3)
         'ica_scale': {commodity: factor}   input-intensity twist: that commodity per unit of output, for every activity,
@@ -1043,6 +1077,14 @@ class CGE:
                    fixed in pesos at the reference (A - A / (1 + mu)), whose cost push is the plain input-output price model's.
         'mk_gap': s, 'mk_gdp': Y_ref (pricing='markup' only; 0.3.13, P6): the pass-through is mk_pass + s x the output gap in
                    percent, 100 x (real GDP / Y_ref - 1); Y_ref default the benchmark's real GDP. s = 0 (default) = as before.
+        'mk_floor': f (pricing='markup', with 'mk_gap' only; 0.3.13, 12 Nov 2026, check MF1): the gap rule's pass-through is
+                   kept at or above f by a C1-smoothed max (exact whenever the rule's value is at or above f; at most 5e-5 off
+                   below it), so margins absorb at most the share -f of the markup on a cost rise. None (default) =
+                   no floor, as before.
+        'mk_ceiling': c (pricing='markup', with 'mk_gap' only; 0.4.1, 13 Nov 2026, check MC1): the gap rule's pass-through is
+                   kept at or below c by the same smoothed max (exact whenever the rule's value is at or below c). c = 1 is the
+                   definition's upper bound, the proportional markup (mk_pass 1): margins rise at most in proportion to cost. It
+                   removes the self-fulfilling boom branch of the gap rule at steep slopes (MC1). None (default) = no ceiling.
         'erpt': one share or {commodity: share} in [0, 1] (commodities not listed: 1), 'exr_ref': the reference peso (default 1)
                    (0.3.13, P2(b); Keynesian closure with the fixed peso only): import prices PM = pwm x exr_ref x (EXR /
                    exr_ref) ** erpt x (1 + tm), the foreign supplier absorbing the rest (see __init__). Check ER1.
@@ -1050,6 +1092,15 @@ class CGE:
                    positive number or {commodity: value} (default 1) (0.3.13; Keynesian closure only): the domestic
                    peso price of those imports is oil_ref x (pwm x EXR / oil_ref) ** oil_pass before the tariff, the government
                    absorbing the rest at the border (see __init__). A commodity may not carry both 'erpt' and 'oil_pass'. Check OP1.
+        'cet_sr': {"omega": one number or {commodity: omega}, "ref": a Solution or {"QE", "QD", "QX", "PE", "PDS": arrays by
+                   commodity}} (0.4.2, 15 Nov 2026 P3; check CET1): for the listed commodities that have both
+                   exports and home sales (others are skipped: they have no CET), the CET is re-centred on the reference point with its
+                   own elasticity omega > 0: QE / QD = (QE_r / QD_r) x u, u = [(PE / PDS) / (PE_r / PDS_r)] ** omega, and the frontier
+                   (QX / QX_r) ** rho = s_e (QE / QE_r) ** rho + (1 - s_e) (QD / QD_r) ** rho, rho = (omega + 1) / omega, s_e the
+                   reference's export revenue share. At the reference prices it reproduces the reference split exactly, whatever
+                   omega (so a zero shock is the reference). With pricing='markup' the exports QE = (QE_r / QD_r) x u x 'mk_qd' and home
+                   sales are this frontier inverted. Used by DynamicCGE(sr_cet=...) for a short-run export elasticity in the hybrid
+                   closure's short-run years, the reference being the baseline year's solution. None (default) = the SAM's CET.
         """
         sh = self.default_shocks()
         idx = {"c": {c: i for i, c in enumerate(self.C)}, "a": {a: i for i, a in enumerate(self.A)},
@@ -1063,9 +1114,19 @@ class CGE:
                     "pa_anchor": ("pa_anchor", "a"), "markup": ("markup", "a")}
         if "lscale" in (spec or {}) and self.land != "fixed":
             raise ValueError("'lscale' needs land='fixed' (with mobile land it would be ignored)")
-        if self.pricing != "markup" and any(k in (spec or {}) for k in ("markup", "mk_coef", "mk_qd", "mk_pass", "mk_gap", "mk_gdp")):
-            raise ValueError("'markup', 'mk_coef', 'mk_qd', 'mk_pass', 'mk_gap' and 'mk_gdp' need pricing='markup' (otherwise they "
-                             "would be ignored)")                    # 0.3.13
+        if self.pricing != "markup" and any(k in (spec or {}) for k in ("markup", "mk_coef", "mk_qd", "mk_pass", "mk_gap", "mk_gdp",
+                                                                        "mk_floor", "mk_ceiling")):
+            raise ValueError("'markup', 'mk_coef', 'mk_qd', 'mk_pass', 'mk_gap', 'mk_gdp', 'mk_floor' and 'mk_ceiling' need "
+                             "pricing='markup' (otherwise they would be ignored)")    # 0.3.13; 0.4.1 mk_ceiling
+        if (spec or {}).get("mk_floor") is not None and not float((spec or {}).get("mk_gap", 0.0) or 0.0):
+            raise ValueError("'mk_floor' bounds the gap rule (mk_pass + mk_gap x gap): it needs 'mk_gap' other than 0")   # MF1
+        if (spec or {}).get("mk_ceiling") is not None and not float((spec or {}).get("mk_gap", 0.0) or 0.0):
+            raise ValueError("'mk_ceiling' bounds the gap rule (mk_pass + mk_gap x gap): it needs 'mk_gap' other than 0")   # MC1
+        if (spec or {}).get("mk_ceiling") is not None and (spec or {}).get("mk_floor") is not None and not (
+                isinstance(spec["mk_ceiling"], (bool, np.bool_)) or isinstance(spec["mk_floor"], (bool, np.bool_))) and (
+                np.isfinite(float(spec["mk_ceiling"])) and np.isfinite(float(spec["mk_floor"]))
+                and float(spec["mk_ceiling"]) <= float(spec["mk_floor"])):
+            raise ValueError("'mk_ceiling' must be above 'mk_floor'")                                                      # MC1
         if any(k in (spec or {}) for k in ("erpt", "exr_ref")) and not (self.closure == "keynesian" and self.fx == "fixed"):
             raise ValueError("'erpt' and 'exr_ref' (incomplete pass-through of the peso to import prices; 0.3.13) need the "
                              "Keynesian closure with the fixed peso (fx='fixed'): elsewhere the peso is determined by the model")
@@ -1106,6 +1167,10 @@ class CGE:
                 if isinstance(val, (bool, np.bool_)) or not np.isfinite(float(val)):
                     raise ValueError(f"'mk_gap' must be a finite number, not {val!r}")
                 sh[k] = float(val)
+            elif k in ("mk_floor", "mk_ceiling"):       # 0.3.13 (12 Nov 2026, MF1); 0.4.1 ceiling (MC1): None or a finite number
+                if val is not None and (isinstance(val, (bool, np.bool_)) or not np.isfinite(float(val))):
+                    raise ValueError(f"'{k}' must be None or a finite number, not {val!r}")
+                sh[k] = None if val is None else float(val)
             elif k == "mk_gdp":                         # 0.3.13 (P6): the reference real GDP (benchmark prices); None = benchmark
                 if val is not None and (isinstance(val, (bool, np.bool_)) or not np.isfinite(float(val)) or float(val) <= 0):
                     raise ValueError(f"'mk_gdp' must be None or a positive number, not {val!r}")
@@ -1142,6 +1207,8 @@ class CGE:
                         raise ValueError(f"'oil_ref' ({c}): the reference world price in pesos must be positive, not {f!r}")
                     o_[idx["c"][c]] = float(f)
                 sh[k] = o_
+            elif k == "cet_sr":                         # 0.4.2 (15 Nov 2026, check CET1): the re-centred CET
+                sh[k] = None if val is None else self._cet_sr(val, idx["c"])
             elif k == "hoard_ref":                      # 0.3.11: labour by factor x activity of the reference year
                 sh[k] = None if val is None else np.asarray(val, float)
             elif k in ("mk_coef", "mk_qd"):             # 0.3.13 (pricing='markup'): installed technology; reference home sales
@@ -1186,6 +1253,26 @@ class CGE:
                 out = out2
         R, V = self.evaluate(out.x, sh)
         ok = bool(np.abs(R).max() < 1e-7)
+        if (not ok and x_start is None and self.closure == "keynesian" and self.fx == "fixed"
+                and float(sh["exr"]) != 1.0):
+            # 0.3.13 (11 Nov 2026; checks MK1, ER1, MG1, OP1): a second start, used ONLY when the solve
+            # from the benchmark has failed, so every solve that succeeded before is unchanged. With the peso (the numeraire of
+            # the fixed-rate Keynesian closure) moved, start from the benchmark at the peso's price level (prices, wages and
+            # rents x exr; quantities and foreign saving in US$ as at the benchmark), the point the model's homogeneity maps
+            # the benchmark to. Why: on Infinity GEM SAM v1.0 coal mining (acoal, 72% of its output exported) is a markup activity
+            # (pricing='markup'); its exports follow world demand at the reference home sales and its home sales are the CET
+            # inverted, and from the cold start a 10% peso move sent the solver where that inversion has no interior
+            # solution, so it stopped (maxfev) although the scaled solution solves the model to 5e-15. Since 12 Nov 2026 coal is
+            # out of the default markup set (WORLD_PRICE_ACTS); this start stays for any explicit markup_acts list naming it.
+            xs = self.x0()
+            for k in ("PDS", "PQ", "WF", "RK", "RL", "RN"):
+                xs[self.slices[k]] *= float(sh["exr"])
+            alt = self.solve(spec, x_start=xs, tol=tol, verbose=False)
+            if alt.ok:
+                alt.message = "solved from the benchmark at the peso's price level (the first start failed): " + alt.message
+                if verbose:
+                    print(f"solve: OK  max residual {alt.residual_max:.2e}  Walras {alt.v['WALRAS']:.2e}  ({alt.message})")
+                return alt
         if verbose:
             print(f"solve: {'OK' if ok else 'FAILED'}  max residual {np.abs(R).max():.2e}  Walras {V['WALRAS']:.2e}  ({out.message})")
         return Solution(out.x, V, ok, str(out.message), float(np.abs(R).max()), spec or {})
@@ -1275,6 +1362,47 @@ class CGE:
         GDP at benchmark prices, Y_ref the shock key 'mk_gdp' (the dynamic model's baseline year) or the benchmark's."""
         ref = self.real_gdp0 if sh["mk_gdp"] is None else sh["mk_gdp"]
         return 100.0 * (Y / ref - 1.0)
+
+    def _cet_sr(self, val, cidx) -> dict:
+        """0.4.2 (15 Nov 2026 P3, check CET1): the shock key 'cet_sr' as arrays (see make_shocks): the mask of
+        the re-centred commodities (listed, with both exports and home sales at the benchmark), their elasticity w, rho = (w + 1) / w,
+        the reference quantities QE_r, QD_r, QX_r, the reference ratio QE_r / QD_r, relative price PE_r / PDS_r and export revenue
+        share s_e (s_d = 1 - s_e). Refused: omega not a finite number > 0; a commodity not of this SAM; a reference with a
+        non-positive quantity or price where the CET is re-centred."""
+        if not isinstance(val, dict) or "omega" not in val or "ref" not in val:
+            raise ValueError("'cet_sr' must be {'omega': one number or {commodity: omega}, 'ref': a Solution or {'QE', 'QD', 'QX', "
+                             "'PE', 'PDS': arrays}}")
+        om = val["omega"]
+        om = dict(om) if isinstance(om, dict) else {c: om for c in self.C}
+        bad = [c for c in om if c not in cidx]
+        if bad:
+            raise ValueError(f"'cet_sr': not commodities of this SAM: {bad}")
+        for c, w in om.items():
+            if (isinstance(w, (bool, np.bool_)) or not isinstance(w, (int, float, np.integer, np.floating))
+                    or not np.isfinite(float(w)) or float(w) <= 0):
+                raise ValueError(f"'cet_sr' ({c}): the CET elasticity must be a finite number above 0, not {w!r}")
+        ref = val["ref"]
+        get = (lambda k: np.asarray(ref[k], float)) if isinstance(ref, dict) else (lambda k: np.asarray(ref.v[k], float))
+        try:
+            QEr, QDr, QXr, PEr, PDSr = (get(k) for k in ("QE", "QD", "QX", "PE", "PDS"))
+        except KeyError as err:
+            raise ValueError(f"'cet_sr': the reference needs QE, QD, QX, PE and PDS ({err})") from None
+        both = self.hasE & self.hasD
+        mask = np.zeros(len(self.C), bool)
+        w = np.ones(len(self.C))
+        for c, v in om.items():
+            i = cidx[c]
+            if both[i]:
+                mask[i], w[i] = True, float(v)
+        if not mask.any():
+            return None                          # nothing to re-centre: the SAM's CET (as without the key)
+        sel = lambda a: a[mask]
+        for nm, a in (("QE", QEr), ("QD", QDr), ("QX", QXr), ("PE", PEr), ("PDS", PDSr)):
+            if a.shape != (len(self.C),) or not np.all(np.isfinite(sel(a))) or np.any(sel(a) <= 0):
+                raise ValueError(f"'cet_sr': the reference {nm} must be positive and finite for every re-centred commodity")
+        se_ = sel(PEr * QEr) / sel(PEr * QEr + PDSr * QDr)
+        return {"mask": mask, "w": sel(w), "rho": (sel(w) + 1.0) / sel(w), "QEr": sel(QEr), "QDr": sel(QDr), "QXr": sel(QXr),
+                "rb": sel(QEr) / sel(QDr), "pb": sel(PEr) / sel(PDSr), "se": se_, "sd": 1.0 - se_}
 
     def _ptm(self, pwm, EXR, sh):
         """0.3.13 (P2(b), check ER1): the US$ price foreign suppliers charge for imports sold here when they absorb the share

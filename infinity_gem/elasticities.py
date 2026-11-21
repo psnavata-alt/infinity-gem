@@ -92,3 +92,44 @@ SENSITIVITY_SETS_72BC = {
                   "significant, and OLS is negative or insignificant in every group: the data do not identify the CET (GTAP's values "
                   "stay; electronics' CET is inactive, home sales 0 in the SAMs); research/elasticities_72bc/cet72c.py"),
 }
+
+
+# 0.4.2 (15 Nov 2026 item P3; opt-in, check CET1): SHORT-RUN export (CET) elasticities for the hybrid closure's
+# short-run years (DynamicCGE(sr_cet=short_run_cet())). Source: preshock/export_elasticity_sr_estimate.py, run 14 Nov 2026, 10:39 PM
+# (outputs/export_elasticity_sr_estimate_20261114_2239.md and .json): the WITHIN-YEAR response of PSA real exports (0012B5BEXQ1, constant
+# 2018 prices) to a permanent 1% real appreciation (BSP REER, Table 15, overall), the four quarters of the first year averaged, from a
+# distributed lag in y/y log differences over 8 quarters with export-partner GDP growth (ARDL dataset of 12 Nov 2026); sample
+# 2003Q1-2019Q4 and 2023Q1-2026Q3; Newey-West errors. Values = minus the estimate (an elasticity of exports to the relative price
+# PE / PDS). Check CET1 compares them with the json. The long-run responses in the same file (goods 0.67, services 1.12, all 0.79)
+# are also below GTAP's CET values, which stay the long-run elasticities (not tested here: the CET's level was not identified on
+# 24 Oct 2026; a review note, not included).
+SR_CET_ESTIMATE = {                         # group: (within-year elasticity, s.e., share of the long run within the year)
+    "goods": (0.5348608043123821, 0.26777531712689734, 0.7944861472183719),          # "goods, REER, L=8"
+    "services": (0.044804409323104616, 0.23969401313458666, 0.039859343321255944),   # "services, REER, L=8"
+    "all": (0.3075768320041813, 0.20683894675481704, 0.39024613925951457),           # "goods and services, REER, L=8"
+}
+SR_CET_SOURCE = "outputs/export_elasticity_sr_estimate_20261114_2239.json"
+# PSA's exports of services (0012B5BEXQ1 "Exports of services") are these commodities' exports in the Infinity GEM SAM; every other commodity's
+# exports are goods (agriculture, mining, coal, manufacturing, refined petroleum, milled rice, electricity and water)
+SERVICE_COMMODITIES = ("ccons", "ctrad", "ctran", "chotl", "ccomm", "cfsrv", "creal", "cbsrv", "cpadm", "ceduc", "cheal", "cosrv")
+
+
+def short_run_cet(commodities, form: str = "level", lr: dict | None = None) -> dict:
+    """0.4.2: {commodity: short-run CET elasticity} for DynamicCGE(sr_cet=...), from SR_CET_ESTIMATE.
+    form "level" (central): goods' or services' within-year elasticity for each commodity; "all": the one elasticity of all exports;
+    "ratio": the long-run CET of `lr` ({commodity: omega}, e.g. the model's own "ph" values) times the group's share of the long-run
+    response within the year (keeps GTAP's pattern across commodities, takes only the time profile from the data)."""
+    out = {}
+    for c in commodities:
+        g = "services" if c in SERVICE_COMMODITIES else "goods"
+        if form == "level":
+            out[c] = SR_CET_ESTIMATE[g][0]
+        elif form == "all":
+            out[c] = SR_CET_ESTIMATE["all"][0]
+        elif form == "ratio":
+            if lr is None or c not in lr:
+                raise ValueError("short_run_cet(form='ratio') needs lr = {commodity: long-run omega} for every commodity")
+            out[c] = float(lr[c]) * SR_CET_ESTIMATE[g][2]
+        else:
+            raise ValueError("form must be 'level', 'all' or 'ratio'")
+    return out

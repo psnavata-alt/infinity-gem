@@ -4,6 +4,7 @@ Validation results and test inputs outside `data/`. Each was written by the scri
 
 - `LICENSES/GPL-2.0-only.txt`
 - `checks/reference_live.json`
+- `checks/reference_transfer_legacy.json`
 - `docs/verification/SAM2023_condensed_9sectors.csv`
 - `docs/verification/SAM2023_condensed_9sectors_IFPRI_netted.csv`
 - `docs/verification/stata/data/parameters.csv`

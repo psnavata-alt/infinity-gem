@@ -40,7 +40,7 @@ NOT FOR CITATION. Run:  py scenarios/corruption_efficiency_leakage.py   (about 4
 """
 import itertools
 
-from _common import PSA_GDP, SAM_GDP_2023, Report, to_sam_units
+from _common import PSA_GDP, SAM_GDP_2023, Report, to_sam_units, peso_factor  # 13 Nov 2026: year-by-year peso basis (_common.peso_factor; INFINITY_GEM_SCENARIO_PESO=legacy = the constant TO_2025)
 import pandas as pd
 
 from infinity_gem import paths
@@ -105,7 +105,7 @@ for pcname in ("low", "high"):
     def measures(ref, sim):
         r, s = ref.table, sim.table
         gap = (s.real_gdp / r.real_gdp - 1) * 100
-        out = {"cumulative GDP loss 2023-2030 (₱ bn)": -float((s.real_gdp - r.real_gdp).sum()) * TO_2025,
+        out = {"cumulative GDP loss 2023-2030 (₱ bn)": -sum(float(s.real_gdp[y] - r.real_gdp[y]) * peso_factor(r, y, TO_2025) for y in r.index),
                "GDP gap 2025 (%)": float(gap[2025]), "GDP gap 2030 (%)": float(gap[2030]),
                "public capital gap 2030 (%)": float(s.public_capital_gap_pct[2030] - r.public_capital_gap_pct[2030]),
                "employment gap 2025 (pp)": float(s.employment_gap_low_skill_pct[2025] - r.employment_gap_low_skill_pct[2025])}
@@ -144,7 +144,7 @@ for pcname in ("low", "high"):
                                "public capital gap (%)": kg_gap,
                                "productivity shock, all industries (%)": ((1 + kg_gap / 100) ** pc0["phi"] - 1) * 100,
                                "general capital stock gap (%)": float(eff.capital_stock_index[t] / clean.table.capital_stock_index[t] - 1) * 100,
-                               "leakage at the bound (₱ bn, 2025 pesos)": (LEAK * S_PUB * float(base.solutions[t]["QINV"][ic]) * TO_2025
+                               "leakage at the bound (₱ bn, 2025 pesos)": (LEAK * S_PUB * float(base.solutions[t]["QINV"][ic]) * peso_factor(base.table, t, TO_2025)
                                                                            if t in SCANDAL else 0.0),
                                "freeze (₱ bn)": -FALL25 if t == 2025 else 0.0})
 

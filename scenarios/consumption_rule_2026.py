@@ -31,9 +31,11 @@ Output: outputs/consumption_rule_2026_<YYYYMMDD_HHMM>.md and .csv (the stamp is 
 """
 import os
 
-os.environ["INFINITY_GEM_SCENARIO_SAM"] = "own"                  # the central 2026 case; set before _common reads them
+os.environ["INFINITY_GEM_SCENARIO_SAM"] = os.environ.get("INFINITY_GEM_ROW83_SAM", "own")   # the central 2026 case; set before _common reads them (12 Nov 2026: 'own' = v1.0;
+#                                                     INFINITY_GEM_ROW83_SAM=own-0.5 reproduces the v0.5 runs)
 os.environ["INFINITY_GEM_SCENARIO_ENGINE"] = '{"hoarding": 0.85}'
-import sys                                                                      # noqa: E402
+os.environ["INFINITY_GEM_SETTING"] = os.environ.get("INFINITY_GEM_ROW83_SETTING", "0.3 recommended")   # 0.4.0 (13 Nov 2026): as row83_p2_p6_2026
+import sys                                                                    # noqa: E402
 import time                                                                     # noqa: E402
 
 import numpy as np                                                              # noqa: E402

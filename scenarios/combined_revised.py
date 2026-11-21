@@ -60,9 +60,16 @@ Fourth revision (17 Oct 2026, after code review of the 2026 scenarios of 16 Oct 
      2026-27 implied by the DBCC 193rd statement), not of 2025's. Results stay in 2025-peso equivalents (the same share of 2025
      GDP); the deficit entries and the cost column are converted the same way, and 'output recovered per peso' is computed on
      that common basis (the nominal cost is also reported).
+ 19. Transfers at the year's scale (11 Nov 2026, engine fix): the dynamic model now
+     multiplies every scenario amount (the aid lines here: trg_h_add) by the year's baseline index, as it does the SAM's own
+     transfers, so an amount of year y is its share of the model's year-y economy, as note 18 intends (before: 1 / 1.21 of it in
+     2027). INFINITY_GEM_SCENARIO_ENGINE={"transfer_scaling": "legacy"} reproduces the runs before the fix (the 2026 scenarios of 18-20 Oct 2026). The peso
+     conversion TO_2025 is NOT changed (see the note at TO_2025).
 NOT FOR CITATION until reviewed. Run:  py scenarios/combined_revised.py   (about 25 minutes)
 """
+import copy
 import itertools
+import os
 import sys
 
 from _common import PSA_GDP, SAM_GDP_2023, Report, equiv_2025, population_shares, to_sam_units, ROOT
@@ -71,11 +78,14 @@ import pandas as pd
 
 sys.path.insert(0, str(ROOT / "preshock"))
 from infinity_gem import paths                                                     # noqa: E402
+from infinity_gem import __version__ as Infinity_GEM_VERSION                            # noqa: E402  (0.4.2.dev0, 13 Nov 2026: report title)
 from infinity_gem.decompose import shapley                                          # noqa: E402
 from infinity_gem.dynamic import DynamicCGE, PUBLIC_CAPITAL_DEFAULTS                # noqa: E402
 from infinity_gem.microlink import MicroLink                                        # noqa: E402
-from infinity_gem.oil import cge_oil_shock, fertilizer_cost_shares, fertilizer_cost_shock   # noqa: E402
-from infinity_gem.settings import cge_model, dynamic_kwargs, short_run_closure      # noqa: E402
+from infinity_gem.oil import cge_oil_shock, coal_lng_shock, is_own_sam_v10, fertilizer_cost_shares, fertilizer_cost_shock   # noqa: E402
+from infinity_gem.settings import BSP_RULE_REFERENCE, cge_model, dynamic_kwargs, short_run_closure      # noqa: E402
+from infinity_gem.settings import OPTION_C, OPTION_C_SETTINGS     # noqa: E402  (13 Nov 2026: 0.4.1)
+from _common import SETTING                                                     # noqa: E402  (0.4.0: INFINITY_GEM_SETTING, else DEFAULT)
 import shock_paths as SP                                                        # noqa: E402
 import elnino_to_cge as EN                                                      # noqa: E402
 
@@ -89,12 +99,32 @@ _STILL_OPEN_DEC25 = {"DSWD": (265.9 - 255.3) / (215.9 - 149.7), "DOLE": (58.6 - 
 A_LOW_EXTRA = 16.55 * _STILL_OPEN_DEC25["DOH"] + 15.18 * _STILL_OPEN_DEC25["DOLE"] + (AID_2026 - 16.55 - 15.18) * _STILL_OPEN_DEC25["DSWD"]
 A_LOW_RETARGET = AID_2026 - A_LOW_EXTRA                               # re-targeted, gain not counted (see note 15)
 TO_2025 = PSA_GDP[2025] / SAM_GDP_2023
+# 11 Nov 2026: the model's levels grow with the baseline index Y_index (real GDP 1.10 x
+# the SAM's in 2025, 1.21 in 2027), so TO_2025 values a year-y change at the 2023 SAM's scale times 2025 GDP: Y_y times its share
+# of year y's GDP x 2025 GDP (the basis note 18 states), or 1.1035 times the change at 2025 prices. Since the transfer-scaling fix
+# (dynamic.py transfer_scaling, note 19) this factor applies to every route alike (transfers too); the peso rows of measures()
+# should not be cited until the basis is decided. GDP gaps, prices, jobs and poverty do not use it.
+# 12 Nov 2026: measures() now divides each year's change by that year's no-shock index Y_y = ref real GDP in y / ref real GDP in the
+# base year (the SAM's GDP), so a peso row is the change's share of year y's economy times 2025 GDP: note 18's basis, for every
+# route. PESO_BASIS = "legacy" (environment INFINITY_GEM_SCENARIO_PESO=legacy) keeps the constant TO_2025 of the runs before 12 Nov.
+PESO_BASIS = os.environ.get("INFINITY_GEM_SCENARIO_PESO", "year")
+if PESO_BASIS not in ("year", "legacy"):
+    raise ValueError(f"INFINITY_GEM_SCENARIO_PESO must be 'year' or 'legacy', not {PESO_BASIS!r}")
+
+
+def peso_factor(ref_table, y) -> float:
+    """2025-peso equivalents of a model change in year y (see PESO_BASIS)."""
+    if PESO_BASIS == "legacy":
+        return TO_2025
+    return TO_2025 * float(ref_table["real_gdp"].iloc[0]) / float(ref_table.loc[y, "real_gdp"])
 SHOCKS = ["public works", "oil", "El Nino", "world food and fertilizer prices"]
 # 0.3.10 (18 Oct 2026): the 2026 scenarios of 17-18 Oct 2026 are built on IFPRI's 2023 SAM; Infinity GEM's default for rice=True runs is now the project's
 # own SAM (settings.DEFAULT_SAM_VARIANT), so this script pins IFPRI's to keep reproducing the 2026 scenarios. Other SAMs: set this, or use
 # scenarios/sam_psa_sensitivity.py (which overrides it and recalibrates the wage curve on that SAM).
 from _common import SCENARIO_SAM                                                    # noqa: E402
-SAM_VARIANT = SCENARIO_SAM          # "ifpri" unless INFINITY_GEM_SCENARIO_SAM=own (the 2026 scenarios of 18 Oct 2026 on Infinity GEM's own SAM; scenarios/_common.py)
+SAM_VARIANT = SCENARIO_SAM          # "ifpri" unless INFINITY_GEM_SCENARIO_SAM=own (Infinity GEM's own SAM, v1.0 since 6 Nov 2026) or own-0.5 (the 2026 scenarios of 18-20 Oct 2026; scenarios/_common.py)
+# 6 Nov 2026 (v1.0): on Infinity GEM SAM v1.0 each year's oil piece carries coal and LNG (the PSA coal path), as the 2026 scenarios on v1.0 did. Checks/test_own_sam_v10.py sets this False because its comparison mode adds them itself, by variant.
+COAL_LNG_IN_OIL = True
 # Validation targets (pre-shock and revised official paths; actual data)
 PRE_SHOCK_GROWTH = {2025: 6.0, 2026: 5.5, 2027: 6.0}     # DBCC 26 Jun 2025 (2025: 5.5-6.5); DBCC 192nd, 9 Dec 2025 (2026-27)
 REVISED_GROWTH = {2025: "4.4 (PSA actual)", 2026: "3.5-4.5 (DBCC 193rd, Jul 2026); H1 actual 2.6", 2027: "5.0-6.0 (DBCC 193rd)"}
@@ -138,6 +168,8 @@ def merge(*specs):
 
 def land_cuts(oni):
     """El Nino land factors by calendar year, sized in the one-year short-run model with the 2026 tariff."""
+    # 0.4.0 (13 Nov 2026): the static CGE of "0.4 recommended" IS that of "0.3 recommended" (settings.cge_kwargs), so the El Nino
+    # sizing is the same under every 0.3+ setting; it stays named here.
     m = cge_model("0.3 recommended", rice=True, sam_variant=SAM_VARIANT, **short_run_closure("0.3 recommended"), land="fixed")
     base = EN.policy_2026(m)
     b = m.solve(base)
@@ -147,12 +179,31 @@ def land_cuts(oni):
     return cal, {y: EN.land_cuts(m, b, cal[y], base) for y in cal}
 
 
-class Runs:
-    """One public-capital setting: the model, its no-shock path and every path asked for."""
+_SETTING_BETA = object()     # 0.4.0: Runs(wage_curve=...) not given = the setting's own (None under 0.3, as before; 0.4: OPTION_C_04)
 
-    def __init__(self, pcname, growth=None, wage_curve=None, targeting="4Ps", **engine):
-        kw = dynamic_kwargs("0.3 recommended", public_capital=pcname, rice=True, land="fixed", sam_variant=SAM_VARIANT)
-        kw["wage_curve"] = wage_curve
+
+class Runs:
+    """One public-capital setting: the model, its no-shock path and every path asked for.
+    0.4.0 (13 Nov 2026): setting = a name in infinity_gem.settings.SETTINGS; None = _common.SETTING (environment INFINITY_GEM_SETTING, else
+    settings.DEFAULT, "0.4.1 recommended" since 13 Nov 2026, about 5:25 PM). Under "0.4 recommended" and "0.4.1 recommended" the wage-curve beta is the setting's unless wage_curve is given, and
+    the BSP rule inside every path reads its gaps against the no-shock path with the policies (settings.BSP_RULE_REFERENCE; run()):
+    rule_reference None = the setting's convention ("no-shock path" under 0.4; "baseline", the engine's own, otherwise, so every
+    earlier run that set a rule itself is unchanged)."""
+
+    def __init__(self, pcname, growth=None, wage_curve=_SETTING_BETA, targeting="4Ps", setting=None, rule_reference=None,
+                 fies_base=None, **engine):
+        # fies_base (0.4.2, 18 Nov 2026): the survey of self.ml ("fies2023" or "fies2025"); None = _common.FIES_BASE (environment
+        # INFINITY_GEM_FIES_BASE, else settings.DEFAULT_FIES_BASE, "fies2025" since 18 Nov 2026)
+        self.setting = setting or SETTING
+        self.fies_base = fies_base or __import__("_common").FIES_BASE
+        kw = dynamic_kwargs(self.setting, public_capital=pcname, rice=True, land="fixed", sam_variant=SAM_VARIANT)
+        # 13 Nov 2026: "0.4.1 recommended" as "0.4 recommended" (was == "0.4 recommended")
+        if wage_curve is not _SETTING_BETA or self.setting not in OPTION_C_SETTINGS:
+            kw["wage_curve"] = None if wage_curve is _SETTING_BETA else wage_curve
+        self.rule_reference = rule_reference or (BSP_RULE_REFERENCE if self.setting in OPTION_C_SETTINGS else "baseline")
+        if self.rule_reference not in ("no-shock path", "baseline"):
+            raise ValueError("rule_reference must be 'no-shock path' or 'baseline'")
+        self._ref = None                             # (fingerprint, no-shock path) for the rule's reference (run())
         kw.update(__import__("_common").SCENARIO_ENGINE)   # 0.3.11 (19 Oct 2026): INFINITY_GEM_SCENARIO_ENGINE, e.g. {"hoarding": 0.85}; unset = {}
         kw.update(engine)                            # 0.3.8: engine sensitivities (scenarios/engine_sensitivities.py)
         self.alloc = AID_4PS if targeting == "4Ps" else B30
@@ -166,7 +217,7 @@ class Runs:
         self.q0 = m.qinv[m.C.index("ccons")]
         self.trg_pattern = {h: float(v) / float(m.trg_h.sum()) for h, v in zip(m.H, m.trg_h)}   # current transfers by household
         self.fshares = fertilizer_cost_shares()
-        self.ml = MicroLink(self.d.ms)
+        self.ml = MicroLink(self.d.ms, base=self.fies_base)      # 18 Nov 2026: the base named, never a silent default
         self.cache = {}
 
     def pieces(self, oil_nc="central", oil_fc="EIA", pw="2026 central", oni="central", pw2027="2027 NEP x 2025 rate (central)"):
@@ -180,6 +231,8 @@ class Runs:
         for t in range(2026, 2031):
             s = cge_oil_shock(m, float(oil.loc[t, "crude (Dubai)"]) / 100)
             s["pwm_scale"]["cpetr"] = 1 + float(oil.loc[t, "fuel products, weighted"]) / 100
+            if COAL_LNG_IN_OIL and is_own_sam_v10(m):
+                s = merge(s, coal_lng_shock(m, t, coal=True, lng=True, coal_series="psa"))
             o[t] = s
         f = {t: merge({"pwm_scale": {"cmric": 1 + float(food.loc[t, "world rice"]) / 100}},
                       fertilizer_cost_shock(m, float(food.loc[t, "urea"]) / 100, self.fshares)) for t in range(2026, 2031)}
@@ -199,6 +252,11 @@ class Runs:
         tariff = {"tm_scale": {"cmric": EN.TARIFF_2026 / float(m.tm[m.C.index("cmric")])}}
         aid = lambda bn, y, alloc=None: {"trg_h_add": {h: to_sam_units(bn, PSA_GDP[y]) * w for h, w in (alloc or self.alloc).items()}}
         sh = {2025: {}, 2026: dict(tariff), 2027: merge(tariff, aid(-AID_2027, 2027))}   # policies in every run (note 18: year y's GDP)
+        mo = d.a.get("monetary")
+        if mo is not None and self.rule_reference == "no-shock path":    # 0.4.0 (13 Nov 2026; settings.BSP_RULE_REFERENCE)
+            ref = self._no_shock_path(sh)
+            if not S and not measures:               # the no-shock path: its gaps against itself are zero, so the rule's rate is
+                return ref                           # zero in every year and the path is the one without the rule, exactly
         for f in S:
             for t, sp in piece[f].items():
                 sh[t] = merge(sh.get(t, {}), sp)
@@ -210,7 +268,39 @@ class Runs:
             sh[2027] = merge(sh[2027], aid(AID_2027, 2027))
         if "C" in measures:
             sh[2027] = merge(sh[2027], {"qinv_scale": {"ccons": 1 + to_sam_units(CATCHUP, PSA_GDP[2027]) / self.q0}})
+        if mo is not None and self.rule_reference == "no-shock path":    # the rule reacts to this path's gaps against the no-shock
+            d.a["monetary"] = dict(mo, reference=ref)                     # path (DynamicCGE.monetary_scenario reference=)
+            try:
+                return d.scenario(sh)
+            finally:
+                d.a["monetary"] = mo
         return d.scenario(sh)
+
+    def _no_shock_path(self, policies):
+        """0.4.0 (13 Nov 2026): the no-shock path with the policies (run without the BSP rule: against itself its gaps are zero),
+        the reference the rule reads its gaps against; computed once and kept while the engine's assumptions (other than 'monetary')
+        and the policies stay the same (a fingerprint of both; a script that changes d.a gets a fresh no-shock path)."""
+        import hashlib
+        import pickle
+        d = self.d
+        try:
+            key = hashlib.sha256(pickle.dumps(({k: v for k, v in sorted(d.a.items()) if k != "monetary"}, policies),
+                                              protocol=4)).hexdigest()
+        except (pickle.PicklingError, TypeError, AttributeError):
+            key = object()                           # not picklable: never reuse (always a fresh no-shock path)
+        if self._ref is None or self._ref[0] != key:
+            mo = d.a["monetary"]
+            acc = d.a.get("sr_accelerator")          # 0.4.2 (14 Nov 2026; ACC1): the no-shock path is run without the
+            d.a["monetary"] = None                   # accelerator too (it reads the same reference, so against itself it is zero);
+            if acc is not None:                      # without the option d.a is not touched
+                d.a["sr_accelerator"] = None
+            try:
+                self._ref = (key, d.scenario(copy.deepcopy(policies)))
+            finally:
+                d.a["monetary"] = mo
+                if acc is not None:
+                    d.a["sr_accelerator"] = acc
+        return self._ref[1]
 
     def poor(self, ref, sim, y):
         link = self.ml.link_variables(self.d.ms, ref.solutions[y], sim.solutions[y])
@@ -224,7 +314,7 @@ class Runs:
         gap = (s.real_gdp / r.real_gdp - 1) * 100
         cpi = (s.cpi / r.cpi - 1) * 100
         out = {f"GDP gap {y} (%)": float(gap[y]) for y in YEARS}
-        loss = -float((s.real_gdp - r.real_gdp).sum()) * TO_2025
+        loss = -sum(float(s.real_gdp[y] - r.real_gdp[y]) * peso_factor(r, y) for y in r.index)
         out["cumulative GDP loss 2025-2030 (₱ bn)"] = loss
         out["cumulative GDP loss 2025-2030 (% of 2025 GDP)"] = loss / PSA_GDP[2025] * 100
         out["consumer prices 2026 (%)"] = float(cpi[2026])
@@ -232,7 +322,7 @@ class Runs:
         for y in (2026, 2027):
             out[f"employment gap {y} (pp of labour supply)"] = float(s.employment_gap_low_skill_pct[y] - r.employment_gap_low_skill_pct[y])
         # fiscal block: deficit change (+ = larger), ₱ bn in 2025-peso equivalents (the same share of GDP; note 18)
-        dg = {y: -(float(sim.solutions[y]["GSAV"]) - float(ref.solutions[y]["GSAV"])) * TO_2025 for y in YEARS}
+        dg = {y: -(float(sim.solutions[y]["GSAV"]) - float(ref.solutions[y]["GSAV"])) * peso_factor(r, y) for y in YEARS}
         for y, bn in (works or {}).items():          # construction not done: spending not made (routing A); bn in year y's pesos
             dg[y] = dg.get(y, 0.0) + equiv_2025(bn, y)  # bn < 0 narrows the deficit
         for y, bn in (extra_spend or {}).items():    # catch-up spending, year y's pesos
@@ -270,12 +360,16 @@ class Runs:
 
 
 def main():
-    rep = Report("The 2025-2027 shocks and a costed response, fourth revision (Infinity GEM 0.3.8)", "combined_revised")
+    # 0.4.2.dev0 (13 Nov 2026): the title names the running version (it said "Infinity GEM 0.3.8" since 15 Oct)
+    rep = Report(f"The 2025-2027 shocks and a costed response, fourth revision (Infinity GEM {Infinity_GEM_VERSION})", "combined_revised")
     rep.p("**NOT FOR CITATION** (audit of 15 Oct 2026 night; code review of 16 Oct 2026, findings C1 and I1 applied). Reference: "
           "the no-shock path with the same policies (rice tariff 15% in 2026-27; the 2027 NEP aid cut). Pesos: an amount of year y "
           "enters as its share of year y's nominal GDP (2025 PSA; 2026-27 implied by the DBCC 193rd statement: ₱30.5 and ₱33.2 "
           "trillion); results are in 2025-peso equivalents (the same share of 2025 GDP). Every shock size comes from data or a "
           "published forecast (preshock/shock_paths.py); what is still an assumption is listed in section 8.")
+    rep.p(f"**Model setting: {SETTING}** (infinity_gem/settings.py; environment INFINITY_GEM_SETTING; 0.4.1, 13 Nov 2026, about 5:25 PM: the "
+          "default is \"0.4.1 recommended\", option (c) and the BSP rule with the gap rule's ceiling and adaptive expected inflation; "
+          "INFINITY_GEM_SETTING=\"0.4 recommended\" reproduces the 0.4.0 runs of 13 Nov 2026, \"0.3 recommended\" the runs before 13 Nov 2026).")
     if __import__("_common").SCENARIO_ENGINE:
         rep.p(f"**Engine settings added for this run (INFINITY_GEM_SCENARIO_ENGINE): {__import__('_common').SCENARIO_ENGINE}.** Not the 2026 scenarios' own "
               "setting; e.g. hoarding = paid labour hoarding (a review note (not included)).")
@@ -287,6 +381,14 @@ def main():
             "no-COVID": float(cal.loc["no-COVID Okun (2020-2021 dropped)", "beta"])}
     if "hours-inclusive Okun (2020-2021 dropped)" in cal.index:     # 0.3.10: calibrations from 18 Oct 2026 on carry it
         BETA["hours"] = float(cal.loc["hours-inclusive Okun (2020-2021 dropped)", "beta"])
+    if SETTING in OPTION_C_SETTINGS:     # 13 Nov 2026: the 0.4 point (h, lam, s, omega) was fitted with beta
+        # HELD at OPTION_C_04's 9.9835; the newest calibration file (12 Nov, MBIE oil, made under "0.3 recommended") would pair the
+        # fitted point with another beta. So centre on the setting's beta; keep the calibration's spread. 13 Nov
+        # 2026: "0.4.1 recommended" too, with its own values (OPTION_C_041 keeps OPTION_C_04's beta).
+        shift = float(OPTION_C[SETTING]["wage_curve"]) - BETA["central"]
+        BETA = {k: v + shift for k, v in BETA.items()}
+        rep.p(f"**Wage-curve beta under {SETTING}:** central {BETA['central']:.4f} (the setting's, as fitted); sensitivity variants shifted by "
+              f"{shift:+.4f} from {__import__('_common').calibration_file().name} (same spread).")
     for pcname in ("low", "high"):
         R = Runs(pcname, wage_curve=BETA["central"])
         piece, src = R.pieces()
@@ -407,8 +509,11 @@ def main():
     infl = tot.loc["inflation effect 2026 (pp)", "low"]
     rep.p(f"Inflation 2026: pre-shock official 2.0-4.0% (midpoint {PRE_SHOCK_CPI[2026]}) + model effect {infl:+.2f} pp = "
           f"{PRE_SHOCK_CPI[2026] + infl:.1f}%, against actual January-September 5.4% (PSA) and the July 2026 official 6.0-7.0%. "
-          "The model has no money, exchange-rate or wage-price round in the short run (exchange rate fixed), so it is expected "
-          "to explain only part of the rise in prices. Jobs: unemployment 5.3% in August 2026 against 3.9% a year earlier (PSA LFS).")
+          + ("Under this setting short-run prices are markups with sticky falls and a BSP rule acts through investment, but the model has "
+             "no money market, exchange-rate or wage-price round (exchange rate fixed), so it is expected "     # 0.4.2.dev0 (13 Nov 2026)
+             if SETTING in OPTION_C_SETTINGS else
+             "The model has no money, exchange-rate or wage-price round in the short run (exchange rate fixed), so it is expected ")
+          + "to explain only part of the rise in prices. Jobs: unemployment 5.3% in August 2026 against 3.9% a year earlier (PSA LFS).")
     rep.h("3. The combined shocks against the no-shock path")
     rep.table(tot, floatfmt=",.3f")
     rep.h("4. Each shock's share (Shapley; public capital low; the shares add up exactly to the total)")
@@ -441,10 +546,15 @@ def main():
     for a in ("Public works in 2027: the 2027 budget (NEP) x DPWH's latest commitment rate; FY2026 money carried into 2027 assumes 2026 H2 "
               "commits at 2025's H2 pace; construction moves with DPWH commitments relative to 2024 (backtest 2025: 4% high). H2 2026 "
               "public construction is a forecast (the year-on-year rate of H1).",
-              "Prices: in the short-run years the model's prices fall with demand (public works lower 2026 consumer prices by 2.3%, "
-              "against about 0.3-0.8 points below forecast in the data, preshock/inflation_var.py). Firms in practice keep their margins, "
-              "so the price relief is overstated and the poverty effect of the public-works shock is, if anything, understated "
-              "(16 Oct: caveat only).",
+              ("Prices: in the short-run years non-farm prices are markups over unit variable cost with sticky falls, a margin floor "
+               "(and from 0.4.1 a ceiling) (its option (c), fitted to 11 data targets; settings.OPTION_C), so public works lower 2026 "
+               "consumer prices only a little (section 4), against about 0.3-0.8 points below forecast in the data "
+               "(preshock/inflation_var.py). The fitted parameters, not the data, set how far margins absorb costs."
+               if SETTING in OPTION_C_SETTINGS else      # 0.4.2.dev0 (13 Nov 2026, about 9:20 PM): the 0.3 text below describes flexible prices
+               "Prices: in the short-run years the model's prices fall with demand (public works lower 2026 consumer prices by 2.3%, "
+               "against about 0.3-0.8 points below forecast in the data, preshock/inflation_var.py). Firms in practice keep their margins, "
+               "so the price relief is overstated and the poverty effect of the public-works shock is, if anything, understated "
+               "(16 Oct: caveat only)."),
               "The peso is held at its pre-shock path in 2025-2027 (16 Oct): in the model a weaker peso is expansionary and passes "
               "fully into prices, which the data do not show; sensitivity in scenarios/peso_sensitivity.py.",
               "Fuel products move with crude from 2028 (margins back to pre-conflict); LPG and other products move with crude.",

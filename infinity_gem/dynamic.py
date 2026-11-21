@@ -10,9 +10,21 @@ Year 0 is the SAM year (2023). Each later year t:
      capital grows at `g_K0` (net of depreciation).
   2. Exogenous demand and foreign flows grow with the baseline GDP path: government consumption,
      the investment level, real transfers, foreign savings, remittances and factor income from abroad.
+     A scenario's amounts ('trg_h_add', 'sav_add', 'grow_out_add') grow the same way (transfer_scaling, below).
   3. Baseline only: total factor productivity (TFP, uniform across activities) is solved so that
      real GDP grows at the target rate for that year. Scenarios keep the baseline TFP path.
   4. The static model is solved; its investment feeds next year's capital stock.
+
+Scenario amounts grow with the baseline (11 Nov 2026, 0.3.13: transfer_scaling; check TS1)
+  A scenario's factors multiply levels that already grow with the baseline (qinv_scale, qg_scale, remit_scale, ...). Its
+  amounts ('trg_h_add', 'sav_add', 'grow_out_add': ₱ bn at the 2023 SAM's scale, e.g. from scenarios/_common.to_sam_units)
+  used to enter every year at the 2023 scale, so a transfer meant as a share of year y's GDP was only 1 / Y_index of that
+  share of the model's year-y economy (0.83 of it in 2027 on the DBCC path). Found 11 Nov 2026 in a rerun of earlier scenarios and
+  confirmed by an independent check (a review note, not included); fixed on 11 Nov 2026. Transfer_scaling="baseline" (default) multiplies each such
+  amount by the year's Y_index, as the SAM's own transfers are (trg_scale), so it is the intended share of the year's economy.
+  "legacy" = as before 11 Nov 2026, exactly (check TS1; the "0.2 published" setting uses it). Amounts the engine derives from
+  the year's baseline itself (public_capital leakage) are already at the year's scale and are never scaled; mpsadj is a rate,
+  not an amount, and is left alone.
 
 Hybrid closure (0.3, opt-in: DynamicCGE(hybrid=True))
   The baseline is unchanged (long-run closure every year). In a scenario, every year that carries a shock is
@@ -112,6 +124,46 @@ Slower pass-through of world oil prices within the year (0.3.13, 23 Oct 2026, op
   the model's own ratio for the same world shock, omega solved so the two are equal. None (default) = the world price in full,
   results unchanged; omega = 1 gives the same results. Long-run years are unchanged. Refused: omega outside [0, 1]; hybrid=False; a
   commodity that also carries an sr_erpt share; a scenario's own 'oil_pass' or 'oil_ref'. Check OP1.
+
+A short-run private-investment accelerator (0.4.2, 14 Nov 2026; opt-in: DynamicCGE(sr_accelerator={"a": a, ...}); check ACC1)
+  Real investment demand is exogenous in every closure here (the SAM's investment by commodity times the baseline path, the scenario's
+  qinv_scale and, with the BSP rule, exp(-theta r / 100)), so a slump does not lower private investment by itself. With sr_accelerator,
+  in a path's short-run years (from the first year that carries a shock; the BSP rule's convention: it cannot anticipate them) the
+  PRIVATE part of each investment commodity's demand is also multiplied by
+      exp(z_t),   z_t = a x [(1 - lag) x ln(D_t / D_ref,t) + lag x ln(D_t-1 / D_ref,t-1)],
+  D = the driver: "gdp" (real GDP at benchmark prices) or "demand" (real final demand other than investment: household consumption,
+  own produce, government consumption and exports at benchmark prices; the regressor that does not contain investment itself), the
+  ref path = the BSP rule's reference (monetary_scenario reference=, e.g. the no-shock path with the policies) or, without one, the
+  baseline. This is the level form of the growth equation dln I = a dln D (cumulated from a common start); lag is the share of last
+  year's gap (0 = this year's; 0.25 = a one-quarter lag, as estimated on PSA's quarterly accounts, read annually: a gap that opens in
+  January enters the year's four quarters as 0, 1, 1, 1). The private part: 1 - the public share of the commodity's baseline investment
+  ("public": "psa" = construction at PSA's 2023 general-government share of construction GFCF, 0542B5BCNQ1, current prices; every
+  other investment commodity private, as in the estimate's dependent variable, which counts all durable equipment; or {commodity:
+  public share}). It is added to the scenario's own investment in pesos: commodity c's factor is 1 + (1 - s_c)(exp(z) - 1) / x_c, x_c
+  the scenario's own qinv_scale for c (so a public-works cut stays a public cut and the private part moves by exp(z)), times the BSP
+  rule's scale where the rule is on. z depends on the path, so the path is solved as a fixed point: with the BSP rule inside the
+  rule's own loop (monetary_scenario; converged when the rate and z both settle: z within tol, in % of private investment, default
+  0.01), otherwise in a loop of its own (_accelerator_scenario; the same secant steps). Estimates: preshock/accelerator_estimate.py
+  (outputs/accelerator_estimate_*.md). None (default) = no accelerator, results unchanged to the bit; a = 0 gives the same results
+  to the bit (z = 0 leaves the shocks untouched). Long-run years are unchanged (their investment follows the baseline, or savings).
+  Refused: a outside [0, 10], lag outside [0, 1], an unknown driver or key, public shares outside [0, 1) or not commodities of the
+  SAM, tol <= 0, hybrid=False. The path's accelerator table: sim.accelerator (and, with the rule, the columns
+  'accelerator_scale' and 'accelerator_driver_gap_pct' of sim.monetary).
+
+A short-run export (CET) elasticity (0.4.2, 15 Nov 2026 item P3; opt-in: DynamicCGE(sr_cet=omega or {commodity:
+omega}); check CET1)
+  Every year uses the SAM's CET between exports and home sales with the long-run elasticities of the "ph" set (GTAP's ESUBD via
+  MANAGE-WB: 1.9 for services, 1.1-4.3 for goods). Under markup pricing a markup activity's exports follow the CET's relative-price rule
+  at its reference home sales, so a cost push that raises home prices against a fixed peso cuts exports by omega x the price rise
+  within the year. With sr_cet, in the hybrid's short-run years the CET of the listed commodities (those with both exports and home
+  sales) is re-centred on the baseline year's solution with the short-run elasticity given (cge.py shock key 'cet_sr'): exports /
+  home sales = the baseline's ratio x [(PE / PDS) / (PE_b / PDS_b)] ** omega, on the frontier through the baseline year's point, so a
+  zero shock reproduces the baseline whatever omega. elasticities.short_run_cet() gives the project's estimate: the WITHIN-YEAR response of
+  real exports to the real effective exchange rate (BSP REER; PSA exports at constant 2018 prices; partner demand from the ARDL
+  dataset), goods 0.535 (s.e. 0.268), services 0.045 (s.e. 0.240) (preshock/export_elasticity_sr_estimate.py; outputs/
+  export_elasticity_sr_estimate_20261114_2239.md). None (default) = the long-run CET in every year, results unchanged to the bit.
+  Long-run years are unchanged. Refused: omega not a finite number above 0; commodities not of the SAM; hybrid=False; a scenario's own
+  'cet_sr'.
 
 Public capital (0.3, opt-in: DynamicCGE(public_capital={...}))
   Lost roads and bridges lower the productivity of every industry, not only the capital stock. In a scenario,
@@ -333,7 +385,13 @@ DEFAULT_ASSUMPTIONS = dict(
     sr_markup_gap=0.0,            # 0.3.13 (23 Oct 2026, P6): with sr_pricing="markup", the change of that share per percent of the
                                   # year's output gap against the baseline year's real GDP (cge.py 'mk_gap', 'mk_gdp'); 0 = the
                                   # constant share (default, results unchanged). Check MG1.
-    hoarding=0.0,                 # 0.3.11: paid labour hoarding in the hybrid's short-run years: the share of an
+    sr_markup_floor=None,         # 0.3.13 (12 Nov 2026): with sr_markup_gap, a floor f on the pass-through lam + s x gap
+                                  # (cge.py 'mk_floor', a smooth max): margins absorb at most the share -f of the markup on a cost
+                                  # rise (f = -1: at most the whole markup). None (default) = no floor, results unchanged. Check MF1.
+    sr_markup_ceiling=None,       # 0.4.1 (13 Nov 2026): with sr_markup_gap, a ceiling c on the same pass-through (cge.py
+                                  # 'mk_ceiling'): c = 1, the proportional markup, removes the gap rule's self-fulfilling boom branch at
+                                  # steep slopes. None (default) = no ceiling, results unchanged. Check MC1.
+    hoarding=0.0,                # 0.3.11: paid labour hoarding in the hybrid's short-run years: the share of an
                                   # activity's fall in labour demand (below the baseline year's labour) that stays employed and
                                   # paid out of profits (CGE 'hoarding'). 0 = none (default, results unchanged)
     energy_nest=None,             # 0.3.11: CGE 'energy_nest' (value added-energy bundle, fuel substitution) in
@@ -364,14 +422,55 @@ DEFAULT_ASSUMPTIONS = dict(
                                   # year's that reaches domestic prices within the year; the government absorbs the rest at the border
                                   # (cge.py 'oil_pass', 'oil_ref'); or {commodity: omega}. None = in full (default, results unchanged).
                                   # Check OP1.
+    sr_accelerator=None,          # 0.4.2 (14 Nov 2026): in the hybrid's short-run years the private part
+                                  # of real investment demand times exp(a x [(1 - lag) ln(D/D_ref) + lag ln(D/D_ref) of last year]),
+                                  # {"a", "lag", "driver" ("gdp" | "demand"), "public" ("psa" | {commodity: share}), "tol"}, solved as a
+                                  # fixed point over the path (module notes). None = no accelerator (default, results unchanged). ACC1.
+    sr_cet=None,                  # 0.4.2 (15 Nov 2026 P3): in the hybrid's short-run years the CET between exports
+                                  # and home sales re-centred on the baseline year's solution with a SHORT-RUN elasticity: one number
+                                  # omega > 0 or {commodity: omega} (commodities not listed keep the SAM's CET; elasticities.
+                                  # short_run_cet() gives the estimated set). cge.py 'cet_sr'. None = the long-run CET in every year
+                                  # (default, results unchanged). Check CET1.
+    transfer_scaling="baseline",  # 11 Nov 2026 (0.3.13): a scenario's amounts
+                                  # ('trg_h_add', 'sav_add', 'grow_out_add', ₱ bn at the 2023 SAM's scale) are multiplied by the
+                                  # year's baseline index Y_index, as the SAM's own transfers are (trg_scale). "legacy" = as before
+                                  # 11 Nov 2026: the amounts at the 2023 scale in every year (module notes; check TS1)
 )
+TRANSFER_SCALING = ("baseline", "legacy")
 # 0.3.13 (sr_erpt): commodities whose import prices take the peso's move in full (priced in US$ on world markets: refined
 # petroleum at Singapore benchmark prices, crude oil inside mining at Dubai), as in the design note's P2(b). ccoal: Infinity GEM SAM v0.7 only (coal split
 # from mining, 24 Oct 2026): coal is priced in US$ on world markets too, and inside mining it took the peso in full
 ERPT_FULL = ("cpetr", "cmine", "ccoal")
+# 0.4.2 (15 Nov 2026; opt-in, check ERP1): an ESTIMATE of sr_erpt's phi from PSA data, for
+# DynamicCGE(sr_erpt=SR_ERPT_ESTIMATE["phi"]). preshock/import_price_erpt_estimate.py, run 14 Nov 2026, 10:53 PM (outputs/
+# import_price_erpt_estimate_20261114_2253.md and .json): the within-year pass-through of a permanent 1% weaker peso (BIS PHP per US$)
+# into PSA's implicit price index of imports of goods and services (0012B5BEXQ1, pesos), the year's four quarters averaged, US$ world
+# energy and non-energy prices held (World Bank Pink Sheet), a distributed lag over 8 quarters in y/y log differences, 2003Q1-2019Q4 and
+# 2023Q1-2026Q3, Newey-West errors: 0.385 (s.e. 0.085). ERPT_FULL's share of imports in Infinity GEM's own SAM v1.0 (0.127) passes in full at the
+# border, so non-oil imports take phi = (0.385 - 0.127) / (1 - 0.127) = 0.296 (s.e. 0.098). Alternatives in the same file: 4 quarters
+# 0.351; goods only 0.176 (8) and 0.224 (4). The same equation on the CPI gives the within-year consumer-price response the CGE's peso
+# statistic is compared with: 0.073 (s.e. 0.063; 4 quarters 0.023), inside BSP DP 2025-16's 0.04-0.10.
+SR_ERPT_ESTIMATE = {"phi": 0.29584005949181913, "se": 0.09785299875938004, "full-pass import share": 0.12669550987605524,
+                    "cpi within-year": 0.07286623040936417, "cpi within-year se": 0.06325048043448334,
+                    "source": "outputs/import_price_erpt_estimate_20261114_2253.json"}
 # 0.3.13 (sr_oil_pass): the imports whose world price reaches domestic prices only by the share omega within a
 # short-run year: refined petroleum, and mining (crude inside it), the commodities the oil shock moves (infinity_gem.oil.cge_oil_shock)
 OIL_PASS = ("cpetr", "cmine")              # coal (ccoal, Infinity GEM SAM v0.7) is not oil: its world price passes in full
+# 0.4.2 (14 Nov 2026; sr_accelerator): the keys of the accelerator's dict and their defaults
+ACCELERATOR_DEFAULTS = {"lag": 0.0, "driver": "gdp", "public": "psa", "tol": 0.01, "max_iter": 25}
+ACCELERATOR_DRIVERS = ("gdp", "demand")
+
+
+def psa_public_construction_share(year: int = 2023) -> float:
+    """0.4.2 (sr_accelerator): general government's share of gross fixed capital formation in construction in `year`, current
+    prices, sum of the four quarters (PSA OpenSTAT 0542B5BCNQ1, data/raw/macro; 2023 = the SAM's year: 0.393)."""
+    from . import paths
+    f = paths.DATA_RAW / "macro" / "PSA_OpenSTAT_0542B5BCNQ1_construction_GFCF_by_sector_quarterly_2000-2026.csv"
+    t = pd.read_csv(f, comment="#").set_index("Institutional Sector")
+    t.index = [str(i).strip(". ").strip() for i in t.index]
+    cols = [f"At Current Prices {int(year)} Q{k}" for k in (1, 2, 3, 4)]
+    v = lambda r: float(pd.to_numeric(t.loc[r, cols], errors="coerce").sum())
+    return v("General government") / v("Gross Fixed Capital Formation in Construction")
 
 # PSA GVA industries (OpenSTAT 0052B5BPRA1) -> activities of the IFPRI 2023 SAM
 PSA_INDUSTRIES = {
@@ -565,6 +664,30 @@ PUBLIC_CAPITAL_DEFAULTS = dict(delta_g=0.0352, e=0.77)
 
 
 _ADDITIVE = ("trg_h_add", "sav_add", "grow_out_add", "mpsadj")      # shocks that are amounts (0 = none), not factors
+_AMOUNTS = ("trg_h_add", "sav_add", "grow_out_add")    # 11 Nov 2026: of those, the ones in ₱ bn (mpsadj is a rate)
+
+
+def _grow_amounts(extra: dict, y_index: float) -> dict:
+    """11 Nov 2026 (transfer_scaling="baseline"): a year's scenario amounts times the year's baseline index, so that an amount
+    entered as a share of the year's GDP is that share of the model's economy of the year (the SAM's own transfers grow the
+    same way: trg_scale = Y_index). Factors and rates are left alone. The caller's dict is not changed; a dict without any
+    amount is returned as it is, so such a run is unchanged to the bit."""
+    if not any(k in extra for k in _AMOUNTS):
+        return extra
+    out = dict(extra)
+    for k in _AMOUNTS:
+        if k in out:
+            v = out[k]
+            out[k] = {h: float(a) * y_index for h, a in v.items()} if isinstance(v, dict) else float(v) * y_index
+    return out
+
+
+def _check_transfer_scaling(a: dict) -> str:
+    v = a.get("transfer_scaling", "baseline")
+    if v not in TRANSFER_SCALING:
+        raise ValueError(f"transfer_scaling must be 'baseline' (amounts grow with the baseline, the default) or 'legacy' (as "
+                         f"before 11 Nov 2026), not {v!r}")
+    return v
 
 
 def _scale_shock(extra: dict, lam: float) -> dict:
@@ -618,6 +741,7 @@ class DynamicCGE:
                           "settings.dynamic_kwargs(...) or documented_baseline() (DBCC path)", stacklevel=2)
         a = dict(DEFAULT_ASSUMPTIONS)
         a.update(assumptions)
+        _check_transfer_scaling(a)                   # 11 Nov 2026: before any model is built
         self.a = a
         self.growth = dict(DEFAULT_GROWTH if growth is None else growth)
         self.putty = a["capital_allocation"] == "putty-clay"
@@ -631,6 +755,10 @@ class DynamicCGE:
         self._check_employment_cap(a)                # 0.3.13: True, False or "smooth"
         self._check_sr_labour_slack(a)               # 0.3.13
         self._check_sr_oil_pass(a)                   # 0.3.13 (the commodities again once the model is built)
+        if a.get("sr_cet") is not None:              # 0.4.2 (15 Nov 2026, CET1): checked here (commodities once built)
+            self._check_sr_cet(a)
+        if a.get("sr_accelerator") is not None:      # 0.4.2 (ACC1): checked here (the commodities once the model is built)
+            self._check_sr_accelerator(a)
         kw = dict(closure=a["closure"], unemployed=a["unemployed"],
                   capital="fixed" if self.putty else ("vintage" if self.vintage else a["capital"]),
                   les=a["les"], elasticities=a["elasticities"], margins=a["margins"], wage=a["wage"])
@@ -690,9 +818,19 @@ class DynamicCGE:
             self.ms = CGE(sam, **kw_sr) if sam is not None else CGE.from_sam(**kw_sr)
             self._sam_sr, self._kw_sr = sam, kw_sr
             self._ms_cache = {tuple(self.ms.unemployed): self.ms}
+        if isinstance(a["sr_stickiness"], str):      # 0.4.0 (13 Nov 2026, settings "0.4 recommended"): "sectoral" = stickiness.sectoral()
+            if a["sr_stickiness"] != "sectoral" or not a["hybrid"] or a["sr_pricing"] != "markup":   # of the markup activities, as
+                raise ValueError("sr_stickiness must be a share, {activity: share} or, with sr_pricing='markup' in the hybrid "
+                                 "closure, 'sectoral' (infinity_gem.stickiness.sectoral of the markup activities)")
+            from . import stickiness as _stk        # scenarios/row83_p2_p6_2026.runs() set it after construction (same dict)
+            a["sr_stickiness"] = _stk.sectoral([x for i, x in enumerate(self.ms.A) if self.ms.isMK[i]])
         m = self.m
         self._check_sr_erpt(a, m.C)                  # 0.3.13 (P2(b)): commodities named in sr_erpt must be the SAM's
         self._check_sr_oil_pass(a, m.C)              # 0.3.13: the same for sr_oil_pass
+        if a.get("sr_accelerator") is not None:      # 0.4.2 (ACC1): commodities named in 'public' must be the SAM's
+            self._check_sr_accelerator(a, m.C)
+        if a.get("sr_cet") is not None:              # 0.4.2 (15 Nov 2026, CET1): commodities must be the SAM's
+            self._check_sr_cet(a, m.C)
         self.kc = m.F.index("fcap")
         self.K0 = m.QFS0[self.kc]
         self.K0a = m.QF0[self.kc].copy()             # capital by activity (capital-income units, base rental 1)
@@ -907,6 +1045,162 @@ class DynamicCGE:
                 raise ValueError(f"sr_oil_pass and sr_erpt may not both apply to a commodity: {sorted(om & er)}")
         return o
 
+    @staticmethod
+    def _check_sr_cet(a, commodities=None):
+        """0.4.2 (15 Nov 2026 P3; check CET1): None, one finite number omega > 0, or {commodity: omega > 0};
+        needs the hybrid closure (short-run years). Checked at construction and again before a scenario path."""
+        c = a.get("sr_cet")
+        if c is None:
+            return None
+        vals = list(c.values()) if isinstance(c, dict) else [c]
+        if not vals or any(isinstance(v, bool) or not isinstance(v, numbers.Real) or not np.isfinite(float(v)) or float(v) <= 0
+                           for v in vals):
+            raise ValueError("sr_cet must be None, a short-run CET elasticity omega > 0 (one number) or {commodity: omega > 0}")
+        if not a["hybrid"]:
+            raise ValueError("sr_cet is an option of the hybrid closure's short-run years (hybrid=True)")
+        if isinstance(c, dict) and commodities is not None:
+            bad = [k for k in c if k not in commodities]
+            if bad:
+                raise ValueError(f"sr_cet: not commodities of this SAM: {bad}")
+        return c
+
+    # ------------------------------------------------------------------ 0.4.2 (14 Nov 2026): the accelerator (ACC1)
+    @staticmethod
+    def _check_sr_accelerator(a, commodities=None) -> dict:
+        """0.4.2 (sr_accelerator; check ACC1): None or {"a": a, "lag", "driver", "public", "tol", "max_iter"} (module notes); refuses
+        anything else. Returns the dict with the defaults filled in ('public' resolved to {commodity: share}). Checked at construction
+        (the commodities once the model is built) and before each scenario path (scripts may set it afterwards)."""
+        acc = a.get("sr_accelerator")
+        if acc is None:
+            return None
+        num = lambda v: not isinstance(v, bool) and isinstance(v, numbers.Real) and np.isfinite(float(v))
+        if not isinstance(acc, dict) or "a" not in acc or set(acc) - ({"a"} | set(ACCELERATOR_DEFAULTS)):
+            raise ValueError("sr_accelerator must be None or a dict with 'a' (the elasticity) and optionally 'lag', 'driver', 'public', "
+                             "'tol', 'max_iter'")
+        c = dict(ACCELERATOR_DEFAULTS, **acc)
+        if not num(c["a"]) or not 0.0 <= float(c["a"]) <= 10.0:
+            raise ValueError("sr_accelerator['a'] must be a number in [0, 10] (the elasticity of private investment to the driver)")
+        if not num(c["lag"]) or not 0.0 <= float(c["lag"]) <= 1.0:
+            raise ValueError("sr_accelerator['lag'] must be a share in [0, 1] (the weight on last year's gap)")
+        if c["driver"] not in ACCELERATOR_DRIVERS:
+            raise ValueError(f"sr_accelerator['driver'] must be one of {ACCELERATOR_DRIVERS}")
+        if not num(c["tol"]) or float(c["tol"]) <= 0:
+            raise ValueError("sr_accelerator['tol'] must be a positive number (% of private investment)")
+        if isinstance(c["max_iter"], bool) or not isinstance(c["max_iter"], numbers.Integral) or int(c["max_iter"]) < 1:
+            raise ValueError("sr_accelerator['max_iter'] must be a positive integer")
+        pub = c["public"]
+        if isinstance(pub, str):
+            if pub != "psa":
+                raise ValueError("sr_accelerator['public'] must be 'psa' or {commodity: public share}")
+            pub = {"ccons": psa_public_construction_share(2023)}
+        if not isinstance(pub, dict) or any(not num(v) or not 0.0 <= float(v) < 1.0 for v in pub.values()):
+            raise ValueError("sr_accelerator['public'] must be 'psa' or {commodity: public share in [0, 1)}")
+        if commodities is not None:
+            bad = [k for k in pub if k not in commodities]
+            if bad:
+                raise ValueError(f"sr_accelerator['public']: not commodities of this SAM: {bad}")
+        if not a["hybrid"]:
+            raise ValueError("sr_accelerator is an option of the hybrid closure's short-run years (hybrid=True)")
+        c.update(a=float(c["a"]), lag=float(c["lag"]), tol=float(c["tol"]), max_iter=int(c["max_iter"]),
+                 public={k: float(v) for k, v in pub.items()})
+        return c
+
+    def _acc_years(self, shocks: dict) -> list:
+        """0.4.2: the years the accelerator acts in: the path's short-run years (as _run decides them) from the first year that
+        carries a shock (an empty placeholder year before it is left alone, as the BSP rule leaves it)."""
+        if not self.a["hybrid"]:
+            return []
+        shocked = [t for t in shocks if shocks[t]]
+        if not shocked:
+            return []
+        first, srfix = min(shocked), self.a["short_run_years"]
+        return [t for t in self.years[1:] if t >= first and t in shocks and (srfix is None or t in srfix)]
+
+    def _acc_driver(self, path: Path, cfg: dict) -> dict:
+        """0.4.2: the accelerator's driver by year: real GDP (path table) or real final demand other than investment (household
+        consumption and own produce, government consumption, exports; quantities at benchmark prices)."""
+        if cfg["driver"] == "gdp":
+            return {t: float(path.table.loc[t, "real_gdp"]) for t in path.table.index}
+        out = {}
+        for t, s in path.solutions.items():
+            out[t] = float(np.sum(s["QH"]) + np.sum(s["QHA"]) + np.sum(s["QG"]) + np.sum(s["QE"]))
+        return out
+
+    def _acc_targets(self, sim: Path, reference, years, cfg) -> tuple:
+        """0.4.2: z_t = a x [(1 - lag) ln(D_t / D_ref,t) + lag ln(D_t-1 / D_ref,t-1)] for the accelerator's years, and the driver's
+        gap (%, this year's) by year. reference: a Path or None (the baseline)."""
+        ref = self.base if reference is None else reference
+        ds, dr = self._acc_driver(sim, cfg), self._acc_driver(ref, cfg)
+        lg = lambda t: float(np.log(ds[t] / dr[t])) if (t in ds and t in dr) else 0.0
+        z = {t: cfg["a"] * ((1.0 - cfg["lag"]) * lg(t) + cfg["lag"] * lg(t - 1)) for t in years}
+        return z, {t: (np.exp(lg(t)) - 1.0) * 100 for t in years}
+
+    @staticmethod
+    def _acc_step(z, zn, prev, tol):
+        """0.4.2: the next z to run the path with: a secant step on the residual zn - z, year by year (the slope of the map between
+        the last two paths, clipped to [-0.9, 0.9]), or the plain step zn where the last two paths are too close for a slope."""
+        nxt = {}
+        for t in z:
+            if prev is not None:
+                dx = z[t] - prev[0][t]
+                if abs(dx) * 100 >= 10 * tol:
+                    lam = min(max((zn[t] - prev[1][t]) / dx, -0.9), 0.9)
+                    nxt[t] = z[t] + (zn[t] - z[t]) / (1 - lam)
+                    continue
+            nxt[t] = zn[t]
+        return nxt
+
+    def _acc_apply(self, sh: dict, shocks: dict, z: dict, cfg: dict) -> dict:
+        """0.4.2: the accelerator's factor added to the shocks `sh` (changed in place and returned): in year t, investment commodity
+        c's qinv_scale times 1 + (1 - s_c)(exp(z_t) - 1) / x_c, s_c its public share, x_c the scenario's own qinv_scale for c (in
+        `shocks`, before the BSP rule's scale). A year with z_t = 0 is left untouched (so a = 0 changes nothing, to the bit)."""
+        m = self.m
+        inv = [c for i, c in enumerate(m.C) if m.qinv[i] > 0]
+        for t, zt in z.items():
+            if zt == 0.0:
+                continue
+            own = (shocks.get(t) or {}).get("qinv_scale") or {}
+            own = own if isinstance(own, dict) else {c: float(own) for c in inv}
+            d = dict(sh.get(t) or {})
+            q = d.get("qinv_scale") or {}
+            q = dict(q) if isinstance(q, dict) else {c: float(q) for c in inv}
+            e = float(np.exp(zt)) - 1.0
+            for c in inv:
+                x = float(own.get(c, 1.0))
+                if x <= 0:
+                    raise ValueError(f"Year {t}: sr_accelerator needs a positive qinv_scale for {c} (got {x})")
+                q[c] = q.get(c, 1.0) * (1.0 + (1.0 - cfg["public"].get(c, 0.0)) * e / x)
+            d["qinv_scale"] = q
+            sh[t] = d
+        return sh
+
+    def _acc_table(self, z, gap, deltas, converged, it, cfg) -> pd.DataFrame:
+        tab = pd.DataFrame({"accelerator_driver_gap_pct": pd.Series(gap, dtype=float), "accelerator_z": pd.Series(z, dtype=float)})
+        tab["accelerator_scale"] = np.exp(tab["accelerator_z"])
+        tab.attrs.update({"iterations": it, "converged": converged, "deltas": list(deltas),
+                          **{k: v for k, v in cfg.items() if k != "max_iter"}})
+        return tab
+
+    def _accelerator_scenario(self, shocks: dict, reference: Path = None) -> Path:
+        """0.4.2 (sr_accelerator without the BSP rule): the path with the accelerator, a fixed point over the path (each
+        iteration one scenario run; secant steps, _acc_step). The result carries sim.accelerator (z, the scale exp(z) and the
+        driver's gap by year; attrs 'iterations', 'converged', 'deltas' = the largest change of z, % of private investment)."""
+        cfg = self._check_sr_accelerator(self.a, self.m.C)
+        years = self._acc_years(shocks)
+        z, prev, deltas, converged, it = {t: 0.0 for t in years}, None, [], False, 0
+        sim = self._run(shocks=shocks, tfp_path=self.base.tfp)
+        for it in range(1, cfg["max_iter"] + 1):
+            zn, gap = self._acc_targets(sim, reference, years, cfg)
+            delta = max((abs(zn[t] - z[t]) * 100 for t in years), default=0.0)
+            deltas.append(delta)
+            if delta < cfg["tol"]:
+                converged = True
+                break
+            z, prev = self._acc_step(z, zn, prev, cfg["tol"]), (z, zn)
+            sim = self._run(shocks=self._acc_apply(copy.deepcopy(shocks), shocks, z, cfg), tfp_path=self.base.tfp)
+        sim.accelerator = self._acc_table(z, gap, deltas, converged, it, cfg)
+        return sim
+
     def _wage_curve(self, sol, model, spec, t, K):
         """0.3.7 (16 Oct 2026): in a short-run year, each fixed-wage labour type's wage anchor is lowered to
         wbar x min(1, EMP/EMP_baseline) ** beta, where EMP is the employment it produces: a fixed point (each evaluation
@@ -998,6 +1292,22 @@ class DynamicCGE:
         if float(s) != 0.0 and (not a["hybrid"] or a["sr_pricing"] != "markup"):
             raise ValueError("sr_markup_gap is an option of markup pricing in the hybrid closure's short-run years (hybrid=True, "
                              "sr_pricing='markup')")
+        f = a.get("sr_markup_floor")                 # 0.3.13 (12 Nov 2026, check MF1): the floor acts on the gap rule only
+        if f is not None:
+            if isinstance(f, bool) or not isinstance(f, numbers.Real) or not np.isfinite(float(f)):
+                raise ValueError("sr_markup_floor must be None or a finite number: the lowest markup pass-through the gap rule "
+                                 "may reach (-1 = margins absorb at most the whole markup on a cost rise)")
+            if float(s) == 0.0:
+                raise ValueError("sr_markup_floor bounds the gap rule's pass-through: it needs sr_markup_gap other than 0")
+        c = a.get("sr_markup_ceiling")               # 0.4.1 (13 Nov 2026, check MC1): the ceiling acts on the gap rule only
+        if c is not None:
+            if isinstance(c, bool) or not isinstance(c, numbers.Real) or not np.isfinite(float(c)):
+                raise ValueError("sr_markup_ceiling must be None or a finite number: the highest markup pass-through the gap rule "
+                                 "may reach (1 = the proportional markup)")
+            if float(s) == 0.0:
+                raise ValueError("sr_markup_ceiling bounds the gap rule's pass-through: it needs sr_markup_gap other than 0")
+            if f is not None and float(c) <= float(f):
+                raise ValueError("sr_markup_ceiling must be above sr_markup_floor")
         return float(s)
 
     def _sr_erpt_spec(self, ms):
@@ -1145,6 +1455,41 @@ class DynamicCGE:
                 sol, model = self._wage_curve(sol, model, spec, t, K)
         raise RuntimeError(f"Year {t}: the employment cap did not settle")
 
+    CAP_FALLBACK = True                              # 0.4.0 (check EF1): False = the engine before 13 Nov 2026 (the error stands)
+
+    def _cap_fallback(self, spec, t, K, err):
+        """0.4.0 (13 Nov 2026; check EF1): the switching employment cap of year t did not settle
+        (_cap_employment cycled even after its joint re-solve). That one year is re-solved exactly as employment_cap="smooth" solves a
+        short-run year: on the same short-run model with the cap inside it as one complementarity condition per fixed-wage type
+        (_ms_for(..., smooth=True), cge.py labour_cap), from the baseline's start, then the year's wage curve or consumption rule
+        (_wage_curve / _sr_fixed_point), with the year's anchors and saving-rate overrides of the failed loop discarded first. EC1:
+        the smooth and the switching cap agree to 1.4e-12 in slumps and 6.7e-5 in booms where both settle. Reached only where the
+        run raised the error before, so every run that settled is unchanged. Needs the hybrid closure with the fixed peso (the smooth
+        cap's domain); otherwise the original error stands. Logged: a warning, self.cap_fallback_years, and the path table's column
+        'employment_cap_fallback'. Returns (solution, model, capped types)."""
+        import warnings
+        if not self.a["hybrid"] or self.a["sr_fx"] != "fixed":
+            raise err
+        self._wbar_override.pop(t, None)
+        self._mps_override.pop(t, None)
+        model = self._ms_for(self.ms.unemployed, smooth=True)
+        sol = model.solve(self._short_run_spec(spec, t, K, model), x_start=self._short_run_start(t, model))
+        if not sol.ok:
+            raise RuntimeError(f"Year {t}: the employment cap did not settle, and the smooth-cap fallback did not solve "
+                               f"({sol.message})") from err
+        if self.a["sr_consumption"] is not None:
+            sol, model = self._sr_fixed_point(sol, model, spec, t, K)
+        elif self.a["wage_curve"]:
+            sol, model = self._wage_curve(sol, model, spec, t, K)
+        capped = [model.F[k] for k in model.iU if float(sol["LPREM"][k]) > 1e-8]
+        self.cap_fallback_years = getattr(self, "cap_fallback_years", set()) | {t}
+        msg = (f"Year {t}: the switching employment cap did not settle; the year was re-solved with the smooth cap "
+               f"(employment_cap='smooth' for this year only; capped: {capped or 'none'}; check EF1)")
+        warnings.warn(msg)
+        import logging                               # also through logging: scenario scripts silence warnings (scenarios/_common.py)
+        logging.getLogger("infinity_gem.dynamic").warning(msg)
+        return sol, model, capped
+
     def _short_run_spec(self, spec, t, K, ms=None):
         """Anchor the short-run model to the baseline equilibrium of year t (hybrid closure)."""
         ms = ms or self.ms
@@ -1191,6 +1536,11 @@ class DynamicCGE:
             spec["oil_pass"] = self._sr_oil_pass_spec(ms)    # against the baseline year's reaches domestic prices within the year; the
             pw_b, ex_b = np.asarray(bsol["pwm"], float), float(bsol["EXR"])   # government absorbs the rest at the border
             spec["oil_ref"] = {c: float(pw_b[ms.C.index(c)]) * ex_b for c in spec["oil_pass"]}
+        if "cet_sr" in spec:                     # 0.4.2 (15 Nov 2026, CET1): set by DynamicCGE(sr_cet=...), anchored to
+            raise ValueError(f"Year {t}: 'cet_sr' is set by DynamicCGE(sr_cet=...), not by a scenario")   # the baseline year
+        if self.a.get("sr_cet") is not None:     # the CET re-centred on the baseline year's solution with the short-run elasticity
+            spec["cet_sr"] = {"omega": dict(self.a["sr_cet"]) if isinstance(self.a["sr_cet"], dict) else float(self.a["sr_cet"]),
+                              "ref": {k: np.asarray(bsol[k], float) for k in ("QE", "QD", "QX", "PE", "PDS")}}
         if ms.pricing == "sticky":               # 0.3.8 (review D2): prices anchored to the baseline year's, rigid downward
             spec["pa_anchor"] = {x: float(bsol["UNITREV"][i]) for i, x in enumerate(ms.A)}
             s_ = self.a["sr_stickiness"]
@@ -1203,7 +1553,11 @@ class DynamicCGE:
             if float(self.a.get("sr_markup_gap", 0.0)) != 0.0:     # 0.3.13 (P6): the pass-through moves with the output gap
                 spec["mk_gap"] = float(self.a["sr_markup_gap"])  # against the baseline year's real GDP (zero shock = baseline)
                 spec["mk_gdp"] = float(self.base.table.loc[t, "real_gdp"])
-        if ms.en is not None:                    # 0.3.11: installed technology centred on the baseline year
+                if self.a.get("sr_markup_floor") is not None:     # 0.3.13 (12 Nov 2026, check MF1): the rule's floor
+                    spec["mk_floor"] = float(self.a["sr_markup_floor"])
+                if self.a.get("sr_markup_ceiling") is not None:   # 0.4.1 (13 Nov 2026, check MC1): the rule's ceiling
+                    spec["mk_ceiling"] = float(self.a["sr_markup_ceiling"])
+        if ms.en is not None:                   # 0.3.11: installed technology centred on the baseline year
             spec["en_shares"] = ms.energy_shares_at(bsol["PQ"], bsol["PVA"], bsol["QA"], self.m)
         if ms.hoarding > 0:                      # 0.3.11: hoarding relative to the baseline year's labour by activity
             spec["hoard_ref"] = np.asarray(bsol["QF"], float)
@@ -1271,16 +1625,22 @@ class DynamicCGE:
             self._check_sr_consumption(self.a)       # 0.3.13: also when set after construction
         if shocks is not None and not calibrate and self.a.get("sr_erpt") is not None:
             self._check_sr_erpt(self.a, m.C)         # 0.3.13 (P2(b)): also when set after construction
-        if shocks is not None and not calibrate and self.a.get("sr_markup_gap", 0.0) != 0.0:
-            self._check_sr_markup_gap(self.a)        # 0.3.13 (P6): also when set after construction
+        if shocks is not None and not calibrate and (self.a.get("sr_markup_gap", 0.0) != 0.0
+                                                     or self.a.get("sr_markup_floor") is not None
+                                                     or self.a.get("sr_markup_ceiling") is not None):
+            self._check_sr_markup_gap(self.a)        # 0.3.13 (P6; 12 Nov 2026 the floor, MF1): also when set after construction
         if shocks is not None and not calibrate and self.a.get("sr_oil_pass") is not None:
             self._check_sr_oil_pass(self.a, m.C)     # 0.3.13: also when set after construction
+        if shocks is not None and not calibrate and self.a.get("sr_cet") is not None:
+            self._check_sr_cet(self.a, m.C)          # 0.4.2 (15 Nov 2026, CET1): also when set after construction
         if shocks is not None and not calibrate and (isinstance(self.a["employment_cap"], str)
                                                      or self.a.get("sr_labour_slack") is not None):
             self._check_employment_cap(self.a)       # 0.3.13: also when set after construction
             self._check_sr_labour_slack(self.a)
+        grow_amounts = _check_transfer_scaling(self.a) == "baseline"   # 11 Nov 2026 (also when set after construction)
         icons = m.C.index("ccons")
         sols, tfps, caps, rows, dems = {}, {}, {}, [], {}
+        fallback_years = set()                       # 0.4.0 (check EF1): years whose switching cap did not settle (this path)
         K = self.K0a.copy() if self.by_act else self.K0
         Ktot0 = float(np.sum(self.K0a)) if self.by_act else self.K0
         self._knew = 0.0                             # 0.3.12 (vintage): no new capital in the benchmark year
@@ -1296,6 +1656,8 @@ class DynamicCGE:
             if i > 0:
                 Y_index *= 1 + self.growth[t] / 100
             extra = (shocks or {}).get(t)
+            if extra and grow_amounts:                   # 11 Nov 2026: the scenario's amounts at the year's scale (module notes);
+                extra = _grow_amounts(extra, Y_index)    # before the leakage below, whose amounts are at the year's scale already
             self._knew_path[t] = self._knew
             leak = 0.0                                   #: government construction spending diverted as income
             if pubcap and self.pc.get("leakage", {}).get(t):
@@ -1403,8 +1765,14 @@ class DynamicCGE:
             if short and self.a["employment_cap"] == "smooth":   # 0.3.13: the cap held inside every solve above
                 capped = [model.F[k] for k in model.iU if float(sol["LPREM"][k]) > 1e-8]   # (cge.py labour_cap): types at their cap
             elif short and self.a["employment_cap"]:    # 0.3.7: employment at most the labour supply
-                sol, model, capped = self._cap_employment(sol, model, spec, t, K, L_index)
-                if capped and self.a["wage_curve"]:     # 0.3.9 (review D4): not solved jointly; flag it
+                try:
+                    sol, model, capped = self._cap_employment(sol, model, spec, t, K, L_index)
+                except RuntimeError as err:             # 0.4.0 (13 Nov 2026; check EF1): ONLY "did not settle" is caught;
+                    if not self.CAP_FALLBACK or "the employment cap did not settle" not in str(err):   # that year is re-solved
+                        raise                           # with the smooth cap; every run that settled before is unchanged
+                    sol, model, capped = self._cap_fallback(spec, t, K, err)
+                    fallback_years.add(t)
+                if capped and self.a["wage_curve"] and t not in fallback_years:     # 0.3.9 (review D4): not solved jointly; flag it
                     import warnings
                     if t in getattr(self, "cap_joint_years", set()):     # 0.3.10: the cycle fallback solved it jointly
                         warnings.warn(f"Year {t}: the employment cap binds for {capped}; the regimes cycled, so the wage curve "
@@ -1441,6 +1809,8 @@ class DynamicCGE:
                            + (e_t - self.pc["e"]) * self.pc["ig_public_share"] * igb)
                 if (self.pc.get("kg_loss") or {}).get(t):    # 0.3.7: public capital destroyed in year t (₱ bn, SAM units),
                     dKG -= self.pc["kg_loss"][t]                 # e.g. typhoon damage to public infrastructure (NDRRMC)
+                    # 12 Nov 2026 (note only): kg_loss is in YEAR t's model units (stochastic.py sizes it as a share of year t's
+                    # baseline real GDP); it is not grown by transfer_scaling. Only the pinned-legacy combined_2025_2030 enters 2023 units.
                 if self.pc.get("waste_lost"):            # 0.3.6: wasted public spending is not capital in the general stock
                     s_ = self.pc["ig_public_share"]
                     disb = s_ * igb + dIG + leak         # government construction disbursement of the year
@@ -1461,6 +1831,7 @@ class DynamicCGE:
                                  "employment_gap_low_skill_pct": -gap_now[unemp[0]] * 100 if unemp else 0.0,
                                  "employment_capped": ",".join(capped)}
                                 if hybrid else {}),
+                             **({"employment_cap_fallback": "smooth"} if t in fallback_years else {}),   # 0.4.0 (EF1)
                              **({"public_capital_gap_pct": dKG_start / (self.pc["kg_gdp"] * float(self.base.table.loc[t, "real_gdp"])) * 100}
                                 if pubcap else {})))
             # capital for next year from this year's real investment
@@ -1499,16 +1870,19 @@ class DynamicCGE:
             self.baseline()
         if self.a["monetary"] is not None:
             return self.monetary_scenario(shocks, **self.a["monetary"])
+        if self.a.get("sr_accelerator") is not None:     # 0.4.2 (ACC1): the accelerator's own fixed point, against the
+            return self._accelerator_scenario(shocks)    # baseline (with the BSP rule it is solved inside the rule's loop instead)
         return self._run(shocks=shocks, tfp_path=self.base.tfp)
 
     # ------------------------------------------------------------------ (0.3.12, 20 Oct 2026): a BSP rule inside the model
-    def monetary_gaps(self, sim: Path) -> pd.DataFrame:
+    def monetary_gaps(self, sim: Path, reference: Path = None) -> pd.DataFrame:
         """A path's gaps against the baseline, year by year, as the rule reads them: the output gap (%), the inflation gap (the
         scenario's CPI inflation less the baseline's, pp a year) and the peso's depreciation gap (pp a year). The inflation gap
         exists only in short-run years, where the peso is the numeraire and the CPI moves; in long-run years the CPI is the
         numeraire (the price level is not modelled), so the gap is zero there, and a short-run year after a long-run year starts
-        from a price-level ratio of one."""
-        b, s = self.base.table, sim.table
+        from a price-level ratio of one. 0.4.0 (13 Nov 2026): reference = another path (e.g. the no-shock path with the
+        policies, scenarios/combined_revised.Runs) to measure the gaps against instead of the baseline; None = the baseline (as before)."""
+        b, s = (self.base if reference is None else reference).table, sim.table
         g = pd.DataFrame(index=s.index)
         g["output_gap_pct"] = (s["real_gdp"] / b["real_gdp"] - 1) * 100
         short = (s["closure"] == "short run") if "closure" in s.columns else pd.Series(False, index=s.index)
@@ -1540,9 +1914,29 @@ class DynamicCGE:
         i_avg = target + (i_end_prev - target) * (rho * (1 - rho ** 4) / (4 * (1 - rho)))
         return i_avg, i_end
 
+    @staticmethod
+    def quarterly_rule(rule: dict, targets, i_end_prev: float) -> tuple:
+        """0.4.1 (13 Nov 2026; opt-in): annual_rule with a target that differs by quarter (targets = four values,
+        quarters 1-4): i_q = rho i_{q-1} + (1 - rho) T_q, quarter by quarter; returns the year's average and its end value. With four
+        equal targets it equals annual_rule (check MT1)."""
+        rho = float(rule["rho"])
+        if not 0.0 <= rho < 1.0:
+            raise ValueError("rule['rho'] must be in [0, 1)")
+        if rule.get("freq", "quarterly") == "annual":
+            raise ValueError("quarter weights need freq='quarterly'")
+        targets = [float(x) for x in targets]
+        if len(targets) != 4:
+            raise ValueError("quarterly_rule needs four quarterly targets")
+        i, path = float(i_end_prev), []
+        for tq in targets:
+            i = rho * i + (1 - rho) * tq
+            path.append(i)
+        return float(np.mean(path)), path[-1]
+
     def monetary_scenario(self, shocks: dict, rule: dict = None, theta: float = 1.5, fx_per_pp: float = 0.0,
                           expectations: str = "adaptive", path: dict = None, years=None, tol: float = 0.01,
-                          max_iter: int = 15, accelerate: bool = True, relax: float = 0.5, start: dict = None) -> Path:
+                          max_iter: int = 15, accelerate: bool = True, relax: float = 0.5, start: dict = None,
+                          reference: Path = None, observed: dict = None) -> Path:
         """The money block (0.3.12, 20 Oct 2026): the path with a BSP policy rule inside the model, solved as a fixed point over the
         whole path (each iteration is one scenario run; the rule's feedback on the gaps is weak, so two to four iterations
         usually suffice). Opt-in; with no rule the model is as before.
@@ -1570,12 +1964,33 @@ class DynamicCGE:
           iteration runs the path at this rate path (a warm start, e.g. the converged path of a nearby setting in a re-fit) instead of
           the path without the rule; years not listed get zero. None (default) = as before. The fixed point is the same; only the
           number of iterations changes.
+        - reference (0.4.0, 13 Nov 2026, opt-in): a Path (run on this model) whose gaps the rule reads as zero: the gaps are this
+          path's against the reference (monetary_gaps(sim, reference)), e.g. the no-shock path with the policies, so that the rule
+          reacts to the shocks and not to the policies every path carries (settings.BSP_RULE_REFERENCE; combined_revised.Runs).
+          None (default) = against the baseline, as before.
+        - 0.4.1 (13 Nov 2026; all opt-in, absent = as before; check MT1):
+          rule["phi_pi_lead"], rule["phi_pi_lag"]: coefficients on NEXT year's and LAST year's inflation gap of the path in the target
+          (T = phi_pi pi_t + phi_pi_lead pi_{t+1} + phi_pi_lag pi_{t-1} + ...; pi of a year outside the path's short-run years is 0, as
+          monetary_gaps reads it). infinity_gem.monetary.rule("pamph", expected="lead") gives the QPM's own form, E pi' + g2 pi with E pi'
+          model-consistent (phi_pi = g2, phi_pi_lead = 1), instead of phi_pi = 1 + g2 on this year's gap.
+          rule["quarter_weights"] = {year: (w1, w2, w3, w4)}: within that year the INFLATION part of the target is T_pi x w_q (the
+          weights' mean is 1, so the year's average gap is kept) and the rule runs quarter by quarter (quarterly_rule); e.g. the
+          quarterly profile of a shock that began in the year (infinity_gem.monetary.quarter_weights).
+          observed = {year: {"i": the year's average policy-rate gap, "i_end": its end-of-year value, "pi_e": optional}}: in those
+          years the policy-rate gap is the observed one (e.g. the BSP's actual 2026 decisions, infinity_gem.monetary.bsp_observed_gap),
+          and the rule acts in the other years, starting from the observed end-of-year value (the rule's lag). Expected inflation
+          follows `expectations` unless pi_e is given.
         - relax, accelerate, tol: the path used in the next iteration is a damped step towards the rule's rate (relax 0.5; the plain
           map can diverge in the 2026 scenarios' setting, where the years are coupled through expectations), replaced after two iterations by
           a secant step on the residual, year by year, where the last two paths differ by at least ten times tol (the slope is
           clipped to [-0.9, 0.5]; near the solver's noise floor the secant would amplify noise). Convergence = the largest change
           between the rate the rule gives and the rate the path was run with is below tol (0.01 pp: at theta 1.5 that is 0.015% of
           investment, below the model's own solve noise); the result does not depend on the step scheme.
+        - 0.4.2 (14 Nov 2026; opt-in, check ACC1): with the assumption sr_accelerator the accelerator's z (module notes)
+          is solved in this loop against the same reference: each iteration also computes z at the path's driver gaps, the next path
+          carries it (_acc_apply, after the rule's scale), and the loop has converged only when the rate (tol) and z (the
+          accelerator's tol, % of private investment) both settle; max_iter is at least the accelerator's. Without it nothing here
+          changes (the same shocks, the same convergence test).
         Returns a Path whose .monetary table carries the gaps, the policy-rate gap, expected inflation, the real-rate gap and
         the scales applied, with attrs 'iterations', 'converged' and 'deltas' (the largest change of the rate path, pp, by
         iteration). Limits: the rule sees an inflation gap only in short-run years (monetary_gaps); the lag between the rule
@@ -1601,7 +2016,25 @@ class DynamicCGE:
             if hybrid and srfix is None:
                 years = [t for t in years if t in shocks]
         years = list(years)
+        observed = {int(t): dict(v) for t, v in (observed or {}).items()}     # 0.4.1: observed years
+        if observed:
+            if path is not None:
+                raise ValueError("observed is used with a rule, not with path")
+            if any(t not in years for t in observed):
+                raise ValueError(f"observed years {sorted(observed)} must be among the years the rule acts in {years}")
+            if any("i" not in v for v in observed.values()):
+                raise ValueError("observed = {year: {'i': average gap, 'i_end': end-of-year gap (optional), 'pi_e': (optional)}}")
+        qw = {int(t): tuple(float(x) for x in w) for t, w in ((rule or {}).get("quarter_weights") or {}).items()}
+        if any(len(w) != 4 or abs(sum(w) / 4 - 1) > 1e-9 for w in qw.values()):
+            raise ValueError("rule['quarter_weights'] = {year: four weights with mean 1}")
         rate, pie = {t: 0.0 for t in years}, {t: 0.0 for t in years}
+        if observed and start is None:               # the first iteration runs the observed years at their observed rate
+            start = {"i": {t: float(v["i"]) for t, v in observed.items()}}
+        acc = self._check_sr_accelerator(self.a, m.C) if self.a.get("sr_accelerator") is not None else None   # 0.4.2 (ACC1)
+        if acc is not None:                          # the accelerator solved inside this loop, against the same reference
+            acc_years, acc_z, acc_prev, acc_deltas, acc_gap = self._acc_years(shocks), None, None, [], {}
+            acc_z = {t: 0.0 for t in acc_years}
+            max_iter = max(int(max_iter), acc["max_iter"])
         rule_rate = dict(rate)                       # the rate the rule gives (the path is run with `rate`, extrapolated when accelerated)
         prev = None                                  # (path used, rate the rule gave) of the previous iteration, for the secant step
         scale, fxs = {t: 1.0 for t in years}, {t: 1.0 for t in years}
@@ -1612,7 +2045,7 @@ class DynamicCGE:
             pie = {t: float((start.get("pi_e") or {}).get(t, 0.0)) for t in years}
             sim = self._run(shocks=self._monetary_shocks(shocks, years, rate, pie, theta, fx_per_pp, inv, hybrid, srfix, scale, fxs),
                             tfp_path=self.base.tfp)
-        g = self.monetary_gaps(sim)
+        g = self.monetary_gaps(sim, reference)
         deltas, converged, it = [], False, 0
         for it in range(1, max_iter + 1):
             new_rate, new_pie, i_end = {}, {}, 0.0
@@ -1622,11 +2055,26 @@ class DynamicCGE:
                     i_avg, pi_e = float(pt.get("i", 0.0)), float(pt.get("pi_e", 0.0))
                     i_end = i_avg
                 else:
-                    target = (float(rule["phi_pi"]) * float(g.loc[t, "inflation_gap_pp"])
-                              + float(rule["phi_x"]) * float(g.loc[t, "output_gap_pct"])
+                    gpi = lambda y: float(g.loc[y, "inflation_gap_pp"]) if y in g.index else 0.0
+                    t_pi = (float(rule["phi_pi"]) * gpi(t) + float(rule.get("phi_pi_lead", 0.0)) * gpi(t + 1)   # 0.4.1: lead
+                            + float(rule.get("phi_pi_lag", 0.0)) * gpi(t - 1))                                    # and lag (opt-in)
+                    t_rest = (float(rule["phi_x"]) * float(g.loc[t, "output_gap_pct"])
                               + float(rule.get("phi_e", 0.0)) * float(g.loc[t, "depreciation_gap_pp"]))
-                    i_avg, i_end = self.annual_rule(rule, target, i_end)
-                    if expectations == "foresight":
+                    if t in observed:                 # 0.4.1: the observed decisions of that year
+                        i_avg = float(observed[t]["i"])
+                        i_end = float(observed[t].get("i_end", i_avg))
+                    elif t in qw:                     # 0.4.1: the inflation part by quarter within the year
+                        i_avg, i_end = self.quarterly_rule(rule, [t_pi * w + t_rest for w in qw[t]], i_end)
+                    elif "phi_pi_lead" in rule or "phi_pi_lag" in rule:
+                        i_avg, i_end = self.annual_rule(rule, t_pi + t_rest, i_end)
+                    else:                             # as before 0.4.1, in the same order of operations (bit for bit)
+                        target = (float(rule["phi_pi"]) * float(g.loc[t, "inflation_gap_pp"])
+                                  + float(rule["phi_x"]) * float(g.loc[t, "output_gap_pct"])
+                                  + float(rule.get("phi_e", 0.0)) * float(g.loc[t, "depreciation_gap_pp"]))
+                        i_avg, i_end = self.annual_rule(rule, target, i_end)
+                    if t in observed and "pi_e" in observed[t]:
+                        pi_e = float(observed[t]["pi_e"])
+                    elif expectations == "foresight":
                         pi_e = float(g.loc[years[k + 1], "inflation_gap_pp"]) if k + 1 < len(years) else 0.0
                     elif expectations == "adaptive":
                         pi_e = float(g.loc[years[k - 1], "inflation_gap_pp"]) if k > 0 else 0.0
@@ -1636,7 +2084,15 @@ class DynamicCGE:
             delta = max((abs(new_rate[t] - rate[t]) for t in years), default=0.0)
             deltas.append(delta)
             rule_rate, pie = new_rate, new_pie
-            if delta < tol:                           # the path already carries this rate (within tol): done
+            if acc is not None:                       # 0.4.2 (ACC1): the accelerator's z at this path's gaps
+                acc_zn, acc_gap = self._acc_targets(sim, reference, acc_years, acc)
+                acc_delta = max((abs(acc_zn[t] - acc_z[t]) * 100 for t in acc_years), default=0.0)
+                acc_deltas.append(acc_delta)
+                if delta < tol and acc_delta < acc["tol"]:
+                    converged = True
+                    break
+                acc_z, acc_prev = self._acc_step(acc_z, acc_zn, acc_prev, acc["tol"]), (acc_z, acc_zn)
+            elif delta < tol:                         # the path already carries this rate (within tol): done
                 converged = True
                 break
             damped = {t: rate[t] + relax * (new_rate[t] - rate[t]) for t in years}
@@ -1659,6 +2115,8 @@ class DynamicCGE:
             else:
                 prev, rate, plain = (rate, new_rate), damped, None
             sh = self._monetary_shocks(shocks, years, rate, pie, theta, fx_per_pp, inv, hybrid, srfix, scale, fxs)
+            if acc is not None:                       # 0.4.2 (ACC1): not reached without the accelerator (the shocks as before)
+                sh = self._acc_apply(sh, shocks, acc_z, acc)
             try:
                 sim = self._run(shocks=sh, tfp_path=self.base.tfp)
             except RuntimeError:
@@ -1666,8 +2124,10 @@ class DynamicCGE:
                     raise
                 rate = plain                          # the secant step overshot into a path the model cannot solve: plain step
                 sh = self._monetary_shocks(shocks, years, rate, pie, theta, fx_per_pp, inv, hybrid, srfix, scale, fxs)
+                if acc is not None:                   # 0.4.2 (ACC1)
+                    sh = self._acc_apply(sh, shocks, acc_z, acc)
                 sim = self._run(shocks=sh, tfp_path=self.base.tfp)
-            g = self.monetary_gaps(sim)
+            g = self.monetary_gaps(sim, reference)
         tab = g.loc[years].copy()
         tab["policy_rate_gap_pp"] = pd.Series(rule_rate)
         tab["expected_inflation_gap_pp"] = pd.Series(pie)
@@ -1675,7 +2135,14 @@ class DynamicCGE:
         tab["investment_scale"] = pd.Series(scale)
         tab["exr_scale"] = pd.Series(fxs)
         tab.attrs.update({"iterations": it, "converged": converged, "deltas": deltas, "theta": theta, "expectations": expectations,
-                          "fx_per_pp": fx_per_pp, "rule": dict(rule) if rule else None, "path": path})
+                          "fx_per_pp": fx_per_pp, "rule": dict(rule) if rule else None, "path": path,
+                          "reference": "baseline" if reference is None else "the given path",      # 0.4.0
+                          "observed": observed or None})                                             # 0.4.1
+        if acc is not None:                          # 0.4.2 (ACC1): the accelerator's table (z of the path as run)
+            sim.accelerator = self._acc_table(acc_z, acc_gap, acc_deltas, converged, it, acc)
+            tab["accelerator_scale"] = sim.accelerator["accelerator_scale"].reindex(tab.index)
+            tab["accelerator_driver_gap_pct"] = sim.accelerator["accelerator_driver_gap_pct"].reindex(tab.index)
+            tab.attrs["accelerator"] = dict(sim.accelerator.attrs)
         sim.monetary = tab
         return sim
 

@@ -137,6 +137,7 @@ def main():
     summary, shap_rows, pol_rows, years = [], [], [], {}
     for pcname in ("low", "high"):
         kw = dynamic_kwargs("0.3 recommended", public_capital=pcname, rice=True, land="fixed", sam_variant="ifpri")   # 0.3.10: IFPRI, as run
+        kw["transfer_scaling"] = "legacy"            # 11 Nov 2026: this script reproduces the first draft, run before the transfer-scaling fix
         pc0 = dict(kw["public_capital"])
         d = DynamicCGE(**kw)
         base = d.baseline()

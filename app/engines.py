@@ -177,9 +177,15 @@ _CGE_CACHE: dict = {}
 _MS: list = []
 
 
+SIMULATOR_FIES_BASE = "fies2023"   # 18 Nov 2026 (FIES 2025 became the library default): the Simulator stays on
+#                                    the FIES 2023 base for now. Its default setting is "0.2 published" (check R0) and its new-poor
+#                                    labels, LFS option and household panel are FIES 2023's; bringing the FIES 2025 base to the
+#                                    Simulator is a separate step, as bringing 0.4 to it is (settings.SIMULATOR_SETTINGS).
+
+
 def microsim() -> Microsim:
     if not _MS:
-        _MS.append(Microsim())
+        _MS.append(Microsim(base=SIMULATOR_FIES_BASE))
     return _MS[0]
 
 

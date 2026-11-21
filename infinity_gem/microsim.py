@@ -1,4 +1,8 @@
-"""Top-down microsimulation: CGE (or multiplier) results -> FIES 2023 households -> poverty.
+"""Top-down microsimulation: CGE (or multiplier) results -> FIES households -> poverty.
+
+Base (0.4.2, 18 Nov 2026): FIES 2025 and PSA's 2025 lines by default (Microsim(); 11.08 M poor, check
+FB1); Microsim(base="fies2023") = the FIES 2023 base described below (17.54 M poor, check P1), on which every figure published
+before 18 Nov 2026 was computed. infinity_gem/fies_base.py.
 
 Method (the "representative household group" approach used by IFPRI, the World Bank and PIDS):
   1. Each FIES 2023 household is assigned to one of the SAM's ten groups: urban or rural
@@ -22,10 +26,23 @@ import pandas as pd
 from . import paths
 
 OFFICIAL_POOR_2023 = 17_540_000     # PSA, 2023 Full-Year Official Poverty Statistics
+OFFICIAL_POOR_2025 = 11_083_030     # PSA, 2025 Full Year Official Poverty Statistics (rev. 30 Oct 2026), Table 6: opt-in base "fies2025"
 
 
 class Microsim:
-    def __init__(self, path=None):
+    def __init__(self, path=None, base: str | None = None):
+        """base (0.4.2, 18 Nov 2026): "fies2023" or "fies2025" (PSA's FIES 2025 public-use file with PSA's
+        2025 lines, per-capita income = PSA's PERCAPITA; infinity_gem/fies_base.py; check FB1); None = fies_base.default() ("fies2025"
+        since 18 Nov 2026; environment INFINITY_GEM_FIES_BASE overrides it). path: a file of that base."""
+        from . import fies_base
+        self.base = base = fies_base.resolve(base)
+        if base == "fies2025":
+            f = fies_base.households_2025(path)[["W_PROV", "FSIZE", "TOINC", "RFACT", "MEM_RFACT", "URB", "NPCINC", "PLINE",
+                                                 "FLINE", "PCI"]].copy()
+            f["POP"] = f["MEM_RFACT"]
+            f["grp"] = np.where(f["URB"] == 1, "hhd-u", "hhd-r") + np.ceil(f["NPCINC"] / 2).astype(int).astype(str)
+            self.f = f
+            return
         f = pd.read_csv(path or paths.FIES_POVLINES)
         f.columns = [c.upper() for c in f.columns]
         f = f.rename(columns={"PLINE_2023": "PLINE", "FLINE_2023": "FLINE"})

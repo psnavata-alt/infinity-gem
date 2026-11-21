@@ -14,6 +14,8 @@ data/raw/fies/*.csv
 !data/raw/fies/fies_w_prov_to_psa_province.csv
 data/raw/fies/*.dta
 data/raw/fies/fies_lfs_2023/
+data/raw/fies/fies_2025/
+data/processed/FIES2025_poverty_lines_province_urban_rural.csv
 data/raw/elasticities/GTAP10_*.csv
 data/raw/macro/macro_panel_*.xlsx
 # data whose terms do not allow redistribution, if you download them (data/raw/macro/README.md, data/raw/world/README.md)

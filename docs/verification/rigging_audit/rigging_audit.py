@@ -364,10 +364,15 @@ def part_c_runtime(root: Path, public: bool = False):
         treat["fies_not_run"] = missing
         return rows, treat
     from infinity_gem.microsim import Microsim
-    ms = Microsim()
+    ms = Microsim(base="fies2023")                  # 18 Nov 2026: named; the rows are compared with the FIES 2023 file read here
     raw = __import__("pandas").read_csv(paths.FIES_POVLINES)
     treat["fies_rows_dropped"] = int(len(raw) - len(ms.f))
     treat["fies_unmapped_groups"] = int((~ms.f["grp"].isin(m.H)).sum())
+    if getattr(paths, "FIES_2025_PUF", None) is not None and paths.FIES_2025_PUF.exists():   # 18 Nov 2026: the default base, FIES 2025
+        ms25 = Microsim(base="fies2025")
+        raw25 = __import__("pandas").read_csv(paths.FIES_2025_PUF, usecols=["W_PROV"])
+        treat["fies2025_rows_dropped"] = int(len(raw25) - len(ms25.f))
+        treat["fies2025_unmapped_groups"] = int((~ms25.f["grp"].isin(m.H)).sum())
     return rows, treat
 
 
@@ -706,8 +711,10 @@ def main():
           f"- Balancing of the 2018 SAM (published in whole billions): largest cell change ₱{treat['balancing_2018_max_cell']:,.2f} bn; "
           f"total change ₱{treat['balancing_2018_total']:,.1f} bn (the SAM's total is ₱{treat['sam_2018_total']:,.0f} bn). "
           "The 2023 SAM is used as published.",
-          f"- FIES households dropped for missing values: {treat['fies_rows_dropped']}; households in no SAM group "
-          f"(would get no change): {treat['fies_unmapped_groups']}." if "fies_not_run" not in treat else
+          f"- FIES 2023 households dropped for missing values: {treat['fies_rows_dropped']}; households in no SAM group "
+          f"(would get no change): {treat['fies_unmapped_groups']}."
+          + (f" FIES 2025 (the default base since 18 Nov 2026): dropped {treat['fies2025_rows_dropped']}, in no SAM group "
+             f"{treat['fies2025_unmapped_groups']}." if "fies2025_rows_dropped" in treat else "") if "fies_not_run" not in treat else
           f"- FIES households dropped for missing values, and households in no SAM group: NOT RUN in this copy. This step "
           f"reads the household microdata: it needs {treat['fies_not_run']}. The shocked solutions above do not use them.",
           ""]

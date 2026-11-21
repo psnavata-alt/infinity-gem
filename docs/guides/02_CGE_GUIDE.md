@@ -153,6 +153,23 @@ d2 = DynamicCGE(hybrid=True, public_capital={"phi": 0.083, "kg_gdp": ...})   # k
     - Not yet combined with `les=`.
 - **Sources of every parameter:** `08_PARAMETERS_AND_SOURCES.md` (gold / silver / placeholder grades). Plain-language overview: `09_WHATS_NEW_IN_0.3.md`.
 
+### 2.7b The named settings, and the 0.4 default (13 Nov 2026, development copy 0.4.0.dev0; not for citation until reviewed)
+
+`infinity_gem/settings.py` names three settings: **"0.2 published"** (the published results; check R0), **"0.3 recommended"** (the sourced 0.3 upgrades) and, since 13 November 2026, **"0.4 recommended"**, the default.
+
+"0.4 recommended" keeps everything in 0.3 and changes only the shock years of the dynamic model (the hybrid closure's short run):
+
+- **Firms keep their margins** (option (c) of the short-run calibration): outside farming, home sales are priced at a margin over unit cost; the margin per unit is fixed in pesos (mk_pass 0), so a cost rise such as oil passes into prices; a fall in demand lowers prices only slowly, by industry, as PSA's CPI items show (`stickiness.sectoral`); in a slump margins give way a little (slope 0.48 per % of output gap), but never by more than the whole markup (the floor, -1).
+- **Demand and jobs in the shock years:** 48% of household spending follows this year's income, the rest keeps its usual real value (consumption rule); 91% of a fall in labour demand stays on the payroll (paid hoarding); employment can rise to the labour force less the natural rate (PSA LFS slack), with the cap held smoothly; the wage curve's beta is 9.98 (v1.0's calibration).
+- **Oil:** 88% of a world oil-price move in pesos reaches domestic prices within the year (fitted to PSA's retail fuel prices).
+- **The BSP's policy rate inside every path:** the PAMPh-type rule (`infinity_gem.monetary.rule("pamph")`) sets the rate from the inflation and output gaps; real investment falls by exp(-1.5 x real-rate gap / 100). The rule reads its gaps against the **no-shock path** (in the 2026 scenarios, the path with the same policies), so the no-shock path has a zero rate.
+
+**Fit:** at these values (the "T15" point on Infinity GEM's own SAM v1.0) the model meets **8 of 11** data targets, against 3 for the flexible 0.3 central: the four shocks add +1.81 pp to 2026 inflation (VAR band 1.06-2.27; data +1.64), oil alone +1.47 (band 1.27-2.59), the public-works multiplier 0.90 (0.85-1.37); growth, household consumption, the average wage, construction jobs and public works' own effect on inflation also fit (and, outside the 11, the retail fuel pass-through) (a review note (not included)).
+
+**Known misses (state them with any 0.4 result):** exports fall 1.9 pp against "no fall below 1"; the industry slope is +0.46 against "not positive"; the investment growth effect misses (-7.8 against -4.85 +/- 1; a 2025 target-basis issue); a 1% weaker peso raises consumer prices 0.41% against the BSP's 0.04-0.10 (the 2026 scenarios hold the peso at its pre-shock path); at margin slopes near 0.5 a static oil +30% test found a second, boom solution (dynamic runs start from the baseline and land on the slump branch); the money block has only an investment channel.
+
+**Where it applies:** dynamic runs on Infinity GEM's own SAM v1.0 with the rice accounts (`dynamic_model("0.4 recommended", public_capital="low", rice=True, land="fixed")`); elsewhere name "0.3 recommended" (dynamic_kwargs refuses 0.4 there). The static CGE of 0.4 is that of 0.3. The 2026 scenario scripts take `INFINITY_GEM_SETTING` (unset: 0.4 on `INFINITY_GEM_SCENARIO_SAM=own`, 0.3 on the other SAMs of the 2026 scenarios); `INFINITY_GEM_SETTING="0.3 recommended"` reproduces every run before 13 November 2026. Checks: R4 (the values and the 0.4 reference results), R0 (published results), EF1 (the employment-cap fallback). Plain-language summary: `09b_WHATS_NEW_IN_0.4.md`.
+
 ## 2.8 Exercises (do them; they build judgment)
 
 1. **Closure comparison.** Run `scenarios/oil_price_shock.py`. Why is the CPI unchanged in the long-run closure? (Hint: what is the numeraire?)

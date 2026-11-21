@@ -77,7 +77,7 @@ def warm_up(setting: str = "0.2 published"):
 @st.cache_resource(show_spinner="Loading the FIES 2023 households (first time only)…")
 def household_detail():
     from infinity_gem.household import HouseholdDetail
-    return HouseholdDetail()
+    return HouseholdDetail(base=E.SIMULATOR_FIES_BASE)   # 18 Nov 2026: FIES 2023, as the Simulator's labels and LFS option (engines.py)
 
 
 def show_household(r: dict, key: str):
@@ -245,8 +245,8 @@ with st.sidebar:
                              "results are converted back to these pesos.")
     GDP = GDP_CHOICES[gdp_label]
     st.divider()
-    SETTING = st.radio("Model setting (CGE and over time)", list(E.ST.SETTINGS), key="setting",
-                       captions=[E.ST.DESCRIPTION[s] for s in E.ST.SETTINGS],
+    SETTING = st.radio("Model setting (CGE and over time)", list(E.ST.SIMULATOR_SETTINGS), key="setting",   # 0.4.0 (13 Nov 2026):
+                       captions=[E.ST.DESCRIPTION[s] for s in E.ST.SIMULATOR_SETTINGS],   # the settings the Simulator runs (settings.py)
                        help="0.3.1. '0.2 published' reproduces every result published up to 7 October 2026. "
                             "Details: infinity_gem/settings.py and outputs/settings_comparison_*.md.")
     st.divider()

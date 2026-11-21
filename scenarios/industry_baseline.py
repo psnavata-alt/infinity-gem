@@ -10,7 +10,7 @@ added on top of B or C: their baseline already contains the actual slump.
 NOT FOR CITATION until reviewed. Sources: docs/guides/08_PARAMETERS_AND_SOURCES.md.
 Run:  py scenarios/industry_baseline.py
 """
-from _common import PSA_GDP, SAM_GDP_2023, Report, to_sam_units
+from _common import PSA_GDP, SAM_GDP_2023, Report, to_sam_units, gap_pesos_2025  # 13 Nov 2026: year-by-year peso basis (_common.peso_factor; INFINITY_GEM_SCENARIO_PESO=legacy = the constant TO_2025)
 import numpy as np
 import pandas as pd
 
@@ -36,7 +36,7 @@ for label, kw in STEPS.items():
                  "real GDP growth 2024 / 2025 (%)": f"{b.table.loc[2024, 'real_gdp_growth_pct']:.2f} / {b.table.loc[2025, 'real_gdp_growth_pct']:.2f}",
                  "catch-up: GDP gain 2027 (%)": c.loc[2027, "gdp_gap_pct"],
                  "catch-up: GDP gain 2030 (%)": c.loc[2030, "gdp_gap_pct"],
-                 "catch-up: cumulative GDP gain 2027-2030 (₱ bn, 2025 pesos)": c.loc[2027:2030, "gdp_gap_bn"].sum() * TO_2025,
+                 "catch-up: cumulative GDP gain 2027-2030 (₱ bn, 2025 pesos)": gap_pesos_2025(c, b.table, TO_2025, years=range(2027, 2031)),
                  "catch-up: construction output 2027 (%)": (sim.solutions[2027]["QA"][ia] / b.solutions[2027]["QA"][ia] - 1) * 100})
     base_tabs[label], models[label] = b, d
 

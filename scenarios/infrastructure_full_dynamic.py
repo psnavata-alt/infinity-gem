@@ -11,7 +11,7 @@ Shocks: -₱238.3 bn construction investment in 2025; +₱208.7 bn in 2027 (catc
 NOT FOR CITATION until reviewed. Sources: docs/guides/08_PARAMETERS_AND_SOURCES.md.
 Run:  py scenarios/infrastructure_full_dynamic.py
 """
-from _common import PSA_GDP, SAM_GDP_2023, Report, to_sam_units
+from _common import PSA_GDP, SAM_GDP_2023, Report, to_sam_units, gap_pesos_2025  # 13 Nov 2026: year-by-year peso basis (_common.peso_factor; INFINITY_GEM_SCENARIO_PESO=legacy = the constant TO_2025)
 import pandas as pd
 
 from infinity_gem import paths
@@ -45,7 +45,7 @@ def run(d, label, pc=None):
         sim = d.scenario(sh)
         c = d.compare(d.base, sim)
         rows.append({"step": label, "path": name,
-                     "cumulative GDP gap 2025-2030 (₱ bn, 2025 pesos)": c.loc["cumulative", "gdp_gap_bn"] * TO_2025,
+                     "cumulative GDP gap 2025-2030 (₱ bn, 2025 pesos)": gap_pesos_2025(c, d.base.table, TO_2025),
                      "GDP gap 2030 (%)": c.loc[2030, "gdp_gap_pct"], "capital gap 2030 (%)": c.loc[2030, "capital_gap_pct"]})
         if label.startswith("D") and name == "freeze only":
             b30, s30 = d.base.solutions[2030], sim.solutions[2030]

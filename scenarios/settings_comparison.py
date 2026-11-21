@@ -16,7 +16,8 @@ import pandas as pd                                   # noqa: E402
 
 from _common import Report                            # noqa: E402
 from app import engines as E                          # noqa: E402
-from infinity_gem.settings import SETTINGS                # noqa: E402
+from infinity_gem.settings import SIMULATOR_SETTINGS as SETTINGS   # noqa: E402  (0.4.0, 13 Nov 2026: the 0.2 vs 0.3 comparison
+#   through the Simulator's engines, which run these two; "0.4 recommended" is a dynamic setting on Infinity GEM's own SAM v1.0)
 
 SHOCKS = {"Infrastructure freeze (−₱238.3 bn)": E.Shocks(construction_bn=-238.3),
           "World oil prices +20%": E.Shocks(oil_pct=20.0),

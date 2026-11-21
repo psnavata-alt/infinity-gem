@@ -70,8 +70,8 @@ if END is not None:
 # investment's comovement with the rate and output. Outputs and chains carry "_inv"; without obs=inv nothing changes.
 OBS_INV = any(a == "obs=inv" for a in sys.argv[1:])
 if OBS_INV:
-    if MODEL not in ("htmk", "htmki", "htmkf", "htmkw", "htmkwo"):
-        raise SystemExit("obs=inv needs model=htmk, model=htmki, model=htmkf, model=htmkw or model=htmkwo")
+    if MODEL not in ("htmk", "htmki", "htmkf", "htmkw", "htmkwo", "htmkwoi", "htmkwod"):
+        raise SystemExit("obs=inv needs model=htmk, model=htmki, model=htmkf, model=htmkw, model=htmkwo, model=htmkwoi or model=htmkwod")
     STAG += "_inv"
 RATIO_PRIOR = {"infl": (-0.35, 0.10), "growth": (-0.20, 0.15),       # trough per pp of first-year tightening: mean, s.d.
                "persist": (3.0, 2.0)}                                 # ratio2 only: first-year cumulative rate path per pp of impact
@@ -89,6 +89,28 @@ if PRIOR not in ("pamph", "ratio", "ratio_cpi", "ratio2"):
 RATIO_PRIORS = ("ratio", "ratio_cpi", "ratio2")
 RATIO_KEYS = ("infl",) if PRIOR == "ratio_cpi" else (("infl", "growth", "persist") if PRIOR == "ratio2" else ("infl", "growth"))
 PTAG = {"ratio": "_ratio", "ratio_cpi": "_ratiocpi", "ratio2": "_ratio2"}.get(PRIOR, "")
+# oilprior=lp (milestone 30, 12 Nov 2026; model=htmkwo, htmkwoi or htmkwod with obs=inv and a ratio prior): a second system
+# prior (Andrle and Benes 2013), on the model's responses to an OIL SUPPLY innovation (world output unchanged; 10% on impact):
+# year-1 (h 0-3) and year-2 (h 4-7) averages of cumulative real GDP, real exports, the CPI level, the peso (PHP per USD) and the
+# policy rate (pp a year), each ~ N(data, oilscale x its s.e.). Data: local projections of the PH data on Kanzig's (2021, AER)
+# oil supply news shock, 2002Q1-2025Q4 without COVID, per 10% impact rise in Dubai crude (milestone 29, oil_supply_lp.py;
+# recomputed by milestone28_scratch/oil_lp_targets.py; test_milestone30.py checks they still match). Why: milestones 26-28 put
+# year-1 output UP after an oil supply shock (an export boom under producer-currency pricing) and year-2 output near zero with the
+# rate easing, while the data show no export boom, GDP falling by year 2 and the BSP still tightening in year 2. oilscale
+# (default 2) doubles each s.e. because the same macro data also enter the likelihood and the ten entries are correlated (not
+# modelled here): a loose pull toward the evidence, not a fit to it. The penalty is added to the ratio prior's (pieces()[3]), so
+# estimate_rot.py and smc.py both use it. Outputs and chains carry "_oillp" (with the scale if it is not 2).
+OIL_PRIOR = any(a == "oilprior=lp" for a in sys.argv[1:])
+OIL_SCALE = float(next((a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("oilscale=")), 2.0))
+OIL_LP = {("real GDP", 1): (-0.019000, 0.166687), ("real GDP", 2): (-0.355068, 0.227371),
+          ("real exports", 1): (-0.103686, 0.735338), ("real exports", 2): (-0.442001, 0.839462),
+          ("CPI", 1): (0.675552, 0.144076), ("CPI", 2): (0.855737, 0.225942),
+          ("PHP per USD", 1): (0.508816, 0.495579), ("PHP per USD", 2): (1.081877, 0.972984),
+          ("policy rate", 1): (0.136264, 0.088028), ("policy rate", 2): (0.354336, 0.113867)}
+if OIL_PRIOR:
+    if MODEL not in ("htmkwo", "htmkwoi", "htmkwod") or PRIOR not in RATIO_PRIORS or not OBS_INV:
+        raise SystemExit("oilprior=lp needs model=htmkwo, htmkwoi or htmkwod, a ratio prior and obs=inv")
+    STAG += "_oillp" + ("" if OIL_SCALE == 2.0 else f"{OIL_SCALE:g}")
 if MODEL == "htm":
     import soe_htm as R      # noqa: E402
 elif MODEL == "oil":         # milestone 16 (19 Oct 2026): soe_oil.py, Dubai crude as a fifth observable
@@ -111,9 +133,13 @@ elif MODEL == "htmkw":       # milestone 25b (23 Oct 2026): soe_htmkw.py, soe_ht
     import soe_htmkw as R    # noqa: E402
 elif MODEL == "htmkwo":      # 24 Oct 2026: soe_htmkwo.py, soe_htmkw (sticky wages) plus soe_oilf's oil block
     import soe_htmkwo as R   # noqa: E402
+elif MODEL == "htmkwoi":     # milestone 27 (12 Nov 2026): soe_htmkwoi.py, soe_htmkwo plus wage indexation iota_w
+    import soe_htmkwoi as R  # noqa: E402
+elif MODEL == "htmkwod":     # milestone 28 (12 Nov 2026): soe_htmkwod.py, soe_htmkwoi plus dollar pricing of exports
+    import soe_htmkwod as R  # noqa: E402
 else:
     import soe_rot as R      # noqa: E402
-OILM = ("oil", "oilu", "oilw", "oilf", "htmkwo")                     # the oil models (htmkwo: 24 Oct 2026)
+OILM = ("oil", "oilu", "oilw", "oilf", "htmkwo", "htmkwoi", "htmkwod")          # the oil models (htmkwo: 24 Oct 2026; htmkwoi: 12 Nov)
 
 EST = [e for e in EM.EST if e[0] not in ("gH", "gF")]
 i_after = [e[0] for e in EST].index("hab") + 1
@@ -122,18 +148,18 @@ if MODEL in ("htm", "htmu", "htmk", "htmki", "htmkf", "htmkw") + OILM:
     EST[i_after + 2:i_after + 2] = [("lam_h", "beta", 0.30, 0.15, 0.0, 0.90), ("kappa", "beta", 0.30, 0.15, 0.0, 0.90)]
 SHOCKS = list(EM.SHOCKS)
 FIXED = {}
-if MODEL in ("htmk", "htmki", "htmkf", "htmkw", "htmkwo"):
+if MODEL in ("htmk", "htmki", "htmkf", "htmkw", "htmkwo", "htmkwoi", "htmkwod"):
     # milestone 23 (21 Oct 2026): capital and investment. phi_i (adjustment-cost curvature) with Smets and Wouters' prior; the
     # shares calibrated (soe_htmk.py's docstring: Infinity GEM's own SAM v0.5 gives capital 0.60 of value added incl. mixed income, so 0.5;
     # investment 0.24 of household consumption plus investment; depreciation 2.5% a quarter)
     EST.insert(i_after + 4, ("phi_i", "normal", 4.0, 1.5, 0.5, 15.0))
     EST.insert(i_after + 5, ("psi_u", "beta", 0.50, 0.15, 0.05, 0.95))      # utilisation-cost elasticity, Smets-Wouters' prior
     FIXED = dict(alpha_k=0.5, i_y=0.24, delta=0.025)
-if MODEL in ("htmu", "htmk", "htmki", "htmkf", "htmkw", "htmkwo", "oilu", "oilw", "oilf"):  # milestone 19: the cost-push shock's persistence and size (quarterly inflation, %; as sd_v)
+if MODEL in ("htmu", "htmk", "htmki", "htmkf", "htmkw", "htmkwo", "htmkwoi", "htmkwod", "oilu", "oilw", "oilf"):  # milestone 19: the cost-push shock's persistence and size (quarterly inflation, %; as sd_v)
     EST.insert([e[0] for e in EST].index("rho_z") + 1, ("rho_u", "beta", 0.50, 0.20, 0.0, 0.99))
     EST.append(("sd_u", "invgamma", 0.25, 1.0, 1e-3, 10.0))
     SHOCKS.append("u")
-if MODEL in ("htmki", "htmkf", "htmkw", "htmkwo"):
+if MODEL in ("htmki", "htmkf", "htmkw", "htmkwo", "htmkwoi", "htmkwod"):
     # milestone 24 (22 Oct 2026): the investment-specific (MEI) shock's persistence and size (% a quarter), with the same loose
     # priors as the other shocks; it enters the investment Euler equation with unit weight (Smets and Wouters 2007, eq. 3)
     EST.insert([e[0] for e in EST].index("rho_u") + 1, ("rho_ei", "beta", 0.50, 0.20, 0.0, 0.99))
@@ -153,21 +179,33 @@ if MODEL == "oilf":
     # s_f = their fuel cost share, CPI-weighted, from Infinity GEM's own SAM v0.5 (transport: refined petroleum 16.1% of cost; electricity:
     # refined petroleum 17.1% plus coal and gas 5.0%, the DSGE's one oil price standing for all fossil fuels): 0.19 (oil only 0.17)
     FIXED = dict(FIXED, a_f=0.091, s_f=0.19)
-if MODEL in ("htmkf", "htmkw", "htmkwo"):
+if MODEL in ("htmkf", "htmkw", "htmkwo", "htmkwoi", "htmkwod"):
     # milestone 25 (22-23 Oct 2026, night): the same flexible-price, energy-intensive services as milestone 22 (CPI weight a_f =
     # passenger transport services 4.54% + electricity 4.55%, PSA 2018 weights), priced at the economy's marginal cost each
     # quarter (soe_htmkf.py: no oil price in this model, so no fuel share s_f); no new estimated parameter
     FIXED = dict(FIXED, a_f=0.091)
-if MODEL == "htmkwo":
+if MODEL in ("htmkwo", "htmkwoi", "htmkwod"):
     # 24 Oct 2026: the flexible-price services' fuel cost share, as model=oilf (milestone 22; Infinity GEM's own SAM v0.5, CPI-weighted)
     FIXED = dict(FIXED, s_f=0.19)
-if MODEL in ("htmkw", "htmkwo"):
+if MODEL in ("htmkw", "htmkwo", "htmkwoi", "htmkwod"):
     # milestone 25b (23 Oct 2026, night): sticky nominal wages (soe_htmkw.py). The Calvo wage parameter with a prior mean of 0.75,
     # a mean wage duration of one year (Philippine minimum wages are set in pesos by the regional boards about once a year;
     # Smets and Wouters' US prior is beta(0.5, 0.1)); the elasticity of substitution between labour types calibrated (Gali 2015)
     EST.insert([e[0] for e in EST].index("theta_F") + 1, ("theta_w", "beta", 0.75, 0.10, 0.05, 0.97))
     FIXED = dict(FIXED, eps_w=4.5)
-if MODEL in ("oilw", "oilf", "htmkwo"):
+if MODEL in ("htmkwoi", "htmkwod"):
+    # milestone 27 (12 Nov 2026): wage indexation to last quarter's CPI inflation (soe_htmkwoi.py), with Smets and Wouters'
+    # (2007) prior beta(0.5, 0.15); the Labor Code (Art. 124, RA 6727) tells the wage boards to weigh the CPI and the cost of
+    # living. On the milestone 26 posterior the solution has a pole near iota_w 0.92 (milestone27_scratch/indexation_scan.py):
+    # the range is left at (0.01, 0.99) so that the data, not the bound, decide which side the posterior is on
+    EST.insert([e[0] for e in EST].index("theta_w") + 1, ("iota_w", "beta", 0.50, 0.15, 0.01, 0.99))
+if MODEL == "htmkwod":
+    # milestone 28 (12 Nov 2026): exports priced in US dollars with Calvo dollar prices (soe_htmkwod.py, dcp=True; Gopinath et al.
+    # 2020). The Calvo parameter of dollar export prices with a prior mean of 0.75, a price duration of about a year (Gopinath and
+    # Rigobon 2008, US border prices in dollars)
+    EST.insert([e[0] for e in EST].index("iota_w") + 1, ("theta_X", "beta", 0.75, 0.10, 0.05, 0.97))
+    FIXED = dict(FIXED, dcp=True)
+if MODEL in ("oilw", "oilf", "htmkwo", "htmkwoi", "htmkwod"):
     # milestone 21: the oil price's loading on world output (o = o_s + chi_o ystar), positive (world booms raise oil prices);
     # gamma with mean 5 and s.d. 4: a 1% world-output gap moves the real oil price by about 1-13%, the range implied by the
     # comovement of Dubai crude with G3 growth (oil changes s.d. about 15%, G3 growth about 0.6%, correlation 0.2-0.5)
@@ -194,7 +232,7 @@ if THETA_FIX is not None:
 # world= (milestone 21 robustness, 20 Oct 2026): "g3" (default, G3 real GDP growth) or "igrea" (Kilian's index)
 WORLD = next((a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("world=")), "g3")
 if WORLD != "g3":
-    if MODEL not in ("oilw", "oilf", "htmkwo"):
+    if MODEL not in ("oilw", "oilf", "htmkwo", "htmkwoi", "htmkwod"):
         raise SystemExit("world= applies to model=oilw and model=oilf only")
     STAG += f"_{WORLD}"
 if OBS_INV:                                                    # milestone 23c: investment's measurement error, % a quarter
@@ -224,7 +262,7 @@ def me_kw(theta):
     """kalman_loglik's measurement-error variances: the default 1e-4 for every observable, plus me_inv^2 for investment."""
     if not OBS_INV:
         return {}
-    n_obs = {"oil": 5, "oilu": 5, "oilw": 6, "oilf": 6, "htmkwo": 6}.get(MODEL, 4) + 1
+    n_obs = {"oil": 5, "oilu": 5, "oilw": 6, "oilf": 6, "htmkwo": 6, "htmkwoi": 6, "htmkwod": 6}.get(MODEL, 4) + 1
     me = np.full(n_obs, 1e-4)
     me[-1] = dict(zip(NAMES, theta))["me_inv"] ** 2
     return {"me": me}
@@ -242,14 +280,14 @@ def state_space(sol, sds, chi_o=0.0):
     Rbig = np.vstack([Rm, np.zeros((nk, len(SHOCKS)))])
     Q = np.diag((sds / 100.0) ** 2)
     F = sol.F
-    H = np.zeros(({"oil": 5, "oilu": 5, "oilw": 6, "oilf": 6, "htmkwo": 6}.get(MODEL, 4) + (1 if OBS_INV else 0), 2 * nk))
+    H = np.zeros(({"oil": 5, "oilu": 5, "oilw": 6, "oilf": 6, "htmkwo": 6, "htmkwoi": 6, "htmkwod": 6}.get(MODEL, 4) + (1 if OBS_INV else 0), 2 * nk))
     if OBS_INV:                                                # milestone 23c: investment growth = inv - inv(-1), the last row
         H[-1, :nk], H[-1, nk:] = F[ixd["inv"]], -F[ixd["inv"]]
     H[0, :nk], H[0, nk:] = F[ixd["y"]], -F[ixd["y"]]
     H[1, :nk], H[2, :nk], H[3, :nk] = F[ixd["pi"]], F[ixd["i"]], F[ixd["de"]]
     if MODEL in OILM:                                          # Dubai crude in dollars: o - o_lag + pistar (states at t)
         H[4, ixk["o"]], H[4, ixk["o_lag"]], H[4, ixk["pistar"]] = 1.0, -1.0, 1.0
-    if MODEL in ("oilw", "oilf", "htmkwo"):                    # milestone 21: world output growth = ystar - ystar_lag
+    if MODEL in ("oilw", "oilf", "htmkwo", "htmkwoi", "htmkwod"):         # milestone 21: world output growth = ystar - ystar_lag
         H[5, ixk["ystar"]], H[5, ixk["ystar_lag"]] = 1.0, -1.0
     return Pbig, Rbig, Q, 100.0 * H
 
@@ -261,7 +299,7 @@ def observables():
         kw["end"] = END
     if GDP_SA == "stl":
         kw["gdp_sa"] = "stl"
-    if MODEL == "htmkwo":                                      # 24 Oct 2026: the oil model's six series plus investment (obs=inv)
+    if MODEL in ("htmkwo", "htmkwoi", "htmkwod"):                         # 24 Oct 2026: the oil model's six series plus investment (obs=inv)
         df = ph_data.observables_oilw(world=WORLD, **kw)[E0.OBS + ["doil", "dystar"]]
         if OBS_INV:
             df = df.join(ph_data.observables_inv(**kw)[["dinv"]])
@@ -306,6 +344,24 @@ def strength(resp):
             "persist": cum / resp["rate"][1]}                   # ratio2: the scale of the rate path itself
 
 
+def oil_responses(sol, p, T_=8):
+    """milestone 30: year-1 and year-2 averages of the responses to a 10% oil supply innovation, on oil_supply_lp's objects."""
+    ixk = {n: j for j, n in enumerate(R.STATES)}
+    ixd = {n: j for j, n in enumerate(R.JUMPS)}
+    e = np.zeros(len(R.STATES)); e[ixk["o"]] = 0.10
+    k, d = sol.irf(np.eye(len(R.STATES)), e, T=T_)
+    g = lambda n: d[:, ixd[n]] if n in ixd else k[:, ixk[n]]
+    rel = -g("tX") if "tX" in ixd else g("s") + g("psi")
+    r = {"real GDP": 100 * g("y"), "real exports": 100 * (p.gamma * rel + g("ystar")), "CPI": 100 * np.cumsum(g("pi")),
+         "PHP per USD": 100 * np.cumsum(g("de")), "policy rate": 400 * g("i")}
+    return {(o, y + 1): float(v[4 * y:4 * y + 4].mean()) for o, v in r.items() for y in (0, 1)}
+
+
+def oil_distance(sol, p):
+    r = oil_responses(sol, p)
+    return sum(((r[key] - m) / (OIL_SCALE * sd)) ** 2 for key, (m, sd) in OIL_LP.items())
+
+
 def ratio_distance(resp):
     s = strength(resp)
     return sum(((s[k] - m) / sd) ** 2 for k, (m, sd) in RATIO_PRIOR.items() if k in RATIO_KEYS)
@@ -318,10 +374,13 @@ def pieces(theta, Z):
         return None
     kw, sds = split(theta)
     try:
-        sol, _ = R.solve(R.Params(rule="output", **{**kw, **FIXED}))
+        par = R.Params(rule="output", **{**kw, **FIXED})
+        sol, _ = R.solve(par)
         ll = E0.kalman_loglik(*state_space(sol, sds, kw.get("chi_o", 0.0)), Z, **me_kw(theta))
         resp = pamph_responses(sol)
         dist, rdist, st = distance(resp), ratio_distance(resp), strength(resp)
+        if OIL_PRIOR:                                          # milestone 30: the oil system prior, on top
+            rdist += oil_distance(sol, par)
     except (klein.BlanchardKahnError, linalg.LinAlgError, ValueError, ZeroDivisionError):
         return None
     return lp, ll, dist, rdist, st

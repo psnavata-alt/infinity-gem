@@ -16,6 +16,8 @@ import json
 import sys
 import warnings
 from pathlib import Path
+import os
+os.environ["INFINITY_GEM_FIES_BASE"] = "fies2023"   # 18 Nov 2026: this file reproduces results on the FIES 2023 base (its references); FIES 2025 is the default base since 18 Nov 2026 (check R41F)
 
 warnings.filterwarnings("ignore")
 HERE = Path(__file__).resolve().parent

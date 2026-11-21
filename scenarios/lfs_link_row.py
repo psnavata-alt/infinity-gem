@@ -83,7 +83,8 @@ def main():
         sys.exit("The FIES-LFS 2023 member file is not on this machine (paths.FIES_LFS_DIR): the LFS link cannot run.")
     cal = pd.read_csv(_common.calibration_file(), index_col=0)
     beta = float(cal.loc["central (e)", "beta"])
-    R = CR.Runs("low", wage_curve=beta)
+    R = CR.Runs("low", wage_curve=beta, fies_base="fies2023")   # 18 Nov 2026: the LFS link needs FIES-LFS 2023 members, and both
+    #                                                              columns must be on one survey: pinned, whatever the default base
     piece, _ = R.pieces()
     clean, sim = R.run(set(), piece=piece), R.run(set(CR.SHOCKS), piece=piece)
     rows = {}

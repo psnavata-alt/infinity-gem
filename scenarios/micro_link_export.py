@@ -32,9 +32,11 @@ def run(spec_file: Path):
     assert b.ok and s.ok, f"the model did not solve ({s.message}); no file written"
     g0, g1 = m.gdp(b)["real"], m.gdp(s)["real"]
     gdp_pct = (g1 / g0 - 1) * 100
-    new_poor = Microsim().from_cge(m, b, s)["new_poor"]
+    # 18 Nov 2026: FIES 2023 named. A do-file (a Stata do-file (not included)) applies this file to
+    # the FIES 2023 public-use file, so its expected_results must be on the same survey, whatever the default base (FIES 2025)
+    new_poor = Microsim(base="fies2023").from_cge(m, b, s)["new_poor"]
     print(f"{spec_file.stem}: real GDP {gdp_pct:+.4f}%, new poor {new_poor:,.0f}")
-    ml = MicroLink(m)
+    ml = MicroLink(m, base="fies2023")
     link = ml.link_variables(m, b, s, scenario=f"{spec_file.stem}: " + " ".join(d.get("_about", [""])[:1]),
                              settings="Infinity GEM default ('0.2 published'), closure " + json.dumps(d["closure"]))
     out = ROOT / "outputs" / f"Infinity_GEM_micro_link_{spec_file.stem}_{dt.date.today():%Y%m%d}.xlsx"

@@ -10,6 +10,14 @@ The poverty microsimulation (`infinity_gem.microsim`), the household detail (`in
 4. Optional, for the LFS link (check H3) and the own SAM's rebuild (check S6): the household-member file `FIES-LFS PUF 2023 Household Members.CSV`, in the folder `fies_lfs_2023/` here, or anywhere you name in the environment variable `INFINITY_GEM_FIES_LFS`.
 5. Run `python checks/run_all_checks.py`: check P1 then shows that the baseline reproduces PSA's official count of 17.54 million poor people in 2023, and the checks that were NOT RUN for want of these files run.
 
+## FIES 2025, the default base since version 0.4.2 (download it yourself)
+
+Since 0.4.2 the poverty microsimulation starts from PSA's FIES 2025 unless a base is named (`infinity_gem/fies_base.py`; `base="fies2023"` or the environment variable `INFINITY_GEM_FIES_BASE=fies2023` gives the FIES 2023 base above). Neither file below is included.
+
+1. Download PSA's FIES 2025 public-use file (Volume 1) from the PSA Data Archive under PSA's terms, and save its CSV as `fies_2025/fies2025_volume1.csv` in this folder.
+2. Build the 2025 poverty thresholds from PSA's *2025 Full Year Official Poverty Statistics* (Table 16, annual per-capita poverty and food thresholds by province, urban and rural) as `data/processed/FIES2025_poverty_lines_province_urban_rural.csv`, with the columns `w_prov` (the FIES province code), `urban` (1 urban, 2 rural), `pline_2025` and `fline_2025`. The tool that built and checked this file in development is not in this repository.
+3. With both files the microsimulation runs on the FIES 2025 base; before any shock it should give PSA's 2025 count (9.73% of the population poor; PSA: 9.7%). Check FB1, which tests this, also needs the tool that builds the thresholds file, so it reports NOT RUN in this repository. Without the FIES 2025 files, use the FIES 2023 base (`INFINITY_GEM_FIES_BASE=fies2023`).
+
 Included here because it contains no household data: `fies_w_prov_to_psa_province.csv` (a map of province codes to names). PSA's published table of 2023 provincial poverty lines is not included (PSA's terms for its publications); no code reads it.
 
 Cite PSA as the source and do not attempt to identify households.

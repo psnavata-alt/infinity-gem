@@ -29,7 +29,9 @@ SAM_2023_RICE_PSA = DATA_PROCESSED / "InfinityGEM_SAM_PHL_2023_PSA_consistent_fr
 # = PSA's 2023 HFCE by purpose; 0.2: PSA's 2018 I-O moved to 2023; PSA national accounts, BESF 2023 taxes and FIES/FIES-LFS
 # 2023 as controls; tools/build_own_sam_2023.py; versions 0.1 and 0.2 kept as _v0.1 and _v0.2). Opt-in through settings
 # (sam_variant="own").
-SAM_2023_OWN = DATA_PROCESSED / "InfinityGEM_SAM_PHL_2023_own_v0.5.csv"   # 0.3.10 (18 Oct 2026): v0.5 (LFS services split, PSA refining); the default for rice=True runs (settings.DEFAULT_SAM_VARIANT)
+# 6 Nov 2026: v1.0 (v0.9 with the fuel tax row from 2023 collections and coal mining at
+# PSA's 2023 GVA) is the default for rice=True runs (settings.DEFAULT_SAM_VARIANT); v0.5, the default from 18 Oct 2026, stays as sam_own("0.5").
+SAM_2023_OWN = DATA_PROCESSED / "InfinityGEM_SAM_PHL_2023_own_v1.0.csv"
 
 
 def sam_own(version: str) -> Path:
@@ -40,6 +42,12 @@ IO_2018 =DATA_RAW / "io" / "80-Industry20Table202018.csv"
 IO_2018_16 = DATA_RAW / "io" / "16-Industry_Table_2018.csv"
 FIES_PUF = DATA_RAW / "fies" / "FIES-LFS PUF 2023 Household Sum.csv"
 FIES_POVLINES = DATA_RAW / "fies" / "FIES2023_official_poverty_lines_extract.csv"
+# 0.4.2 (18 Nov 2026): PSA's FIES 2025 public-use file (Volume 1) and PSA's 2025 poverty thresholds by province x
+# urban/rural (from PSA's 2025 Table 16). Neither is distributed: save PSA's Volume 1 file (CSV) under the name below, and
+# the thresholds as the CSV named below (data/raw/fies/README.md). FIES 2025 is the default base (infinity_gem/fies_base.py).
+FIES_2025_DIR = DATA_RAW / "fies" / "fies_2025"
+FIES_2025_PUF = FIES_2025_DIR / "fies2025_volume1.csv"
+FIES_2025_POVLINES = DATA_PROCESSED / "FIES2025_poverty_lines_province_urban_rural.csv"
 # PSA's FIES-LFS 2023 public-use file with household MEMBERS (industry, class of worker, pay, hours). Licensed by PSA to
 # the person who downloaded it, so it is NOT distributed: keep your own copy and point Infinity GEM to it (environment
 # variable INFINITY_GEM_FIES_LFS, or the default folder data/raw/fies/fies_lfs_2023/). If absent, the LFS link in

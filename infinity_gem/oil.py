@@ -80,6 +80,25 @@ def io_refined_passthrough(io=None) -> dict:
     return {"passthrough": p, "import_share": s_m, "crude_coef": c, "own_use_coef": o}
 
 
+# 6 Nov 2026 (v1.0 the default): on Infinity GEM SAM v1.0 the oil shock's crude share of (non-coal) mining imports is the file's own: customs crude 2023
+# over the file's cmine imports (0.8167), as the 2026 scenarios on v1.0 used. Every other SAM keeps import_shares(). A test may set this False
+# to compare with PSA's 2018 share.
+CRUDE_SHARE_FROM_SAM = True
+OWN_SAM_V10 = "InfinityGEM_SAM_PHL_2023_own_v1.0.csv"
+CUSTOMS_V09 = paths.DATA_PROCESSED / "fuel_trade_customs_2023_v0.9_inputs.csv"
+
+
+def is_own_sam_v10(m) -> bool:
+    """True if model m was calibrated to Infinity GEM SAM v1.0 (the file named in its SAM's source)."""
+    return OWN_SAM_V10 in str(getattr(getattr(m, "sam", None), "source", ""))
+
+
+def crude_share_own_sam(m) -> float:
+    """Customs crude imports 2023 (HS 2709; data/processed/fuel_trade_customs_2023_v0.9_inputs.csv) over m's SAM's cmine imports."""
+    c = pd.read_csv(CUSTOMS_V09, comment="#").set_index("key")["value"]
+    return float(c["customs imports 2023, CIF: crude oil (HS 2709)"]) / float(m.sam.table.loc["row", "cmine"])
+
+
 def cge_oil_shock(m, oil: float, fertilizer: float = 0.0, combined_share: float = 0.6, coal: float | None = None,
                   lng: float | None = None) -> dict:
     """CGE shock spec for a world oil-price change `oil` (0.40 = +40%) and optionally a fertilizer price change.
@@ -92,7 +111,10 @@ def cge_oil_shock(m, oil: float, fertilizer: float = 0.0, combined_share: float 
     pwm = {}
     if "cpetr" in m.C:
         pwm["cpetr"] = 1 + oil
-        pwm["cmine"] = 1 + oil * sh["crude_in_mining_ex_coal" if "ccoal" in m.C else "crude_in_mining"]
+        crude = sh["crude_in_mining_ex_coal" if "ccoal" in m.C else "crude_in_mining"]
+        if CRUDE_SHARE_FROM_SAM and is_own_sam_v10(m):
+            crude = crude_share_own_sam(m)
+        pwm["cmine"] = 1 + oil * crude
         if fertilizer:
             pwm["cchem"] = 1 + fertilizer * sh["fertilizer_in_chemicals"]
     else:
