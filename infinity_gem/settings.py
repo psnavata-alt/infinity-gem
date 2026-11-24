@@ -3,8 +3,16 @@
     from infinity_gem.settings import cge_model, dynamic_model
     m = cge_model("0.3 recommended", closure="keynesian", unemployed=("flab-n", "flab-p"), capital="fixed")
     d = dynamic_model("0.3 recommended", public_capital="low")
-    d = dynamic_model("0.4.1 recommended", public_capital="low", rice=True, land="fixed")   # the default since 13 Nov 2026, about 5:25 PM
+    d = dynamic_model("0.4.3 recommended", public_capital="low", rice=True, land="fixed")   # the default since 21 Nov 2026 (0.4.3)
 
+"0.4.3 recommended" (Infinity GEM 0.4.3, 21 Nov 2026, after a like-for-like comparison): THE DEFAULT.
+                  Exactly the "0.4.2 candidate" values (OPTION_C_043 = a copy of OPTION_C_042C), on Infinity GEM SAM v1.1 (the rice tariff
+                  fix; check S14) with the public-works shock on PSA's Q3 2026 release (shock_paths.public_works(vintage="q3"); PW1),
+                  the BSP rule as 0.4.1's ("pamph", lag form, theta 1.5; PAMPh's Annex 3 rule is a sensitivity, by name). Each
+                  setting carries its own SAM and shock vintage (SETTING_SAM_VERSION, SETTING_PW_VINTAGE; sam_version(), pw_vintage()):
+                  0.4.3 v1.1 and "q3"; every older setting v1.0 and "oct14", so "0.4.1 recommended" (R41), "0.4.2 candidate" (R42)
+                  and the published runs reproduce by name. INFINITY_GEM_SAM_VERSION / INFINITY_GEM_PW_VINTAGE override every setting. Check R43
+                  (checks/test_043_reference.py). Evidence: a design note (not included).
 "0.4.2 candidate" (0.4.2, 15 Nov 2026, overnight; OPT-IN, reached only by name or INFINITY_GEM_SETTING="0.4.2
                   candidate"; NOT the default): "0.4.1 recommended" plus exactly six keys changed or added (OPTION_C_042C): the
                   re-fitted "evaluation 11" point (hoarding, sr_consumption htm, sr_markup_gap, sr_oil_pass, read from EVAL11_JSON),
@@ -64,13 +72,19 @@ are unchanged. For a drought add land="fixed" (static: CGE closure argument; dyn
 """
 from __future__ import annotations
 
+import copy
+
 from . import paths
 
-SETTINGS = ("0.4.1 recommended", "0.4 recommended", "0.4.2 candidate", "0.3 recommended", "0.2 published")   # 0.4.1 first: 13 Nov 2026
+SETTINGS = ("0.4.3 recommended", "0.4.1 recommended", "0.4 recommended", "0.4.2 candidate", "0.3 recommended", "0.2 published")   # 0.4.3 first:
+#                                        21 Nov 2026; before that 0.4.1 first (13 Nov 2026)
 #                                        "0.4.2 candidate" (0.4.2, 15 Nov 2026, overnight; OPT-IN, by name only; check R42): not the default
-DEFAULT = "0.4.1 recommended"          # 13 Nov 2026 (0.4.1). Was "0.4 recommended" (0.4.0,
-#                                        13 Nov 2026) and "0.3 recommended" (0.3.1 to 0.3.13)
-OPTION_C_SETTINGS = ("0.4.1 recommended", "0.4 recommended", "0.4.2 candidate")   # 13 Nov 2026: the settings with
+DEFAULT = "0.4.3 recommended"          # 21 Nov 2026, after a like-for-like comparison (a design note, not
+#                                        included): the 0.4.2 candidate's values as
+#                                        Infinity GEM 0.4.3 on Infinity GEM SAM v1.1 with the Q3 2026 public-works shock and the current BSP rule
+#                                        ("pamph", lag form; PAMPh's Annex 3 rule reported as a sensitivity). Check R43. Was "0.4.1
+#                                        recommended" (13 Nov 2026 to 21 Nov 2026), "0.4 recommended" (0.4.0, 13 Nov 2026) and "0.3 recommended" (0.3.1 to 0.3.13)
+OPTION_C_SETTINGS = ("0.4.3 recommended", "0.4.1 recommended", "0.4 recommended", "0.4.2 candidate")   # 13 Nov 2026: the settings with
 #                                        option (c) and the BSP rule (dynamic, SAM v1.0 only); code that treated "0.4 recommended" specially
 #                                        tests membership here (scenarios/_common.py, combined_revised.py, central_case_04.py)
 # The Simulator (app/) offers the settings it runs: its one-year CGE and its dynamic page use the petroleum-split IFPRI SAM without
@@ -118,7 +132,7 @@ OPTION_C_041 = {
 #   - sr_cet: the short-run export (CET) elasticities, elasticities.short_run_cet(C) ("level": goods 0.535, services 0.045; check CET1),
 #     resolved over the SAM's commodities in dynamic_kwargs (SR_CET_042C marks it here);
 #   - sr_erpt: dynamic.SR_ERPT_ESTIMATE["phi"] (0.296, PSA import deflator; check ERP1).
-EVAL11_JSON = "row134_overnight_items_2026_20261114_2321_refit_refit_cet_eval11.json"   # in paths.OUTPUTS
+EVAL11_JSON = "refit_eval11_042c.json"   # in infinity_gem/calibration/ (the saved point of the re-fit of 14 Nov 2026, as saved)
 SR_CET_042C = "short_run_cet(C, 'level')"     # resolved by dynamic_kwargs over the SAM's commodities (elasticities.short_run_cet)
 CANDIDATE_042 = "0.4.2 candidate"
 # the eval-11 file's keys and the DynamicCGE assumption each sets (scenarios/row83_p2_p6_2026.apply, the fits' own mapping)
@@ -130,7 +144,7 @@ def _option_c_042c() -> dict:
     The file's other keys must equal 0.4.1's (pricing, beta, bsp, slack, cap, margin floor), so nothing else moves."""
     import json
     from .dynamic import SR_ERPT_ESTIMATE
-    j = json.loads((paths.OUTPUTS / EVAL11_JSON).read_text(encoding="utf-8"))
+    j = json.loads((paths.ROOT / "infinity_gem" / "calibration" / EVAL11_JSON).read_text(encoding="utf-8"))
     same = {"pricing": OPTION_C_041["sr_pricing"], "beta": OPTION_C_041["wage_curve"], "bsp": OPTION_C_041["monetary"]["theta"],
             "slack": OPTION_C_041["sr_labour_slack"], "cap": OPTION_C_041["employment_cap"], "mkfloor": OPTION_C_041["sr_markup_floor"]}
     bad = [k for k, v in same.items() if j.get(k) != v]
@@ -153,6 +167,40 @@ except Exception as _e:                       # noqa: BLE001
 OPTION_C = {"0.4 recommended": OPTION_C_04, "0.4.1 recommended": OPTION_C_041}   # 13 Nov 2026
 if OPTION_C_042C is not None:
     OPTION_C[CANDIDATE_042] = OPTION_C_042C   # 15 Nov 2026 (opt-in; check R42)
+# "0.4.3 recommended" (Infinity GEM 0.4.3, 21 Nov 2026; check R43, checks/test_043_reference.py):
+# EXACTLY the "0.4.2 candidate" values (OPTION_C_042C, a fresh copy; the eval-11 point, sr_cet, sr_erpt; the BSP rule "pamph" in the lag
+# form, theta 1.5, as 0.4.1's), run on Infinity GEM SAM v1.1 (the rice tariff fix; check S14) with the public-works shock on PSA's Q3 2026
+# release (preshock/shock_paths.public_works(vintage="q3"); check PW1). The fitted values are the candidate's (fitted on v1.0 and
+# re-scored on v1.1 with the Q3 shock: 8 of 11 targets, loss 4.85, the lowest of the like-for-like pairs; the comparison of
+# 21 Nov 2026, run B). "0.4.2 candidate" and "0.4.1 recommended" stay as named settings on v1.0 and the 14 Oct shock (their own numbers).
+CURRENT_043 = "0.4.3 recommended"
+OPTION_C_043 = copy.deepcopy(OPTION_C_042C) if OPTION_C_042C is not None else None
+if OPTION_C_043 is not None:
+    OPTION_C[CURRENT_043] = OPTION_C_043
+# The Infinity GEM SAM and the public-works shock vintage each setting's numbers were computed on (0.4.3, 21 Nov 2026). Unlisted settings: SAM
+# v1.0 and the 14 Oct 2026 shock ("oct14"; H1 2026 observed), the basis of every number published or referenced before 0.4.3. The
+# environment variables INFINITY_GEM_SAM_VERSION ("1.0" or "1.1"; infinity_gem/paths.py) and INFINITY_GEM_PW_VINTAGE ("oct14" or "q3";
+# preshock/shock_paths.py), when set, override every setting. The SAM matters only where the 'own' variant is used (rice=True runs);
+# the 2026 scenarios of 18-20 Oct 2026 and the runs of 11 Nov 2026 name "own-0.5" or "ifpri" and are not affected.
+SETTING_SAM_VERSION = {CURRENT_043: "1.1"}
+SETTING_PW_VINTAGE = {CURRENT_043: "q3"}
+PW_VINTAGES = ("oct14", "q3")
+
+
+def sam_version(setting: str = DEFAULT) -> str:
+    """Infinity GEM SAM version of a setting's 'own' variant: INFINITY_GEM_SAM_VERSION if set, else the setting's own (SETTING_SAM_VERSION, else 1.0)."""
+    _check(setting)
+    return paths.SAM_OWN_VERSION_ENV or SETTING_SAM_VERSION.get(setting, "1.0")
+
+
+def pw_vintage(setting: str = DEFAULT) -> str:
+    """Public-works shock vintage of a setting: INFINITY_GEM_PW_VINTAGE if set, else the setting's own (SETTING_PW_VINTAGE, else 'oct14')."""
+    import os
+    _check(setting)
+    v = os.environ.get("INFINITY_GEM_PW_VINTAGE", "").strip() or SETTING_PW_VINTAGE.get(setting, "oct14")
+    if v not in PW_VINTAGES:
+        raise ValueError(f"INFINITY_GEM_PW_VINTAGE must be one of {PW_VINTAGES}, not {v!r}")
+    return v
 # Not in option (c) at T15 (T15 "phi": null, "peso": null): sr_erpt (P2(b)) and the oil shock's own peso path (P2(a)) stay off.
 # The BSP rule's reference (13 Nov 2026; a review note, not included): the rule reacts to the gaps of a path
 # against the NO-SHOCK path (the counterfactual every result is measured against), so the no-shock path itself has zero gaps and a
@@ -172,7 +220,8 @@ SHORT_RUN_UNEMPLOYED = {"0.2 published": ("flab-n", "flab-p"),
                         "0.3 recommended": ("flab-n", "flab-p", "flab-s"),
                         "0.4 recommended": ("flab-n", "flab-p", "flab-s"),     # 13 Nov 2026: as 0.3 (the fits' closure)
                         "0.4.1 recommended": ("flab-n", "flab-p", "flab-s"),   # 13 Nov 2026: as 0.4
-                        "0.4.2 candidate": ("flab-n", "flab-p", "flab-s")}     # 15 Nov 2026 (opt-in): as 0.4.1
+                        "0.4.2 candidate": ("flab-n", "flab-p", "flab-s"),     # 15 Nov 2026 (opt-in): as 0.4.1
+                        "0.4.3 recommended": ("flab-n", "flab-p", "flab-s")}   # 21 Nov 2026 (the default): as 0.4.1
 # The 2023 SAM used by "0.3 recommended" runs with the rice-split accounts (rice=True) when no sam_variant is given.
 # 0.3.10 (18 Oct 2026): Infinity GEM's own 2023 SAM
 # (paths.SAM_2023_OWN, version 0.5 then; version 1.0 since 6 Nov 2026; tools/build_own_sam_2023.py). sam_variant="ifpri" gives IFPRI's
@@ -208,7 +257,12 @@ PUBLIC_CAPITAL = {"off": None,
                   "high": dict(phi=0.122, kg_gdp=0.296)}
 
 DESCRIPTION = {
-    "0.4.2 candidate": "A CANDIDATE, not the default (15 Nov 2026): everything in 0.4.1 recommended, plus short-run export responses "
+    "0.4.3 recommended": "The default since 21 Nov 2026 (Infinity GEM 0.4.3): the values of the 0.4.2 candidate (short-run "
+                         "export responses and the peso's within-year pass-through into non-oil import prices estimated from PSA data, "
+                         "with the four fitted values re-fitted with them), on Infinity GEM's own SAM v1.1 (the 2023 rice tariff at BOC's "
+                         "collections and PSA's customs values) and the public-works shock on PSA's Q3 2026 release; the BSP rule as "
+                         "0.4.1's. Dynamic runs on Infinity GEM's own SAM v1.0 or v1.1 only. Not for citation until reviewed.",
+    "0.4.2 candidate": "A CANDIDATE, not the default (15 Nov 2026):everything in 0.4.1 recommended, plus short-run export responses "
                        "estimated from PSA data (exports react less to prices within the year), a partial within-year pass-through "
                        "of the peso into non-oil import prices estimated from PSA's import prices, and the four fitted values (labour "
                        "hoarding, the consumption rule, the margin slope, the oil pass-through) re-fitted with them. Dynamic runs on "
@@ -233,7 +287,8 @@ def _check(setting):
         raise KeyError(f"Unknown setting '{setting}' ({', '.join(SETTINGS)})")
 
 
-def cge_kwargs(setting: str = DEFAULT, rice: bool = False, sam_year: int | None = None, sam_variant: str | None = None) -> dict:
+def cge_kwargs(setting: str = DEFAULT, rice: bool = False, sam_year: int | None = None, sam_variant: str | None = None,
+               _own_setting: str | None = None) -> dict:
     """Keyword arguments for CGE.from_sam(path, **kw) (without closure arguments). 'path' is the SAM file.
     rice: the rice-split SAM (0.3.7, "0.3 recommended" only).
     sam_year: None = the 2023 SAM (as before); 2024 or 2025 = the rice-split SAM updated to that year's PSA totals
@@ -248,8 +303,12 @@ def cge_kwargs(setting: str = DEFAULT, rice: bool = False, sam_year: int | None 
     0.3.13 (23 Oct 2026): 'own-0.6' = Infinity GEM's own 2023 SAM version 0.6 (paths.sam_own("0.6"); research, opt-in; rice=True,
     2023 only). 6 Nov 2026: 'own' (and the default) = version 1.0; 'own-0.5' = version 0.5 by name.
     13 Nov 2026: "0.4 recommended" = "0.3 recommended" here (option (c) is a set of dynamic short-run assumptions; module notes);
-    "0.4.1 recommended" too (13 Nov 2026)."""
+    "0.4.1 recommended" too (13 Nov 2026).
+    0.4.3 (21 Nov 2026): the 'own' variant is the setting's own Infinity GEM SAM version (sam_version(): "0.4.3 recommended" v1.1, the others
+    v1.0; INFINITY_GEM_SAM_VERSION overrides); _own_setting (internal: dynamic_kwargs passes the 0.4.x setting it resolves through "0.3
+    recommended") names whose version to use."""
     _check(setting)
+    own_path = paths.sam_own(sam_version(_own_setting or setting))   # 0.4.3: the setting's own Infinity GEM SAM
     if setting in OPTION_C_SETTINGS:
         setting = "0.3 recommended"
     if sam_variant not in SAM_VARIANTS:
@@ -273,7 +332,7 @@ def cge_kwargs(setting: str = DEFAULT, rice: bool = False, sam_year: int | None 
     if sam_variant == "psa" and sam_year:                     #: 2024/2025 rebased on the PSA-consistent SAM
         path = paths.sam_updated(sam_year, base="psa")
     else:
-        path = {"psa": paths.SAM_2023_RICE_PSA, "own": paths.SAM_2023_OWN,
+        path = {"psa": paths.SAM_2023_RICE_PSA, "own": own_path,     # 0.4.3: was paths.SAM_2023_OWN for every setting
                 "own-0.5": paths.sam_own("0.5"), "own-0.6": paths.sam_own("0.6")}[sam_variant] if sam_variant else (   # 0.3.13: v0.6 by name only
             paths.sam_updated(sam_year) if sam_year else (paths.SAM_2023_RICE if rice else paths.SAM_2023_PETR))
     return dict(path=path, elasticities=elasticity_set("ph"),
@@ -290,7 +349,7 @@ def cge_model(setting: str = DEFAULT, rice: bool = False, sam_year: int | None =
 
 def dynamic_kwargs(setting: str = DEFAULT, public_capital: str = "off", industry_baseline: bool = False,
                    hybrid: bool | None = None, rice: bool = False, land: str = "mobile", sam_year: int | None = None,
-                   sam_variant: str | None = None) -> dict:
+                   sam_variant: str | None = None, _own_setting: str | None = None) -> dict:
     """Keyword arguments for DynamicCGE(**kw). public_capital: 'off', 'low' or 'high' (0.3 only).
     industry_baseline: PSA industry growth 2024-2025 (contains the 2025 slump: do not add a 2025 freeze).
     hybrid: None = the setting's own choice (0.2 off, 0.3 on).
@@ -303,10 +362,16 @@ def dynamic_kwargs(setting: str = DEFAULT, public_capital: str = "off", industry
             raise ValueError(f"'{setting}' (option (c) and the BSP rule) is fitted on Infinity GEM's own SAM v1.0 with the rice-split accounts "
                              "in the hybrid closure: use rice=True, sam_variant None or 'own', no sam_year, hybrid None or True; "
                              "for other SAMs or closures name '0.3 recommended'")
-        if "v1.0" not in paths.SAM_2023_OWN.name:
-            raise ValueError(f"'{setting}' is fitted on Infinity GEM's own SAM v1.0; paths.SAM_2023_OWN is {paths.SAM_2023_OWN.name} "
+        # 21 Nov 2026 (opt-in): v1.1 (v1.0 with the rice tariff fix; INFINITY_GEM_SAM_VERSION=1.1) is accepted too: the fitted values were
+        # fitted on v1.0, and the 0.4.1-vs-candidate comparison on v1.1 (a design note (not included))
+        # re-scores them there; the default (v1.0) is unchanged
+        # 0.4.3 (21 Nov 2026): the SAM is the setting's own (sam_version(): "0.4.3 recommended" v1.1, the other 0.4.x settings v1.0;
+        # INFINITY_GEM_SAM_VERSION overrides); was paths.SAM_2023_OWN for every setting
+        if sam_version(setting) not in ("1.0", "1.1"):
+            raise ValueError(f"'{setting}' is fitted on Infinity GEM's own SAM v1.0 (v1.1 accepted); its Infinity GEM SAM is v{sam_version(setting)} "
                              "(name '0.3 recommended' for another version)")
-        d = dynamic_kwargs("0.3 recommended", public_capital, industry_baseline, hybrid, rice, land, sam_year, sam_variant)
+        d = dynamic_kwargs("0.3 recommended", public_capital, industry_baseline, hybrid, rice, land, sam_year, sam_variant,
+                           _own_setting=setting)
         d.update(option_c_kwargs(setting))
         if d.get("sr_cet") == SR_CET_042C:        # 15 Nov 2026 ("0.4.2 candidate"): the short-run CET over the SAM's commodities
             from .elasticities import short_run_cet
@@ -319,7 +384,7 @@ def dynamic_kwargs(setting: str = DEFAULT, public_capital: str = "off", industry
         return dict(hybrid=bool(hybrid), transfer_scaling="legacy")
     from .dynamic import documented_baseline, psa_industry_growth
     from .sam import SAM
-    kw = cge_kwargs(setting, rice, sam_year, sam_variant)
+    kw = cge_kwargs(setting, rice, sam_year, sam_variant, _own_setting=_own_setting)
     d = dict(sam=SAM.load_for_model(kw.pop("path")), **kw, **documented_baseline(), land=land,
              capital_allocation="putty-clay", hybrid=True if hybrid is None else bool(hybrid),
              public_capital=PUBLIC_CAPITAL[public_capital],
@@ -343,8 +408,8 @@ def option_c_kwargs(setting: str = "0.4 recommended") -> dict:
     import copy
     from .dynamic import lfs_labour_slack
     from .monetary import rule
-    if setting == CANDIDATE_042 and OPTION_C_042C is None:   # 15 Nov 2026: its source file is missing or changed
-        raise ValueError(f"'{CANDIDATE_042}' cannot be built: {OPTION_C_042C_ERROR}")
+    if setting in (CANDIDATE_042, CURRENT_043) and OPTION_C_042C is None:   # 15 Nov 2026: its source file is missing or changed
+        raise ValueError(f"'{setting}' cannot be built: {OPTION_C_042C_ERROR}")
     if setting not in OPTION_C:
         raise KeyError(f"option_c_kwargs: '{setting}' has no option (c) values ({', '.join(OPTION_C)})")
     kw = copy.deepcopy(OPTION_C[setting])

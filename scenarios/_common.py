@@ -123,10 +123,15 @@ def out_tag() -> str:
     """Suffix for output files of the 2026 scenario scripts: the SAM tag, "_set04" under the setting "0.4 recommended" (13 Nov 2026), plus any
     INFINITY_GEM_SCENARIO_ENGINE settings (e.g. "_hoarding0.85")."""
     fmt = lambda v: f"{v:g}" if isinstance(v, (int, float)) else str(v)
-    st = {"0.4 recommended": "_set04", "0.4.1 recommended": "_set041", "0.4.2 candidate": "_set042c"}.get(SETTING, "")   # 0.4.0 (13 Nov 2026): 0.4 outputs never
-    #                                        overwrite 0.3 ones; "_set041" (13 Nov 2026): nor 0.4's
+    st = {"0.4 recommended": "_set04", "0.4.1 recommended": "_set041", "0.4.2 candidate": "_set042c",
+          "0.4.3 recommended": "_set043"}.get(SETTING, "")   # 0.4.0 (13 Nov 2026): 0.4 outputs never
+    #                                        overwrite 0.3 ones; "_set041" (13 Nov 2026): nor 0.4's;
+    #                                        "_set043" (0.4.3, 21 Nov 2026, the default)
     fb = "_fies25" if FIES_BASE == "fies2025" else ""          # 18 Nov 2026: new poor on the FIES 2025 base (the default)
-    return sam_tag() + st + "".join(f"_{k}{fmt(v)}" for k, v in sorted(SCENARIO_ENGINE.items())) + fb
+    sam = sam_tag()
+    if SCENARIO_SAM == "own" and _settings.sam_version(SETTING) == "1.1":   # 0.4.3 (21 Nov 2026): outputs on Infinity GEM SAM v1.1 say so (the
+        sam = "_ownv11"                                                # input globs of sam_tag(), e.g. the wage-curve file, keep v1.0's)
+    return sam + st + "".join(f"_{k}{fmt(v)}" for k, v in sorted(SCENARIO_ENGINE.items())) + fb
 
 
 def calibration_file() -> Path:

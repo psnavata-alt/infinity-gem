@@ -85,6 +85,7 @@ from infinity_gem.microlink import MicroLink                                    
 from infinity_gem.oil import cge_oil_shock, coal_lng_shock, is_own_sam_v10, fertilizer_cost_shares, fertilizer_cost_shock   # noqa: E402
 from infinity_gem.settings import BSP_RULE_REFERENCE, cge_model, dynamic_kwargs, short_run_closure      # noqa: E402
 from infinity_gem.settings import OPTION_C, OPTION_C_SETTINGS     # noqa: E402  (13 Nov 2026: 0.4.1)
+from infinity_gem.settings import pw_vintage                      # noqa: E402  (0.4.3, 21 Nov 2026: each setting's public-works shock vintage)
 from _common import SETTING                                                     # noqa: E402  (0.4.0: INFINITY_GEM_SETTING, else DEFAULT)
 import shock_paths as SP                                                        # noqa: E402
 import elnino_to_cge as EN                                                      # noqa: E402
@@ -166,11 +167,15 @@ def merge(*specs):
     return out
 
 
-def land_cuts(oni):
+def land_cuts(oni, setting=None):
     """El Nino land factors by calendar year, sized in the one-year short-run model with the 2026 tariff."""
     # 0.4.0 (13 Nov 2026): the static CGE of "0.4 recommended" IS that of "0.3 recommended" (settings.cge_kwargs), so the El Nino
     # sizing is the same under every 0.3+ setting; it stays named here.
-    m = cge_model("0.3 recommended", rice=True, sam_variant=SAM_VARIANT, **short_run_closure("0.3 recommended"), land="fixed")
+    # 0.4.3 (21 Nov 2026): setting = the Runs' setting, so the static model is on that setting's own Infinity GEM SAM (settings.sam_version:
+    # "0.4.3 recommended" v1.1; every older setting v1.0, exactly as before); its static CGE is still "0.3 recommended"'s.
+    # None or a setting without option (c) = "0.3 recommended", as before.
+    st = setting if setting in OPTION_C_SETTINGS else "0.3 recommended"
+    m = cge_model(st, rice=True, sam_variant=SAM_VARIANT, **short_run_closure(st), land="fixed")
     base = EN.policy_2026(m)
     b = m.solve(base)
     if not b.ok:
@@ -224,9 +229,9 @@ class Runs:
         m = self.m
         oil = SP.oil_paths(oil_nc, oil_fc)
         food = SP.food_paths()
-        pw_ = SP.public_works()
+        pw_ = SP.public_works(vintage=pw_vintage(self.setting))   # 0.4.3 (21 Nov 2026): "0.4.3 recommended" q3; older settings oct14
         pw_.update({k: v for k, v in SP.public_works_2027().items() if k.startswith("2027 NEP")})
-        _, cuts = land_cuts(EN.ONI_S1[oni])
+        _, cuts = land_cuts(EN.ONI_S1[oni], self.setting)      # 0.4.3 (21 Nov 2026): on the setting's own Infinity GEM SAM
         o = {}
         for t in range(2026, 2031):
             s = cge_oil_shock(m, float(oil.loc[t, "crude (Dubai)"]) / 100)
@@ -249,6 +254,8 @@ class Runs:
 
     def run(self, S, measures="", piece=None):
         d, m = self.d, self.m
+        from infinity_gem.rice_tariff import guard as rice_guard   # 21 Nov 2026: the 2023 rice rate checked; legacy files pass
+        rice_guard(m, "combined_revised.Runs.run")
         tariff = {"tm_scale": {"cmric": EN.TARIFF_2026 / float(m.tm[m.C.index("cmric")])}}
         aid = lambda bn, y, alloc=None: {"trg_h_add": {h: to_sam_units(bn, PSA_GDP[y]) * w for h, w in (alloc or self.alloc).items()}}
         sh = {2025: {}, 2026: dict(tariff), 2027: merge(tariff, aid(-AID_2027, 2027))}   # policies in every run (note 18: year y's GDP)

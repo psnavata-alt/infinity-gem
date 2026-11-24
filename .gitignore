@@ -22,6 +22,10 @@ data/raw/macro/macro_panel_*.xlsx
 data/raw/macro/WUI_*.xlsx
 data/raw/macro/FRED_*
 data/raw/world/FRED_*/
+# (0.4.3) the Treasury's and the BSP's workbooks and the DBCC statement, if you download them (data/raw/macro/README.md)
+data/raw/fiscal/btr/
+data/raw/macro/bsp_bop/
+data/raw/oil/forecasts/*.pdf
 # GAMS and Julia outputs
 *.lst
 *.log

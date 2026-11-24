@@ -343,12 +343,83 @@ Checks
       gives zeros; value added, output and jobs shared out to regions add up to the national results (1e-9); baseline poverty
       by region = PSA 2023 Table 2; new poor by region sum to the national microsimulation; boundary recode (NIR, Sulu). NOT RUN
       when the regional tables or the FIES 2023 file are absent. Phase 0 keeps the FIES 2023 base (named; 18 Nov 2026).
+  RGB (0.4.3, 21 Nov 2026; opt-in research) Regional Phase 0b,
+      research/regional/phase0b.py (checks/test_regional_phase0b.py, 6 tests): every switch off = Phase 0 bit for bit;
+      within-industry shares (PSA value of production, FIES-LFS jobs, RAS) keep each region's GRDP industry totals and sum to 1;
+      adding-up with every switch on (value added, output, jobs; the household job link leaves national earnings by industry
+      unchanged); El Nino province terms = elnino_to_cge.calendar_year_losses, DPWH weights; homogeneity; zero tests. NOT RUN
+      when the regional tables are absent.
   R41F (0.4.2, 18 Nov 2026) The default
       FIES base (checks/test_041F_reference.py; settings.DEFAULT_FIES_BASE, infinity_gem/fies_base.py): with INFINITY_GEM_FIES_BASE removed every
       class and scenario helper is on FIES 2025 and the switch INFINITY_GEM_FIES_BASE=fies2023 works; the LFS link is refused on the default
       with its remedy; the R41 central case on FIES 2025 equals checks/reference_041F_central.json (1e-9) and its model rows (GDP,
       growth, policy rate, multiplier) equal R41's reference. Every OTHER check runs with INFINITY_GEM_FIES_BASE=fies2023 (set at the top of
       this file and of each standalone test), because every published and frozen reference is on the FIES 2023 base.
+  INV1 (0.4.3, 18 Nov 2026; opt-in, data only) The investment target refreshed with PSA's Q3 2026
+      release and netted of inventories and aircraft (checks/test_investment_target_row137.py; scenarios/row137_investment_target_2026.py):
+      the old name growth13nov (the default 14-18 Nov) = the 13 Nov target and the saved 0.4.1 and 0.4.2-candidate scores to the bit;
+      since 18 Nov 2026 the DEFAULT is levelq3 (the 2026 level), read by name by its refit (T6); the
+      quarterly method on the 13 Nov data = the 13 Nov file, and on the Q3 release cut at Q2 2026 = the 13 Nov code; zero netted parts
+      = not netted; GCF = GFCF + inventories + valuables, z = public + other, air-transport levels from 0182/0192 consistent; the
+      targets file = a fresh recomputation.
+  EV1 (0.4.3, 21 Nov 2026; opt-in, computed after the solve) Equivalent
+      variation by household group (infinity_gem/welfare.py; checks/test_welfare_ev.py, 8 tests): 0 at the reference run; the closed
+      form (LES and Cobb-Douglas) = brute-force minimisation; revealed-preference bounds and the sign for the measured 2026 oil
+      shock; a transfer's EV close to its spending change; second order against Shephard's first-order term; totals = sums;
+      Hosoe's EV via pycge reproduced; per year in the dynamic model; nothing in the engine imports it.
+  CT1 (0.4.3, 21 Nov 2026; opt-in) The electricity vs fuels
+      energy bundle and the carbon tax (cge.py energy_nest 'fuels' and 'sigma_f', carbon=, shock key 'ctax'; infinity_gem/carbon.py;
+      checks/test_energy_split_carbon_row160.py, 7 tests): with neither option the engine = checks/reference_cge_pre_row160.py to the
+      bit in five set-ups; a zero tax = no change; the split's algebra; homogeneity and accounts with the tax on; sign and first-round
+      size at Castillo et al. (2018)'s illustrative rates; their TRAIN benchmark (an 8.5% oil-product wedge cuts activities' CO2
+      within a third to three times their 0.78%); refusals. a design note (not included).
+  GF2 (0.4.3, 21 Nov 2026; opt-in) cge.py's gfin in DynamicCGE with each
+      year's reference saving from the baseline, debt.scenario_debt, and infinity_gem/bop.py (checks/test_gfin_dynamic_debt_bop.py, 8
+      tests): gfin off = checks/reference_dynamic_pre_gfin_043.py to the bit (baseline, shock, BSP rule, savings closure); zero shock
+      = baseline under 'deficit', 'tax', 'spend'; the closures hold saving at the year's reference; domestic borrowing crowds out
+      (investment or consumption by closure), foreign does not; debt stock-flow identity, parts, first years by hand; the DBCC 193rd
+      fiscal program read from the PDF = its transcription, the implied GDP reproduces every printed share; BTr's financing mix adds
+      up; the BSP's BPM6 lines by institution add up to the current account deficit (2023-2025) and the model's lines to its foreign
+      saving; guards. NOT RUN without the BTr and BSP files. a design note (not included).
+  PW1 (0.4.3, 21 Nov 2026; opt-in by name) The
+      public-works shock on PSA's Q3 2026 release (scenarios/row137b_public_works_q3_2026.py; checks/test_public_works_vintage_row137b.py,
+      5 tests; no model run): preshock/shock_paths.public_works(), the default, unchanged to the bit; two observed quarters give the
+      14 Oct rule back to the bit; the Q3 vintage recomputed from PSA's release (1e-12); the swap is local; the data file = a fresh
+      recomputation (1e-9). a design note (not included).
+  DM1 (0.4.3, 21 Nov 2026; opt-in) Demography in labour
+      supply (infinity_gem/demography.py; checks/test_demography.py, 5 tests; dynamic.py not edited, no model run): the default
+      labour path unchanged (==); equal employment rates give the 15+ rule; the LFS and projection data add up; exact rescaling of the
+      projected years; the LFS file = PSA's OpenSTAT download (SHA-256). a design note (not included).
+  VT1 (0.4.3, 21 Nov 2026; opt-in) VAT detail of the
+      taxes on products (infinity_gem/vat.py; checks/test_vat_row162.py, 4 tests; no SAM file changed): VAT + other = each SAM v1.0 stax
+      cell and VAT = BESF 2023's P1,007.257 bn; the VAT-rate shock formula (12% = no shock); the engine does not import the module;
+      in the static CGE 12% = the benchmark and the first-order loss of an 11% rate = VAT/12. a design note (not included).
+  MP2 (0.4.3, 21 Nov 2026; opt-in) PAMPh's own policy-rule coefficients,
+      infinity_gem.monetary.rule("pamph_annex3") (BSP WPS 2020-12, Annex 3 p. 30: gamma1 0.70, gamma2 1.50, gamma3 0.50), and the variant
+      estimated on Philippine data, rule("pamph_estimated") (research/qpm, variant E) (checks/test_monetary_annex3.py, 5 tests): every
+      rule the module gave before = the pre-change module (checks/reference_monetary_pre_annex3_043.py) exactly, and the default
+      setting's resolved keyword arguments are identical; the values = PAMPh's table (and the PDF's Annex 3 page when on this
+      computer); the estimate = the research run's file; in MP1's small dynamic case a zero shock stays on the baseline, each rule's
+      fixed point converges and satisfies its own rule, and the table's larger responses cut the rate deeper and the GDP loss less.
+      a design note (not included).
+  CT2 (0.4.3, 21 Nov 2026; opt-in) cge.py's carbon tax in DynamicCGE(carbon=...)
+      (checks/test_dynamic_carbon.py, 4 tests): off = checks/reference_dynamic_pre_carbon_043.py to the bit (baseline and a
+      construction cut); the one-period case (a tax in the path's first year) = the static CGE with the dynamic model's own keywords to
+      the bit; carbon on with no tax = no carbon (1e-9); a 2026-2028 tax solves, cuts CO2 in each taxed year, its revenue = ctax x
+      pre-tax CPI x taxed tonnes / 1000 (1e-9), and stops after 2028; refusals. Same design note.
+  S14 (0.4.3, 21 Nov 2026; the rice-tariff fix; opt-in INFINITY_GEM_SAM_VERSION=1.1) the project's
+      own 2023 SAM v1.1 = v1.0 with palay's import duty zero and milled-rice and palay imports at PSA customs 2023
+      (checks/test_own_sam_v11.py, 11 lines): the legacy SAM files keep their SHA-256; v1.1 as filed; the 20 SAM checks of the SAM audit pass; cmric = PSA customs (raw download) with BOC's 29.93 bn at 34.4%; totals = v1.0's (PSA, BESF); the
+      guard (infinity_gem/rice_tariff.py) passes v1.1, v1.0 only as legacy, refuses wrong copies; build('1.1') = the file = R1B;
+      the default stays v1.0; the CGE calibrates; the rice-split builder's opt-in palay_duty='zero'.
+      a design note (not included). (0.4.3, 21 Nov 2026: T6 now asserts the NEW default, v1.1, with
+      INFINITY_GEM_SAM_VERSION=1.0 the way back.)
+  R43 (0.4.3, 21 Nov 2026, after a like-for-like comparison) The DEFAULT setting "0.4.3
+      recommended" (checks/test_043_reference.py, 4 tests): DEFAULT and SETTINGS; OPTION_C_043 = OPTION_C_042C (the candidate's
+      values); each setting's Infinity GEM SAM and public-works vintage (0.4.3: v1.1 and "q3"; every older setting: v1.0 and "oct14", so R41,
+      R42 and the published runs reproduce by name); dynamic_kwargs = the candidate's except the SAM; public_works() = the Q3 vintage of the research script to the bit; the INFINITY_GEM_SAM_VERSION, INFINITY_GEM_PW_VINTAGE and INFINITY_GEM_SETTING switches; the 0.4.3 central case equals
+      checks/reference_043_central.json (FIES 2023) and checks/reference_043F_central.json (FIES 2025, the default base) at 1e-9 and
+      the comparison's run B at 1e-6. The suite pins INFINITY_GEM_SAM_VERSION=1.0 and INFINITY_GEM_PW_VINTAGE=oct14 for every other check (top of this file).
 """
 from __future__ import annotations
 
@@ -372,6 +443,15 @@ sys.path.insert(0, str(ROOT))
 import os                                                      # noqa: E402
 SUITE_FIES_BASE = "fies2023"
 os.environ["INFINITY_GEM_FIES_BASE"] = SUITE_FIES_BASE
+# 0.4.3 (21 Nov 2026: 0.4.3 on Infinity GEM SAM v1.1 with the Q3 2026 public-works shock): the
+# defaults are now SAM v1.1 (paths.SAM_2023_OWN) and the "q3" shock vintage (shock_paths.public_works()), but every frozen reference
+# below was computed on SAM v1.0 and the 14 Oct 2026 shock, so the suite PINS them here as it pins the FIES base (INFINITY_GEM_SAM_VERSION
+# and INFINITY_GEM_PW_VINTAGE override every setting; infinity_gem/settings.py sam_version, pw_vintage). Checks that test the new defaults remove
+# the pins in their own process: R43 (checks/test_043_reference.py, the 0.4.3 central case against checks/reference_043_central.json
+# and reference_043F_central.json) and S14 T6 (the SAM switch).
+SUITE_SAM_VERSION, SUITE_PW_VINTAGE = "1.0", "oct14"
+os.environ["INFINITY_GEM_SAM_VERSION"] = SUITE_SAM_VERSION
+os.environ["INFINITY_GEM_PW_VINTAGE"] = SUITE_PW_VINTAGE
 if hasattr(sys.stdout, "reconfigure"):   # 0.3.4 (14 Oct 2026): a '₱' in a detail line crashed the run when output went to a file
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
@@ -413,7 +493,8 @@ _UNDISTRIBUTED = {
     "ELEC-FUEL": ([lambda: paths.DATA_PROCESSED / "electricity_fuel_mix_inputs_2014-2023.csv"],
                   "the electricity fuel-mix inputs of own SAM v0.6e and later (they include GTAP 10A energy volumes, which the "
                   "GTAP licence does not allow us to distribute; research/electricity_fuel_mix/fuel_mix_evidence.py writes them)"),
-    "SAM-TESTS": ([lambda v=v: ROOT / "checks" / f"test_own_sam_v{v}.py" for v in ("05e", "06", "06e", "07", "07b", "08", "09", "10")],
+    "SAM-TESTS": ([lambda v=v: ROOT / "checks" / f"test_own_sam_v{v}.py" for v in ("05e", "06", "06e", "07", "07b", "08", "09", "10",
+                                                                                 "11")],
                   "the own SAM's standalone rebuild tests (not in this repository: they rebuild the SAM files from the "
                   "licensed FIES and FIES-LFS aggregates; the SAM files themselves are in data/processed)"),
     "PAGASA": ([lambda: paths.DATA_RAW / "disasters" / "PAGASA_ARTC_typhoon_damage_events_and_seasons_2017-2023.csv"],
@@ -425,11 +506,16 @@ _UNDISTRIBUTED = {
                "and urban/rural built from PSA's 2025 Table 16, and the tool that builds and checks them (not in this repository; "
                "data/raw/fies/README.md)"),
     "CENTRAL-TESTS": ([lambda f=f: ROOT / "checks" / f for f in ("test_04_reference.py", "test_041_reference.py",
-                                                               "test_042_candidate.py", "test_041F_reference.py")],
+                                                               "test_042_candidate.py", "test_041F_reference.py",
+                                                               "test_043_reference.py")],
                       "the reference tests of the central 2026 case under the 0.4 settings and their reference results (not in "
                       "this release; docs/STATUS.md)"),
     "RUN-OUTPUTS": ([lambda f=f: ROOT / "checks" / f for f in ("test_cap_fallback.py", "test_cet_short_run.py",
-                                                             "test_industry_slope_restated.py", "test_erpt_estimate.py")],
+                                                             "test_industry_slope_restated.py", "test_erpt_estimate.py",
+                                                             # 0.4.3 (25 Nov 2026): INV1, PW1, VT1, MP2
+                                                             "test_investment_target_row137.py",
+                                                             "test_public_works_vintage_row137b.py", "test_vat_row162.py",
+                                                             "test_monetary_annex3.py")],
                     "standalone tests that compare with saved results of earlier runs and with estimation scripts that are not "
                     "in this release (docs/STATUS.md)"),
     "REGIONAL": ([lambda: ROOT / "research" / "regional" / "topdown.py", lambda: ROOT / "checks" / "test_regional_topdown.py"],
@@ -437,6 +523,23 @@ _UNDISTRIBUTED = {
     "RESEARCH-TESTS": ([lambda f=f: ROOT / "checks" / f for f in ("test_row126_127_shock_sizes.py", "test_row111_forecast_tools.py",
                                                                 "test_row96_closeout.py", "test_row94_overlay.py", "test_markup_floor.py")],
                        "the standalone tests of a research batch of 12 Nov 2026, whose scripts are not in this release"),
+    # 0.4.3 (25 Nov 2026): the inputs of the 0.4.3 checks that are not distributed
+    "CARBON": ([lambda: paths.DATA_PROCESSED / "carbon_intensities_2023_row160.csv",
+                lambda: ROOT / "checks" / "test_energy_split_carbon_row160.py", lambda: ROOT / "checks" / "test_dynamic_carbon.py"],
+               "the carbon intensity table of the opt-in carbon tax (it holds GTAP 10A CO2 and energy volumes, which the GTAP "
+               "licence does not allow us to distribute) and the carbon tax's tests (not in this release; docs/STATUS.md)"),
+    "BTR": ([lambda: paths.DATA_RAW / "fiscal" / "btr" / "Debt-Indicator-Annual-1986-2025.xlsx"],
+            "the Bureau of the Treasury's workbook of national government debt indicators, 1986-2025 (not distributed: "
+            "redistribution terms not confirmed; save it as data/raw/fiscal/btr/Debt-Indicator-Annual-1986-2025.xlsx, "
+            "data/raw/macro/README.md)"),
+    "BTR-BSP-GF2": ([lambda: paths.DATA_RAW / "fiscal" / "btr" / "COR-Financing_Annual_1986-2025-1.xlsx",
+                     lambda: paths.DATA_RAW / "macro" / "bsp_bop" / "Table1.xlsx",
+                     lambda: ROOT / "checks" / "test_gfin_dynamic_debt_bop.py"],
+                    "the Bureau of the Treasury's financing workbook and the BSP's balance-of-payments tables (not distributed: "
+                    "redistribution terms not confirmed; data/raw/macro/README.md) and the check's standalone test (not in this "
+                    "release; docs/STATUS.md)"),
+    "REGIONAL-0B": ([lambda: ROOT / "research" / "regional" / "phase0b.py", lambda: ROOT / "checks" / "test_regional_phase0b.py"],
+                    "the regional research code (phase 0b) and its test (not in this release)"),
 }
 _NEEDS = {"P1": ["FIES"], "V1": ["MACRO-Q"], "I1": ["IO80"], "I2": ["IO80", "LFS-IND"], "A1": ["FIES"],
           "I3": ["IO80"], "I4": ["IO80"], "I5": ["IO80", "IO16", "LFS-IND"], "S1": ["IO240"], "H2": ["FIES", "REF-H2"],
@@ -454,7 +557,13 @@ _NEEDS = {"P1": ["FIES"], "V1": ["MACRO-Q"], "I1": ["IO80"], "I2": ["IO80", "LFS
           "S13": ["FIES", "FIES-LFS", "IO240", "ELEC-FUEL", "SAM-TESTS"], "FB1": ["FIES", "FIES25"],
           "R4": ["FIES", "CENTRAL-TESTS"], "R41": ["FIES", "CENTRAL-TESTS"], "R42": ["FIES", "CENTRAL-TESTS"],
           "R41F": ["FIES", "FIES25", "CENTRAL-TESTS"], "EF1": ["FIES", "RUN-OUTPUTS"], "CET1": ["RUN-OUTPUTS"],
-          "IS1": ["RUN-OUTPUTS"], "ERP1": ["RUN-OUTPUTS"], "RG1": ["FIES", "REGIONAL"], "RB1": ["RESEARCH-TESTS"]}
+          "IS1": ["RUN-OUTPUTS"], "ERP1": ["RUN-OUTPUTS"], "RG1": ["FIES", "REGIONAL"], "RB1": ["RESEARCH-TESTS"],
+          # 0.4.3 (25 Nov 2026): R43 (the central case under the 0.4.3 default) and S14 (the own SAM v1.1's test) as R41 and S13;
+          # INV1, PW1, VT1 and MP2 compare with saved development or research outputs; CT1 and CT2 need the GTAP-based intensity
+          # table; DB1 and GF2 the Treasury's and the BSP's workbooks; RGB the regional research and the FIES microdata
+          "R43": ["FIES", "CENTRAL-TESTS"], "S14": ["FIES", "FIES-LFS", "IO240", "ELEC-FUEL", "SAM-TESTS"],
+          "INV1": ["RUN-OUTPUTS"], "PW1": ["RUN-OUTPUTS"], "VT1": ["RUN-OUTPUTS"], "MP2": ["RUN-OUTPUTS"],
+          "CT1": ["CARBON"], "CT2": ["CARBON"], "DB1": ["BTR"], "GF2": ["BTR", "BTR-BSP-GF2"], "RGB": ["FIES", "REGIONAL-0B"]}
 
 
 def _missing_inputs(code):
@@ -2291,6 +2400,61 @@ def ir1():
                 f"cut (theta 2, eps 0.3): r {float(s_r['RINT']):+.2f} pp, other investment {crowd:+.2%}; dynamic zero shock {zd:.1e}")
 
 
+@check("GF1", "government financing closure (0.4.3, 19 Nov 2026, from GEM-Core PRWP 8272): gfin off = deficit/phi 0 exactly "
+              "in three closures; 'tax' and 'spend' hold government saving; domestic borrowing crowds out investment, foreign does not")
+def gf1():
+    from infinity_gem.cge import CGE
+    from infinity_gem.settings import cge_kwargs
+    kw = cge_kwargs("0.3 recommended", rice=True)
+    path = kw.pop("path")
+    up = {"qg_scale": 1.05}
+    real = lambda s: np.concatenate([np.atleast_1d(np.asarray(s[k], float)).ravel()
+                                     for k in ("QA", "QH", "QINV", "QG", "QE", "QM", "CPI", "EXR", "GSAV")])
+    off = 0.0
+    for clo, ex in (("savings", {}), ("investment", {}), ("interest", {"interest": {"theta": 2.0, "eps": 0.3}})):
+        a = CGE.from_sam(path, closure=clo, **ex, **kw).solve(up)
+        b = CGE.from_sam(path, closure=clo, gfin={"close": "deficit", "foreign": 0.0}, **ex, **kw).solve(up)
+        off = max(off, float(np.max(np.abs(real(a) - real(b)))))
+    md, mf = (CGE.from_sam(path, closure="savings", gfin={"close": "deficit", "foreign": p}, **kw) for p in (0.0, 1.0))
+    bd, sd, sf = md.solve({}), md.solve(up), mf.solve(up)
+    inv = lambda s: float(s["QINV"].sum() / bd["QINV"].sum() - 1)
+    mt, ms = (CGE.from_sam(path, closure="savings", gfin={"close": c}, **kw) for c in ("tax", "spend"))
+    bt, st, ss = mt.solve({}), mt.solve(up), ms.solve({"tins_scale": 0.9})
+    hold = max(abs(float(st["GSAV"]) - mt.gsav0 * float(st["CPI"])), abs(float(ss["GSAV"]) - ms.gsav0 * float(ss["CPI"])))
+    try:
+        CGE.from_sam(path, closure="keynesian", gfin={"foreign": 0.5}, **kw)
+        refused = False
+    except ValueError:
+        refused = True
+    ok = (all(x.ok for x in (bd, sd, sf, bt, st, ss)) and off < 1e-10 and abs(float(bt["GFADJ"])) < 1e-9 and hold < 1e-6
+          and float(st["GFADJ"]) > 0 and float(ss["GFADJ"]) < 0 and inv(sd) < -0.01 and abs(inv(sf)) < 0.1 * abs(inv(sd))
+          and abs(float(sf["WALRAS"])) < 1e-6 and refused)
+    return ok, (f"off vs deficit/phi 0 {off:.1e}; government +5%: direct tax rates {float(st['GFADJ']):+.1%} ('tax'); investment "
+                f"{inv(sd):+.2%} borrowed at home, {inv(sf):+.3%} abroad; direct tax -10%: government consumption "
+                f"{float(ss['GFADJ']):+.2%} ('spend'); saving held to {hold:.1e}; Keynesian fixed peso + foreign refused: {refused}")
+
+
+@check("DB1", "national government debt after a deficit change (0.4.3, 19 Nov 2026, infinity_gem/debt.py, from GEM-Core): BTr "
+              "file read by label (domestic + external = total; ratio = BTr's own); interest snowball and peso revaluation by hand")
+def db1():
+    from infinity_gem.debt import btr_debt_base, debt_path, BTR_ANNUAL
+    if not BTR_ANNUAL.exists():
+        return None, f"BTr file not on this machine: {BTR_ANNUAL}"
+    b = btr_debt_base()
+    sumgap = abs(b["stock_dom"] + b["stock_ext"] - b["stock"])
+    t0 = debt_path({2026: 100.0, 2027: 100.0}, base=b, rate_dom=0.05, rate_ext=0.04)
+    t1 = debt_path({2026: 100.0, 2027: 100.0}, base=b, foreign_share=1.0, rate_dom=0.05, rate_ext=0.04, exr={2026: 1.0, 2027: 1.1})
+    t2 = debt_path({2026: 100.0}, base=b, rate_dom=0.05, inflation=0.05, baseline_gdp={2026: 30000.0}, base_ratio=0.6,
+                   gdp_ratio={2026: 1.0})
+    hand = max(abs(t0.loc[2027, "extra_debt"] - 205.0), abs(t0.loc[2027, "extra_interest"] - 5.0),
+               abs(t1.loc[2027, "extra_ext"] - (100 * 1.04 + 100 / 1.1) * 1.1),
+               abs(t2.loc[2026, "ratio_change_pp"] - 100 / 30000 * 100), abs(t2.loc[2026, "extra_debt"] - 100.0))
+    zero = float(debt_path({2026: 0.0, 2028: 0.0}, base=b).abs().to_numpy().max())
+    ok = sumgap < 1.0 and 0.4 < b["ratio"] < 0.9 and 0.01 < b["rate_dom"] < 0.12 and 0.01 < b["rate_ext"] < 0.12 and hand < 1e-9 and zero == 0
+    return ok, (f"end-{b['year']}: ₱{b['stock']:,.0f} bn ({b['ratio']:.1%} of GDP), domestic + external gap ₱{sumgap:.3f} bn; "
+                f"{b['year']} effective rates {b['rate_dom']:.2%} domestic, {b['rate_ext']:.2%} external; hand checks {hand:.1e}")
+
+
 @check("VN1", "within-year capital vintages (0.3.12): benchmark; e = 0 = fixed capital; e = 100 = mobile; "
               "capital conserved; a new-capital pool is hired under complementarity; dynamic baseline bounded and zero shock reproduced")
 def vn1():
@@ -3666,7 +3830,7 @@ def r4():
     return _standalone("test_04_reference.py", 4, 7200)
 
 
-@check("R41", "the default setting '0.4.1 recommended' (13 Nov 2026): 0.4 + exactly the gap "
+@check("R41", "the setting '0.4.1 recommended' (the default from 13 Nov 2026 to 21 Nov 2026): 0.4 + exactly the gap "
               "rule's ceiling 1 and the lag-form BSP rule; the INFINITY_GEM_SETTING switch; the 0.4.1 central case equals its reference (1e-9)")
 def r41():
     return _standalone("test_041_reference.py", 3, 7200)
@@ -3715,7 +3879,7 @@ def erp1():
 
 
 @check("R42", "the OPT-IN setting '0.4.2 candidate' (0.4.2, 15 Nov 2026, overnight; not the default): values = their "
-              "source files; 0.4.1 + exactly the eval-11 point, sr_cet and sr_erpt; the switch; DEFAULT still 0.4.1; central case = reference")
+              "source files; 0.4.1 + exactly the eval-11 point, sr_cet and sr_erpt; the switch; DEFAULT now 0.4.3 (R43); central case = reference")
 def r42():
     return _standalone("test_042_candidate.py", 4, 7200)
 
@@ -3742,7 +3906,106 @@ def rg1():
     return _standalone("test_regional_topdown.py", 7, 3600)
 
 
-EXTRA = [i3, i4, c8, y2, y3, v2, v3, e1, y4, y5, l1, h1, s1, v4, i5, v5, s2, h2, h3, a2, w1, v6, v7, m2, d3, w2, x1, ml1, lp1, sh1, cr1, s3, y6, pk1, sr1, wc1, ex1, vd1, ic1, ps1, s4, lg1, e2, x2, s5, s6, ml2, pc1, hd1, x3, en1, en2, st1, ir1, vn1, mp1, mk1, cs1, er1, mg1, sl1, ec1, s7, sd1, op1, s10, s11, s12, s13, ts1, ol1, rb1, r4, r41, ef1, mt1, mc1, acc1, cet1, is1, erp1, r42, fb1, rg1, r41f]    # checks added in 0.3 (R41F: 0.4.2, 18 Nov 2026, FIES 2025 the default base; RG1: 0.4.2, 18 Nov 2026, regional Phase 0, opt-in research; FB1: 0.4.2, 18 Nov 2026, the opt-in FIES 2025 base;R42: 0.4.2, 15 Nov 2026, overnight, the opt-in "0.4.2 candidate" setting; CET1, IS1, ERP1: 0.4.2, 14-15 Nov 2026, its three open items, all opt-in; ACC1: 0.4.2, 14 Nov 2026, the opt-in private-investment accelerator; R41: 0.4.1, 13 Nov 2026, the 0.4.1 default; MT1, MC1: 0.4.1, 13 Nov 2026, the 0.4 misses; R4, EF1: 0.4.0, 13 Nov 2026, the 0.4 default switch; OL1: 12 Nov 2026, public oil data; S13, TS1: put in the run list 11 Nov 2026; S13 was defined on 6 Nov but not listed, TS1 was standalone; S12: 0.3.13, 24 Oct 2026, Infinity GEM SAM v0.9, customs-anchored coal and fuel account; S11: 0.3.13, 24 Oct 2026, Infinity GEM SAM v0.7b, v0.7 without the coal double count; S10: 0.3.13, 24 Oct 2026, Infinity GEM SAM v0.7, coal split from mining; OP1: 0.3.13, 23 Oct 2026, a within-year share of the world oil price reaching domestic prices; EC1: 0.3.13, 23 Oct 2026, an employment cap that settles; SL1: 0.3.13, 23 Oct 2026, slack at the start of short-run years; S7, SD1: 0.3.13, 23 Oct 2026; MG1: 0.3.13, P6, a markup pass-through that depends on the output gap; ER1: 0.3.13, P2(b), incomplete pass-through of the peso to import prices; CS1: 0.3.13, the short-run consumption rule; MK1: 0.3.13; MP1: 0.3.12; VN1: 0.3.12; IR1: 0.3.11; ST1: 0.3.11, sectoral stickiness; EN1, EN2: 0.3.11; HD1, X3: 0.3.11; S5, S6, ML2: 0.3.9; E2, X2: 0.3.9; LG1: 0.3.9; IC1, PS1, S4: 0.3.8; S3, Y6, PK1, SR1, WC1, EX1, VD1: 0.3.7; CR1: 0.3.6; ML1, LP1, SH1: 0.3.5; V4, I5, V5, S2, H2, H3: 0.3.1; W1: 0.3.2; D3: 0.3.3; W2: 0.3.4)
+@check("RGB", "regional Phase 0b (opt-in research, 21 Nov 2026; research/regional/phase0b.py): within-industry location, "
+              "shocks with a regional address, household job link; off = Phase 0 bit for bit; adding-up; homogeneity; zero tests")
+def rgb():
+    # NOT RUN (None) when the regional tables of Phase 0 and 0b (data/raw/regional) or the FIES 2023 household file are absent
+    reg = ROOT / "data" / "raw" / "regional"
+    need = [reg / "SOURCE.md", reg / "PSA_OpenSTAT_2B_AA_VP_RE_value_of_production_by_region_2026-08-05",
+            reg / "DBM_BESF_B6_regional_allocation_DPWH_2017-2027_extract.csv",
+            reg / "PSA_OpenSTAT_2B_GP_IN_GRDP_by_industry_levels_2026-08-05", paths.FIES_PUF, paths.FIES_POVLINES]
+    missing = [p.name for p in need if not p.exists()]
+    if missing:
+        return None, f"NOT RUN: missing {', '.join(missing)}"
+    return _standalone("test_regional_phase0b.py", 6, 3600)
+
+
+@check("INV1", "the investment target refreshed with PSA's Q3 2026 release and netted of inventories and aircraft (0.4.3, 18 Nov "
+               "2026; opt-in by name, data only): off = before (bit for bit), the 13 Nov file and code reproduced, "
+               "zero netted parts = not netted, accounts close, file = recomputation, the default = the 2026 level "
+               "(T6 18 Nov 2026, 10:13 PM)")
+def inv1():
+    return _standalone("test_investment_target_row137.py", 6, 1800)   # 6 tests since T6 (18 Nov 2026, 10:17 PM); was 5
+
+
+@check("EV1", "equivalent variation by household group (0.4.3, 21 Nov 2026; opt-in, after the solve; "
+              "infinity_gem/welfare.py): 0 at the reference; closed form = brute force; revealed-preference bounds and sign; second "
+              "order; totals; Hosoe/pycge EV; per year; not imported by the engine")
+def ev1():
+    return _standalone("test_welfare_ev.py", 8, 3600)
+
+
+@check("CT1", "electricity vs fuels energy bundle and the carbon tax (0.4.3, 21 Nov 2026; opt-in; ideas from OPEN-GEM "
+              "and MANAGE-WB): off = pre-change engine bit for bit; zero tax = no change; split algebra; homogeneity and accounts; "
+              "sign and size; Castillo et al. 2018 benchmark; refusals")
+def ct1():
+    return _standalone("test_energy_split_carbon_row160.py", 7, 3600)
+
+
+@check("GF2", "government financing in the dynamic model, debt by scenario, foreign flows by institution (0.4.3, 21 Nov 2026, "
+              "opt-in): off = pre-change engine bit for bit; zero shock = baseline under each closure; "
+              "closures by hand; crowding out; debt stock-flow consistent; DBCC and BTr data; BOP by institution adds up; guards")
+def gf2():
+    # NOT RUN (None) when the BTr or BSP files are not on this computer (read in place from the libraries, as DB1)
+    from infinity_gem import bop as _bop, debt as _debt
+    need = [_debt.BTR_ANNUAL, _debt.BTR_FINANCING, _debt.DBCC_193] + [_bop.BSP_BOP / f for f in
+                                                                     ("Table1.xlsx", "Table1.7.xlsx", "Table1.8.xlsx", "Table1.9.xlsx", "Table1.10.xlsx")]
+    missing = [p.name for p in need if not p.exists()]
+    if missing:
+        return None, f"NOT RUN: missing {', '.join(missing)}"
+    return _standalone("test_gfin_dynamic_debt_bop.py", 8, 5400)
+
+
+@check("PW1", "the public-works shock on PSA's Q3 2026 release (0.4.3, 21 Nov 2026; opt-in by "
+              "name; preshock/shock_paths.py not edited): the default shock unchanged; two quarters = the 14 Oct rule bit for bit; "
+              "the Q3 vintage recomputed; the swap is local; the data file = a recomputation")
+def pw1():
+    return _standalone("test_public_works_vintage_row137b.py", 5, 1800)
+
+
+@check("DM1", "demography in labour supply (0.4.3, 21 Nov 2026; opt-in, infinity_gem/demography.py; "
+              "dynamic.py not edited): the default labour path unchanged; equal rates = the 15+ rule; the data add up; exact "
+              "rescaling; the LFS file = PSA's OpenSTAT download")
+def dm1():
+    return _standalone("test_demography.py", 5, 1800)
+
+
+@check("VT1", "VAT detail of the taxes on products (0.4.3, 21 Nov 2026; opt-in, "
+              "infinity_gem/vat.py; no SAM file changed): the builder's split adds up to the SAM and to BESF's VAT; the VAT-rate shock "
+              "formula; the engine untouched; the static CGE solves, 12% = benchmark, first-order loss = VAT/12")
+def vt1():
+    return _standalone("test_vat_row162.py", 4, 3600)
+
+
+@check("MP2", "PAMPh's own BSP-rule coefficients (0.4.3, 21 Nov 2026; opt-in, "
+              "monetary.rule('pamph_annex3' or 'pamph_estimated')): the default rules and setting unchanged to the bit; Annex 3 values "
+              "(and the PDF); the estimate = the research file; zero shock, fixed point, own rule, direction in the dynamic model")
+def mp2():
+    return _standalone("test_monetary_annex3.py", 5, 3600)
+
+
+@check("CT2", "the carbon tax in the dynamic model (0.4.3, 21 Nov 2026; opt-in, "
+              "DynamicCGE(carbon=...)): off = pre-change engine bit for bit; one period = the static model bit for bit; no tax = no "
+              "carbon; the taxed path, CO2 down, revenue identity; refusals")
+def ct2():
+    return _standalone("test_dynamic_carbon.py", 4, 5400)
+
+
+@check("S14", "Infinity GEM's own 2023 SAM v1.1 (0.4.3, 21 Nov 2026; opt-in INFINITY_GEM_SAM_VERSION=1.1): the rice "
+              "tariff fix; legacy files unchanged; the 20 SAM checks; rice at BOC and customs; the guard; rebuild = file = R1B; default "
+              "v1.1 since 0.4.3 (v1.0 by INFINITY_GEM_SAM_VERSION); CGE calibrates; the rice-split builder's opt-in palay_duty='zero'")
+def s14():
+    return _standalone("test_own_sam_v11.py", 11, 3600)
+
+
+@check("R43", "the DEFAULT setting '0.4.3 recommended' (Infinity GEM 0.4.3, 21 Nov 2026): the "
+              "candidate's values on Infinity GEM SAM v1.1 with the Q3 2026 public-works shock; older settings keep v1.0 and the 14 Oct shock; "
+              "the switches; the central case equals its references on FIES 2023 and FIES 2025 (1e-9) and the comparison's run B (1e-6)")
+def r43():
+    return _standalone("test_043_reference.py", 4, 9000)     # the test removes the suite's SAM and vintage pins in its own process
+
+
+EXTRA = [i3, i4, c8, y2, y3, v2, v3, e1, y4, y5, l1, h1, s1, v4, i5, v5, s2, h2, h3, a2, w1, v6, v7, m2, d3, w2, x1, ml1, lp1, sh1, cr1, s3, y6, pk1, sr1, wc1, ex1, vd1, ic1, ps1, s4, lg1, e2, x2, s5, s6, ml2, pc1, hd1, x3, en1, en2, st1, ir1, vn1, mp1, mk1, cs1, er1, mg1, sl1, ec1, s7, sd1, op1, s10, s11, s12, s13, ts1, ol1, rb1, r4, r41, ef1, mt1, mc1, acc1, cet1, is1, erp1, r42, fb1, rg1, rgb, r41f, inv1, gf1, db1, ev1, ct1, gf2, pw1, dm1, vt1, mp2, ct2, s14, r43]    # checks added in 0.3 (R43: 0.4.3, 21 Nov 2026, the 0.4.3 default on SAM v1.1 and the Q3 2026 public-works shock; S14: 0.4.3, 21 Nov 2026, the opt-in Infinity GEM SAM v1.1 (rice tariff fix) and the rice-tariff guard; MP2, CT2: 0.4.3, 21 Nov 2026, the opt-in PAMPh Annex 3 BSP rule and the carbon tax in the dynamic model; PW1, DM1, VT1: 0.4.3, 21 Nov 2026, all opt-in; GF2: 0.4.3, 21 Nov 2026, the opt-in gfin in the dynamic model, debt by scenario and foreign flows by institution; CT1: 0.4.3, 21 Nov 2026, the opt-in electricity vs fuels bundle and carbon tax; EV1: 0.4.3, 21 Nov 2026, the opt-in equivalent variation; INV1: 0.4.3, 18 Nov 2026, the opt-in investment target refreshed and netted; R41F: 0.4.2, 18 Nov 2026, FIES 2025 the default base; RG1: 0.4.2, 18 Nov 2026, regional Phase 0, opt-in research; FB1: 0.4.2, 18 Nov 2026, the opt-in FIES 2025 base;R42: 0.4.2, 15 Nov 2026, overnight, the opt-in "0.4.2 candidate" setting; CET1, IS1, ERP1: 0.4.2, 14-15 Nov 2026, its three open items, all opt-in; ACC1: 0.4.2, 14 Nov 2026, the opt-in private-investment accelerator; R41: 0.4.1, 13 Nov 2026, the 0.4.1 default; MT1, MC1: 0.4.1, 13 Nov 2026, the 0.4 misses; R4, EF1: 0.4.0, 13 Nov 2026, the 0.4 default switch; OL1: 12 Nov 2026, public oil data; S13, TS1: put in the run list 11 Nov 2026; S13 was defined on 6 Nov but not listed, TS1 was standalone; S12: 0.3.13, 24 Oct 2026, Infinity GEM SAM v0.9, customs-anchored coal and fuel account; S11: 0.3.13, 24 Oct 2026, Infinity GEM SAM v0.7b, v0.7 without the coal double count; S10: 0.3.13, 24 Oct 2026, Infinity GEM SAM v0.7, coal split from mining; OP1: 0.3.13, 23 Oct 2026, a within-year share of the world oil price reaching domestic prices; EC1: 0.3.13, 23 Oct 2026, an employment cap that settles; SL1: 0.3.13, 23 Oct 2026, slack at the start of short-run years; S7, SD1: 0.3.13, 23 Oct 2026; MG1: 0.3.13, P6, a markup pass-through that depends on the output gap; ER1: 0.3.13, P2(b), incomplete pass-through of the peso to import prices; CS1: 0.3.13, the short-run consumption rule; MK1: 0.3.13; MP1: 0.3.12; VN1: 0.3.12; IR1: 0.3.11; ST1: 0.3.11, sectoral stickiness; EN1, EN2: 0.3.11; HD1, X3: 0.3.11; S5, S6, ML2: 0.3.9; E2, X2: 0.3.9; LG1: 0.3.9; IC1, PS1, S4: 0.3.8; S3, Y6, PK1, SR1, WC1, EX1, VD1: 0.3.7; CR1: 0.3.6; ML1, LP1, SH1: 0.3.5; V4, I5, V5, S2, H2, H3: 0.3.1; W1: 0.3.2; D3: 0.3.3; W2: 0.3.4)
 
 
 if __name__ == "__main__":

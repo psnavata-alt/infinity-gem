@@ -8,11 +8,15 @@ multiplier SAM and input-output multipliers (fixed-price models).
 iomodel    Leontief quantity, price and job-equivalent models on PSA's 2018 input-output tables (data/raw/io).
 cge        Static CGE model calibrated to the SAM (IFPRI standard-model tradition).
 dynamic    Recursive-dynamic extension of the CGE (capital accumulation, labour growth, TFP, hybrid closures, short-run options).
-settings   Named sets of model assumptions; the default is "0.4.1 recommended" (CHANGELOG.md).
+settings   Named sets of model assumptions; the default is "0.4.3 recommended" (CHANGELOG.md).
 microsim   Links model results to FIES households for poverty and distribution (FIES downloaded by the user from PSA).
 fies_base  Which survey the poverty microsimulation starts from: FIES 2025 (the default) or FIES 2023.
+rice_tariff  The check that a SAM carries the 2023 rice import duty the 2026 rice scenarios assume.
+welfare    Equivalent variation by household group, computed after a solve (opt-in).
+demography, vat, carbon, debt, bop   Opt-in extensions: demography in labour supply, the VAT part of product taxes, a carbon
+           tax, government debt after a deficit change, foreign flows by institution (some need files that are not distributed).
 var, svar  Time-series tools: OLS with Newey-West errors, VARs, structural VARs, local projections.
 
 Start with README.md and docs/STATUS.md. Research results only: nothing here is an official statement.
 """
-__version__ = "0.4.2"   # built from version 0.4.2 of 18 Nov 2026; see CHANGELOG.md
+__version__ = "0.4.3"   # built from version 0.4.3 of 21 Nov 2026; see CHANGELOG.md

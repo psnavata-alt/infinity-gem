@@ -42,6 +42,7 @@ Public works (the measurable corruption/freeze shock: construction that was not 
 NOT FOR CITATION until reviewed. Run:  py preshock/shock_paths.py
 """
 import datetime as dt
+import os
 import sys
 from pathlib import Path
 
@@ -63,6 +64,12 @@ DBCC_192 = {"low": 60.0, "central": 65.0, "high": 70.0}     # Dubai US$/bbl, 202
 DBCC_193_LATER = 70.0                                       # Dubai US$/bbl, 2028-2030, midpoint of 60-80 (8 Jul 2026)
 YEARS = (2025, 2026, 2027, 2028, 2029, 2030)
 GOV_CONS = paths.DATA_RAW / "macro" / "PSA_OpenSTAT_0542B5BCNQ1_construction_GFCF_by_sector_quarterly_2000-2026.csv"
+# 0.4.3 (21 Nov 2026: 0.4.3 with the Q3 2026 public-works shock): PSA's Q3 2026 release of the
+# same table (9 Nov 2026; downloaded 11 Nov 2026 through the PXWeb API; check PW1).
+# public_works() reads it by default ("q3"); "oct14" (GOV_CONS, the file of 14 Oct 2026) stays selectable by name or INFINITY_GEM_PW_VINTAGE.
+GOV_CONS_Q3 = paths.DATA_RAW / "macro" / "PSA_OpenSTAT_QNA_Q3-2026_downloaded_2026-11-11" / "0542B5BCNQ1.csv"
+PW_VINTAGE_FILES = {"oct14": GOV_CONS, "q3": GOV_CONS_Q3}
+DEFAULT_PW_VINTAGE = "q3"
 
 
 def eia_monthly(path=EIA_OCT26) -> pd.DataFrame:
@@ -223,9 +230,61 @@ def food_paths() -> pd.DataFrame:
     return out
 
 
-def public_works() -> dict:
+def pw_vintage_default() -> str:
+    """0.4.3 (21 Nov 2026): the vintage public_works() reads when none is named: INFINITY_GEM_PW_VINTAGE if set, else DEFAULT_PW_VINTAGE."""
+    v = os.environ.get("INFINITY_GEM_PW_VINTAGE", "").strip() or DEFAULT_PW_VINTAGE
+    if v not in PW_VINTAGE_FILES:
+        raise ValueError(f"INFINITY_GEM_PW_VINTAGE must be one of {sorted(PW_VINTAGE_FILES)}, not {v!r}")
+    return v
+
+
+def _public_works_quarterly(path) -> dict:
+    """0.4.3 (21 Nov 2026): the public-works shock with 2026's observed quarters and each missing quarter = the same quarter of 2025 x
+    (observed 2026 / the same quarters of 2025), the no-change forecast of the year-on-year rate, generalised from halves to
+    quarters. The same arithmetic, line for line, as a research script of 21 Nov 2026 (not in this
+    release; check PW1 T2: with two observed quarters it is the 14 Oct rule bit for bit); check R43 compares the two to the bit."""
+    g = pd.read_csv(path, comment="#").set_index("Institutional Sector")
+    row = g.loc["..General government"]
+    q = {c.replace("At Current Prices ", ""): float(pd.to_numeric(row[c], errors="coerce")) / 1000 for c in g.columns
+         if c.startswith("At Current Prices 202")}
+    lq = 0
+    for k in (1, 2, 3, 4):
+        v = q.get(f"2026 Q{k}")
+        if v is None or v != v:                    # absent or NaN (PSA prints ".." before a release)
+            break
+        lq = k
+    if lq < 1:
+        raise ValueError(f"public_works: no 2026 quarter in {Path(path).name}")
+    y = lambda yr, ks: sum(q[f"{yr} Q{k}"] for k in ks)
+    obs, miss = range(1, lq + 1), range(lq + 1, 5)
+    ytd26, ytd25 = y(2026, obs), y(2025, obs)
+    rate = ytd26 / ytd25
+    miss_c = y(2025, miss) * rate if lq < 4 else 0.0
+    miss_lo = y(2025, miss) if lq < 4 else 0.0
+    base24 = y(2024, range(1, 5))
+    h1 = (q["2026 Q1"] + q["2026 Q2"]) / (q["2025 Q1"] + q["2025 Q2"]) * 100 - 100 if lq >= 2 else float("nan")
+    return {"2025": y(2025, range(1, 5)) - base24,
+            "2026 central": ytd26 + miss_c - base24,
+            "2026 low": ytd26 + miss_lo - base24,
+            "H1 2026 vs H1 2025 (%)": h1,
+            f"Q1-Q{lq} 2026 vs Q1-Q{lq} 2025 (%)": (rate - 1) * 100,
+            "observed 2026 quarters": lq,
+            "file": Path(path).name,
+            "quarters": q}
+
+
+def public_works(vintage: str | None = None) -> dict:
     """General government construction shortfall vs the same period of 2024, ₱ bn current prices: {'2025', '2026 central',
-    '2026 low'} plus the quarterly data used."""
+    '2026 low'} plus the quarterly data used.
+    vintage (0.4.3, 21 Nov 2026): "q3" = PSA's Q3 2026 release (Q1-Q3 2026 observed; the missing Q4 at the
+    year-to-date rate; _public_works_quarterly); "oct14" = the file of 14 Oct 2026 (H1 2026 observed; H2 2026 = H2 2025 x H1 2026 /
+    H1 2025), the shock of every number before 0.4.3, computed exactly as before. None = pw_vintage_default() ("q3" unless
+    INFINITY_GEM_PW_VINTAGE is set). The 2026 scenario scripts pass the setting's own vintage (settings.pw_vintage; combined_revised.Runs.pieces)."""
+    vintage = pw_vintage_default() if vintage is None else vintage
+    if vintage not in PW_VINTAGE_FILES:
+        raise ValueError(f"public_works: vintage must be one of {sorted(PW_VINTAGE_FILES)}, not {vintage!r}")
+    if vintage != "oct14":
+        return _public_works_quarterly(PW_VINTAGE_FILES[vintage])
     g = pd.read_csv(GOV_CONS, comment="#").set_index("Institutional Sector")
     row = g.loc["..General government"]
     q = {c.replace("At Current Prices ", ""): float(pd.to_numeric(row[c], errors="coerce")) / 1000 for c in g.columns
@@ -292,11 +351,18 @@ def main():
     f = food_paths()
     L += [f"## World rice and urea (no-change forecast from {f.attrs['latest']}; vs January-February 2026)", "", f.round(1).to_markdown(), ""]
     print(f.round(1).to_string())
-    pw = public_works()
+    pw = public_works("oct14")                 # 0.4.3 (21 Nov 2026): this section's wording is the 14 Oct rule's; the Q3 vintage below
     L += ["## Public works: general government construction vs the same period of 2024 (₱ bn, current prices; PSA 0542B5BCNQ1)", "",
+          "### Vintage oct14 (the file of 14 Oct 2026; the shock of every number before 0.4.3)", "",
           f"- 2025: {pw['2025']:,.1f} (DBM cross-check: -238.3 for H2 2025 vs H2 2024)",
           f"- 2026 central (H2 at H1's year-on-year rate, {pw['H1 2026 vs H1 2025 (%)']:+.1f}%): {pw['2026 central']:,.1f}",
           f"- 2026 lower bound (H2 2026 = H2 2025): {pw['2026 low']:,.1f}", ""]
+    q3 = public_works("q3")
+    ytd = next(k for k in q3 if k.startswith("Q1-Q"))
+    L += ["### Vintage q3 (PSA's Q3 2026 release; the default since 0.4.3)", "",
+          f"- 2025: {q3['2025']:,.1f}",
+          f"- 2026 central (missing quarters at the year-to-date rate, {ytd} {q3[ytd]:+.1f}%): {q3['2026 central']:,.1f}",
+          f"- 2026 lower bound (missing quarters = 2025's): {q3['2026 low']:,.1f}", ""]
     print({k: v for k, v in pw.items() if k != "quarters"})
     out = paths.output_dir() / f"shock_paths_{dt.date.today():%Y%m%d}.md"
     out.write_text("\n".join(L), encoding="utf-8")

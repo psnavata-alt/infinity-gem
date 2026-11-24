@@ -22,6 +22,8 @@ import elnino_to_cge as EN                                                      
 def run_with(R, piece, extra):
     """CR.Runs.run with all four shocks and extra shock specs {year: spec} merged in (no named measures)."""
     m = R.m
+    from infinity_gem.rice_tariff import guard as rice_guard   # 21 Nov 2026: the 2023 rice rate checked; legacy files pass
+    rice_guard(m, "measure_c_sensitivity")
     tariff = {"tm_scale": {"cmric": EN.TARIFF_2026 / float(m.tm[m.C.index("cmric")])}}
     aid = lambda bn, y: {"trg_h_add": {h: to_sam_units(bn, CR.PSA_GDP[y]) * w for h, w in R.alloc.items()}}
     sh = {2025: {}, 2026: dict(tariff), 2027: CR.merge(tariff, aid(-CR.AID_2027, 2027))}

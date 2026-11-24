@@ -100,7 +100,7 @@ class CGE:
     def __init__(self, sam: SAM, elasticities=None, closure="investment", unemployed=(), capital="mobile", les=None,
                  margins="composite", home="market", gov="real", inv="fixed", wage="real", land="mobile",
                  fx="fixed", pricing="flex", sticky_acts=None, hoarding=0.0, energy_nest=None, interest=None, vintage=None,
-                 markup_acts=None, labour_cap=False):
+                 markup_acts=None, labour_cap=False, gfin=None, carbon=None):
         """closure: 'investment' (real investment fixed, saving rates adjust), 'savings' (saving rates
         fixed, investment adjusts) or 'keynesian' (short-run, demand-driven: investment AND saving rates
         fixed; the exchange rate is fixed and serves as numeraire; foreign savings (the current account)
@@ -245,7 +245,38 @@ class CGE:
         capped type there clears its market and does not hoard; a cap on EMP itself would leave hoarding free to fill any gap at
         the cap, a continuum of solutions). Below the cap LP_k = 0 to about 1e-18 (the model as before); at the cap the wage rises
         above its anchor and employment equals S_k, the market-clearing regime, with no switching between models. Reported:
-        'LPREM' (by factor; 0 for the others). Check EC1."""
+        'LPREM' (by factor; 0 for the others). Check EC1.
+        gfin: how the government budget closes and how a change in its deficit is financed (0.4.3, 19 Nov 2026, opt-in; from
+        GEM-Core, Cicowiez and Lofgren 2017, World Bank PRWP 8272, pp. 14, 18-21, 45 and eq. INV-2, p. 48; a design note (not included)). None (default) = the model as before. Otherwise a dict
+        {'close': 'deficit' | 'tax' | 'spend', 'foreign': phi}, gov='real' only:
+          'deficit' (default): real government consumption fixed, government saving GSAV adjusts (as gov='real');
+          'tax': GSAV is held at CPI x 'gsav_tgt' (shock key; default the SAM's government saving) and every household's direct
+                 tax rate is scaled by (1 + GFADJ), GFADJ solved (GEM-Core's base closure: the direct tax rate clears the budget);
+          'spend': GSAV is held the same way and real government consumption is scaled by (1 + GFADJ) (GEM-Core's QGSCAL).
+        phi in [0, 1] (default 0): the share of a fall of GSAV below CPI x 'gsav_ref' (shock key; default the SAM's) that the
+        government borrows abroad. That amount, GFOR = phi x (CPI x gsav_ref - GSAV) / EXR in foreign currency, enters the current
+        account and the saving pool as extra foreign saving; the rest (GBOR_D) is borrowed at home and draws on domestic saving.
+        Under the 'savings' or 'interest' closure the domestically financed part therefore crowds out investment one for one (or
+        through r), and the foreign part does not (GEM-Core's ginv-dbor and ginv-fbor runs, p. 21); a surplus repays in the same
+        shares. phi > 0 is refused in the Keynesian closure with the fixed peso, where foreign saving already adjusts freely.
+        Reported: 'GFADJ', 'GFOR' (foreign currency), 'GBOR_D' (pesos). Check GF1.
+        energy_nest, two levels (0.4.3, 21 Nov 2026, opt-in; idea from OPEN-GEM, E3Modelling 2025,
+        github.com/e3modelling/OPEN-GEM, MODEL/05_Model_Equations.gms lines 115-125, re-expressed here, no code copied; a design note (not included)): the optional keys 'fuels' (a proper subset of 'energy', e.g.
+        ['cpetr', 'ccoal']) and 'sigma_f' make the energy bundle EN = CES(the other energy commodities, e.g. electricity, and a
+        fuel bundle FU; sigma_e), FU = CES(the fuels; sigma_f). sigma_f = sigma_e is the one-level bundle exactly. Optional
+        'sigma_e_act' / 'sigma_f_act' ({activity: value}) set those elasticities by activity (MANAGE-WB's bridge file gives land
+        transport a Leontief energy bundle). Without these keys the bundle is as before.
+        carbon: an opt-in tax on the CO2 of fuel purchases (0.4.3, 21 Nov 2026; idea from OPEN-GEM,
+        05_Model_Equations.gms lines 33-36, 48-50, 318-320 and 370-383, and MANAGE-WB, World Bank PRWP 11258, 2025, eq. 142, pp.
+        37-38; re-expressed). None (default) = the model as before. Otherwise {'ef': {commodity: Mt CO2 per PHP bn bought at
+        benchmark prices (= kg per peso)}, 'ef_act': {commodity: {activity: value}} (buyer-specific intensities, e.g. the gas in
+        mining products bought by power plants), 'exempt': [activity codes, or 'households']}; infinity_gem.carbon.intensities_2023()
+        gives Infinity GEM SAM v1.0's. The shock key 'ctax' (PHP per tonne of CO2, in benchmark pesos; default 0) adds ctax x ef / 1000 x
+        PIDX per unit bought by each activity and household (PIDX = the CPI before the tax, so the tax is real and the model
+        stays homogeneous), as a specific tax on the buyer's price: the energy prices in the bundle, the Leontief input cost,
+        and households' purchase prices PQH (the CPI then counts the tax). Government purchases, investment, stocks and exports
+        pay none. The revenue ('CTREV'; by commodity 'CTc') goes to the government; the rebuilt SAM books it in the stax row.
+        CGE.emissions(sol) reports Mt CO2 by fuel and buyer (government purchases emit at 'ef'). Check CT1."""
         if not 0.0 <= hoarding < 1.0:
             raise ValueError("hoarding must be in [0, 1)")
         if hoarding > 0 and closure != "keynesian":
@@ -285,6 +316,20 @@ class CGE:
         if gov not in ("real", "cd") or inv not in ("fixed", "value_shares"):
             raise ValueError("gov must be 'real' or 'cd'; inv must be 'fixed' or 'value_shares'")
         self.gov, self.inv = gov, inv
+        self.gfin = None                             # 0.4.3 (19 Nov 2026, GEM-Core, check GF1)
+        if gfin is not None:
+            gf = dict(gfin)
+            if set(gf) - {"close", "foreign"}:
+                raise ValueError("gfin takes {'close': 'deficit'|'tax'|'spend', 'foreign': share in [0, 1]}")
+            close_, phi_ = gf.get("close", "deficit"), float(gf.get("foreign", 0.0))
+            if close_ not in ("deficit", "tax", "spend") or not 0.0 <= phi_ <= 1.0:
+                raise ValueError("gfin: 'close' must be 'deficit', 'tax' or 'spend'; 'foreign' must be in [0, 1]")
+            if gov != "real":
+                raise ValueError("gfin needs gov='real' (gov='cd' has its own budget rule)")
+            if phi_ > 0 and closure == "keynesian" and fx == "fixed":
+                raise ValueError("gfin 'foreign' > 0 needs a closure where foreign saving is given (not the Keynesian closure "
+                                 "with the fixed peso, where the current account already adjusts freely)")
+            self.gfin = {"close": close_, "foreign": phi_}
         el = dict(DEFAULT_ELASTICITIES)
         el.update(elasticities or {})
         # 0.3: each elasticity may be one number (all sectors, as before) or a dict {code: value} by activity
@@ -360,6 +405,8 @@ class CGE:
             self.en = dict(E=np.array(E), s1=s1, s2=s2, ica_ne=ica_ne, ive=ive, has=e0 > 0,
                            dva=np.where(ive > 0, self.iva / safe(ive), 1.0), den=np.where(ive > 0, e0 / safe(ive), 0.0),
                            de=np.where(e0 > 0, self.ica[E] / safe(e0), 0.0))
+            if any(k in energy_nest for k in ("fuels", "sigma_f", "sigma_e_act", "sigma_f_act")):   # 0.4.3
+                self.en.update(self._energy_split(energy_nest))
 
         # ---- make matrix, output and trade
         make = t.loc[A, C].values                                   # A x C: activity a's sales of commodity c
@@ -513,6 +560,7 @@ class CGE:
         self.qg = t.loc[C, "gov"].values
         self.grow_in = v("gov", "row")
         self.grow_out = v("row", "gov")
+        self.gsav0 = v("s-i", "gov")                 # 0.4.3 (gfin): the SAM's government saving
         if gov == "cd":                     # Hosoe: Sg = ssg * revenue; consumption = fixed value shares of the rest
             YG0 = float(t.loc["gov"].sum())                           # total government receipts (row total)
             self.ssg = v("s-i", "gov") / YG0
@@ -525,6 +573,9 @@ class CGE:
         hc = t.loc[C, H].sum(axis=1).values - hcs                   # market purchases (all purchases by default)
         self.cwts = hc / hc.sum()
         self.YH0, self.YE0, self.EH0 = YH0, YE0, EH0
+        self.carbon = None                           # 0.4.3 (21 Nov 2026): the opt-in carbon tax (check CT1)
+        if carbon is not None:
+            self.carbon = self._carbon_setup(carbon)
         # 0.3.8 (pricing='sticky', review D2): activities whose prices are rigid downward
         self.isST = np.array([a in (sticky_acts or ()) for a in A]) if pricing == "sticky" else np.zeros(nA, bool)
         # 0.3.13 (pricing='markup'): the markup activities, their benchmark markups (capital income / variable cost, variable
@@ -596,6 +647,7 @@ class CGE:
                  ("NK", len(self.iK) if self.capital == "vintage" else 0), ("RN", 1 if self.capital == "vintage" else 0),   # 0.3.12
                  ("EXR", 1), ("CLOS", 0 if self.closure == "keynesian" else 1),
                  ("GADJ", 1 if self.gov == "cd" else 0), ("WALRAS", 1),
+                 ("GFIN", 1 if (getattr(self, "gfin", None) or {}).get("close") in ("tax", "spend") else 0),   # 0.4.3
                  ("LCAP", len(self.iU) if getattr(self, "labour_cap", False) else 0)]   # 0.3.13: wage premia at the cap
         self.slices, pos = {}, 0
         for k, n in sizes:
@@ -688,6 +740,13 @@ class CGE:
         if self.margins == "split":             # 0.3: IFPRI eq. 1 (import price includes its margin)
             PM = PM + self.icx * PTRC
         CPI = float(self.cwts @ PQ)
+        cb = self.carbon
+        if cb is not None:                      # 0.4.3 (check CT1): the carbon tax per unit bought, PHP per tonne x kg CO2 per
+            ctu = sh["ctax"] * CPI / 1000.0     # peso / 1000, indexed to the CPI before the tax (real; homogeneous of degree one)
+            CTA = ctu * cb["taxa"]              # commodity x activity: tax per unit bought by the activity
+            CTH = ctu * cb["taxh"]              # by commodity: tax per unit bought by households
+            PQH = PQ + CTH                      # households' purchase prices; the CPI counts the tax
+            CPI = float(self.cwts @ PQH)
         for k in self.iU:                       # fixed wage: indexed to the CPI ('real') or fixed in pesos ('nominal')
             WF[k] = sh["wbar"][k] * (CPI if self.wage == "real" else 1.0)
         if self.labour_cap:                     # 0.3.13 (labour_cap): at its cap a fixed-wage type is paid its anchor x (1 + LP)
@@ -750,11 +809,18 @@ class CGE:
         if self.en is None:
             UCOST = ica.T @ PQ + self.iva * PVA
             QVA = self.iva * QA
+            if cb is not None:                  # 0.4.3: the carbon tax on Leontief inputs
+                UCOST = UCOST + (ica * CTA).sum(axis=0)
         else:                                   # 0.3.11: value added-energy bundle
             if np.any(s_ica != 1.0):
                 raise NotImplementedError("ica_scale shocks are not combined with energy_nest yet")
-            PEN, PVAE, QVA, QEd = self._energy_nest(PQ, PVA, QA, sh["en_shares"])
-            UCOST = self.en["ica_ne"].T @ PQ + self.en["ive"] * PVAE
+            if cb is None:
+                PEN, PVAE, QVA, QEd = self._energy_nest(PQ, PVA, QA, sh["en_shares"])
+                UCOST = self.en["ica_ne"].T @ PQ + self.en["ive"] * PVAE
+            else:                               # 0.4.3: the bundle's energy prices include the tax (by activity)
+                E_ = self.en["E"]
+                PEN, PVAE, QVA, QEd = self._energy_nest(PQ, PVA, QA, sh["en_shares"], PEm=PQ[E_][:, None] + CTA[E_])
+                UCOST = self.en["ica_ne"].T @ PQ + (self.en["ica_ne"] * CTA).sum(axis=0) + self.en["ive"] * PVAE
         ZP = PA * (1 - ta) - UCOST
         # factor demand: QF = (QVA / TFP) * delta * (TFP * PVA / W)^sigma   (= QVA * delta at the benchmark)
         tfp = self.tfp * sh["tfp_scale"]
@@ -769,6 +835,8 @@ class CGE:
             UTIL[ik] = coef[kk, ik] * QA[ik] / tfp[ik] / Kmk     # capital services needed / installed capital (reporting)
             QF[kk, ik] = Kmk                                     # paid the residual rent RK per unit installed
             AVC = (W[lab] * coef[lab]).sum(axis=0) / tfp + ica.T @ PQ    # unit variable cost: labour and intermediate inputs
+            if cb is not None:                   # 0.4.3: the carbon tax is a variable cost
+                AVC = AVC + (ica * CTA).sum(axis=0)
             PROFIT = (UNITREV - AVC) * QA                        # revenue less variable cost (capital's income, markup acts)
         QFH = np.zeros_like(QF)                 # 0.3.11: hoarded labour, employed and paid but not producing
         if self.hoarding > 0 and sh["hoard_ref"] is not None:
@@ -832,15 +900,20 @@ class CGE:
         trg_add = sh["trg_h_add"]                # additional real transfers, ₱ bn at benchmark prices (e.g. an Ayuda change)
         YH = YIF[:nH].sum(axis=1) + self.she * YE + (trg_h + trg_add) * CPI + hrow_in * EXR
         tins = self.tins * sh["tins_scale"]
+        gclose = self.gfin["close"] if self.gfin is not None else "deficit"   # 0.4.3 (gfin, check GF1)
+        GF = float(g("GFIN")[0]) if gclose in ("tax", "spend") else 0.0
+        if gclose == "tax":
+            tins = tins * (1 + GF)
         DY = YH * (1 - tins - self.tgh) - self.hrow_out * EXR
         mps = np.clip(self.mps * (1 + MPSADJ), -1, 1)
         HSAV = mps * DY
         EH = DY - HSAV
+        PQd = PQ if cb is None else PQH          # 0.4.3: households pay the carbon tax on top of PQ
         if self.les is None:
-            QH = self.beta * EH[None, :] / _pos(PQ)[:, None]
+            QH = self.beta * EH[None, :] / _pos(PQd)[:, None]
         else:                                    # LES: subsistence + marginal share of supernumerary spending
             g_, mb_ = self.les["gamma"], self.les["mb"]
-            QH = g_ + mb_ * (EH - PQ @ g_)[None, :] / _pos(PQ)[:, None]
+            QH = g_ + mb_ * (EH - PQd @ g_)[None, :] / _pos(PQd)[:, None]
         if self.home == "separate":
             # 0.3.1, book eq. 34: own produce valued at the producer price, PX * QHA = beta_h * EH; book eq. 18:
             # marketed output = gross output - home use, split by the CET at the prices found above (PX does not
@@ -860,6 +933,8 @@ class CGE:
             QG = self.qg * g("GADJ")[0] / _pos(PQ)
         else:
             QG = self.qg * sh["qg_scale_vec"] * sh["qg_scale"]
+            if gclose == "spend":                # 0.4.3 (gfin): spending scaled to hold government saving
+                QG = QG * (1 + GF)
         if self.inv == "value_shares":           # fixed value shares; IADJ = nominal investment index
             QINV = self.qinv * IADJ * sh["qinv_scale_vec"] / _pos(PQ)
         else:
@@ -868,6 +943,14 @@ class CGE:
         if self.en is not None:                 # 0.3.11: energy inputs come from the nest
             QINT = self.en["ica_ne"] @ QA
             QINT[self.en["E"]] += QEd.sum(axis=1)
+        if cb is not None:                      # 0.4.3: intermediate use by commodity x activity, and the tax revenue
+            if self.en is None:
+                QINTM = ica * QA[None, :]
+            else:
+                QINTM = self.en["ica_ne"] * QA[None, :]
+                QINTM[self.en["E"]] += QEd
+            CTc = (CTA * QINTM).sum(axis=1) + CTH * QH.sum(axis=1)
+            CTREV = float(CTc.sum())
         D = QINT + QH.sum(axis=1) + QG + QINV + self.qdst
         if self.margins == "composite":
             icq = self.icq
@@ -940,9 +1023,16 @@ class CGE:
         STAX = tq * (PARM + icq * PTRC) * QQ
         YG = (self.te * YE + (tins * YH).sum() + (self.tf * YF).sum() + MTAX.sum() + STAX.sum() + ATAX.sum()
               + self.sheg * YE + (self.tgh * YH).sum() + self.grow_in * EXR)
+        if cb is not None:                       # 0.4.3: carbon tax revenue
+            YG = YG + CTREV
         GEXP = float(PQ @ QG) + ((trg_h + trg_add) * CPI).sum() + trg_ent * CPI + self.grow_out * EXR
         GEXP += sh["sav_add"] * CPI + sh["grow_out_add"] * EXR      # 0.3.6: diverted public money, saved or sent abroad
         GSAV = YG - GEXP
+        GFOR, GBOR_D = 0.0, 0.0                  # 0.4.3 (gfin): financing of a deficit change, abroad (FCU) and at home (pesos)
+        if self.gfin is not None:
+            gref = (self.gsav0 if sh["gsav_ref"] is None else sh["gsav_ref"]) * CPI
+            GFOR = self.gfin["foreign"] * (gref - GSAV) / EXR
+            GBOR_D = (gref - GSAV) - GFOR * EXR
 
         # ---- residuals
         res = []
@@ -981,14 +1071,18 @@ class CGE:
         fcu_out = imp_fcu + self.frow_out.sum() + self.erow_out + self.hrow_out.sum() + self.grow_out \
             + sh["grow_out_add"]
         fcu_in = (pwe * (QE + self.rex)).sum() + frow_in.sum() + self.erow_in + hrow_in.sum() + self.grow_in + self.fsav * FSAVS
+        fcu_in += GFOR                                                     # 0.4.3 (gfin): government borrowing abroad
         res.append(np.array([(fcu_out - fcu_in) / self.QM0.sum()]))        # current account
         INVV = float(PQ @ (QINV + self.qdst))
-        SAV = HSAV.sum() + ESAV + GSAV + self.fsav * FSAVS * EXR
+        SAV = HSAV.sum() + ESAV + GSAV + (self.fsav * FSAVS + GFOR) * EXR
         res.append(np.array([(SAV - INVV - WALRAS) / self.qinv.sum()]))    # savings = investment
         if self.closure != "keynesian":
             res.append(np.array([CPI - sh["cpi"]]))                        # numeraire (the fixed exchange rate is the numeraire otherwise)
         if self.gov == "cd":
             res.append(np.array([(GEXP - (1 - self.ssg) * YG) / self.qg.sum()]))   # government spends revenue net of saving
+        if gclose in ("tax", "spend"):          # 0.4.3 (gfin): government saving held at its target
+            gtgt = (self.gsav0 if sh["gsav_tgt"] is None else sh["gsav_tgt"]) * CPI
+            res.append(np.array([(GSAV - gtgt) / self.qg.sum()]))
         if self.labour_cap:                     # 0.3.13 (labour_cap, check EC1): E <= S, LP >= 0, (S - E) LP = 0, Fischer-Burmeister
             ku = self.iU                        # (smoothed 1e-10, as capital='vintage'); E = productive employment: hoarding is bounded
             a_ = (self.QFS0[ku] * sh["qfs_scale"][ku] - QF.sum(axis=1)[ku]) / self.QFS0[ku]   # by the slack, so none at the cap
@@ -1001,6 +1095,10 @@ class CGE:
                  YG=YG, GEXP=GEXP, GSAV=GSAV, MTAX=MTAX, STAX=STAX, ATAX=ATAX, T=T, MPSADJ=MPSADJ, IADJ=IADJ,
                  RINT=(float(g("CLOS")[0]) if self.closure == "interest" else 0.0),
                  WALRAS=WALRAS, fcu_out=fcu_out, fcu_in=fcu_in, FSAV=self.fsav * FSAVS, UNITREV=UNITREV)
+        if self.gfin is not None:                # 0.4.3 (gfin, check GF1)
+            V["GFADJ"], V["GFOR"], V["GBOR_D"] = GF, GFOR, GBOR_D
+        if cb is not None:                       # 0.4.3 (check CT1)
+            V.update(PQH=PQH, CTA=CTA, CTH=CTH, CTc=CTc, CTREV=CTREV, QINTM=QINTM, PIDX=float(self.cwts @ PQ))
         if self.capital == "vintage":
             V["NK"], V["RN"] = NK_v, RN_v
         if self.labour_cap:                      # 0.3.13: the wage premium over the anchor, by factor (0 below the cap)
@@ -1035,7 +1133,9 @@ class CGE:
                     mk_floor=None,                              # 0.3.13 (12 Nov 2026, MF1): None = no floor on the gap rule (as before)
                     mk_ceiling=None,                            # 0.4.1 (13 Nov 2026, MC1): None = no ceiling on the gap rule (as before)
                     oil_pass=None, oil_ref=np.ones(nC),         # 0.3.13: None = the world price in full (as before)
-                    cet_sr=None)                                # 0.4.2 (15 Nov 2026, CET1): None = the SAM's CET (as before)
+                    cet_sr=None,                                # 0.4.2 (15 Nov 2026, CET1): None = the SAM's CET (as before)
+                    gsav_tgt=None, gsav_ref=None,               # 0.4.3 (19 Nov 2026, gfin, GF1): None = the SAM's government saving
+                    ctax=0.0)                                   # 0.4.3 (21 Nov 2026, CT1): PHP per tonne of CO2 (carbon= only)
 
     def make_shocks(self, spec=None):
         """Translate a readable shock spec into arrays. Keys:
@@ -1065,7 +1165,10 @@ class CGE:
         'grow_out_add': ₱ bn   government money sent ABROAD (foreign-currency units, base exchange rate 1): e.g.
                    diverted public funds moved out of the country (0.3.6). Both default 0: results unchanged.
         'en_shares': {'dva', 'den', 'de'}   share parameters of the value added-energy bundle centred on another point
-                   (energy_shares_at; energy_nest only; 0.3.11). Default None: the SAM's.
+                   (energy_shares_at; energy_nest only; 0.3.11). Default None: the SAM's. A two-level bundle
+                   ('fuels'; 0.4.3) also needs 'dfb', the fuel bundle's share.
+        'ctax': PHP per tonne of CO2, in benchmark pesos (carbon= only; 0.4.3, 21 Nov 2026, check CT1). 0 (default)
+                   = no tax: results as without it.
         'markup': {activity: mu} or one number   markups of the home price over unit variable cost (pricing='markup' only;
                    0.3.13); default the benchmark's (capital income / variable cost). 'mk_coef': factors x activities array, factor
                    use per unit of output at TFP 1 (the installed technology; labour rows used, the capital row for UTIL). 'mk_qd':
@@ -1147,6 +1250,10 @@ class CGE:
                     sh[tgt][:] = float(val)
             elif k in ("trg_scale", "fsav_scale", "iadj", "mpsadj", "cpi", "exr", "sav_add", "grow_out_add"):
                 sh[k] = float(val)
+            elif k in ("gsav_tgt", "gsav_ref"):         # 0.4.3 (gfin, check GF1): real government saving, ₱ bn at benchmark prices
+                if self.gfin is None or (k == "gsav_tgt" and self.gfin["close"] == "deficit"):
+                    raise ValueError("'gsav_tgt' needs gfin={'close': 'tax' or 'spend'}; 'gsav_ref' needs gfin=")
+                sh[k] = float(val)
             elif k == "knew":                           # 0.3.12
                 if self.capital != "vintage":
                     raise ValueError("'knew' (new capital) needs capital='vintage'")
@@ -1220,6 +1327,16 @@ class CGE:
                 if val is not None and self.en is None:
                     raise ValueError("'en_shares' needs energy_nest")
                 sh[k] = None if val is None else {n: np.asarray(val[n], float) for n in ("dva", "den", "de")}
+                if val is not None and self.en.get("fl") is not None:   # 0.4.3: the fuel bundle's share
+                    if "dfb" not in val:
+                        raise ValueError("'en_shares' of a two-level energy bundle needs 'dfb' (energy_shares_at gives it)")
+                    sh[k]["dfb"] = np.asarray(val["dfb"], float)
+            elif k == "ctax":                           # 0.4.3 (21 Nov 2026, CT1): PHP per tonne of CO2
+                if self.carbon is None:
+                    raise ValueError("'ctax' needs carbon= (the CO2 per peso of each fuel bought)")
+                if isinstance(val, (bool, np.bool_)) or not np.isfinite(float(val)):
+                    raise ValueError(f"'ctax' must be a finite number (PHP per tonne of CO2), not {val!r}")
+                sh[k] = float(val)
             else:
                 raise KeyError(f"Unknown shock '{k}'")
         if sh["oil_pass"] is not None and sh["erpt"] is not None and np.any((sh["oil_pass"] != 1.0) & (sh["erpt"] != 1.0)):
@@ -1286,9 +1403,13 @@ class CGE:
         I_ = float(v["PQ"] @ (v["QINV"] + self.qdst))
         X_ = float(v["PE"] @ v["QE"]) + float(v["EXR"] * (v["pwe"] @ self.rex))
         M_ = float(v["EXR"] * (v["pwm"] @ (v["QM"] + self.rex)))
+        if "PQH" in v:                           # 0.4.3: households' purchases include the carbon tax
+            C_ = float(v["PQH"] @ v["QH"].sum(axis=1)) + float(v["PX"] @ v["QHA"].sum(axis=1))
         gdp_exp = C_ + G_ + I_ + X_ - M_
         va = float((v["W"] * v["QF"]).sum())
         gdp_inc = va + float(v["MTAX"].sum() + v["STAX"].sum() + v["ATAX"].sum())
+        if "CTREV" in v:                         # 0.4.3: the carbon tax is a tax on products
+            gdp_inc += float(v["CTREV"])
         real = float(v["QH"].sum() + v["QHA"].sum() + v["QG"].sum() + (v["QINV"] + self.qdst).sum() + v["QE"].sum() - v["QM"].sum())
         return dict(nominal_expenditure=gdp_exp, nominal_income=gdp_inc, real=real,
                     C=C_, G=G_, I=I_, X=X_, M=M_)
@@ -1314,21 +1435,39 @@ class CGE:
         df["pct_change"] = (df["sim"] / df["base"] - 1) * 100
         return df
 
-    def _energy_nest(self, PQ, PVA, QA, shares=None):
+    def _energy_nest(self, PQ, PVA, QA, shares=None, PEm=None):
         """0.3.11: (PEN, PVAE, QVA, QEd) of the value added-energy bundle. PEN: price of the energy bundle (CES
         over the energy commodities, sigma_e); PVAE: price of the VA-energy bundle (CES of PVA and PEN, sigma_ve); QVA: value
         added demanded; QEd: energy commodity x activity demand. All equal the Leontief values at benchmark prices (1).
-        shares: {'dva', 'den', 'de'} centred on another point (energy_shares_at); None = the SAM's."""
+        shares: {'dva', 'den', 'de'} centred on another point (energy_shares_at); None = the SAM's.
+        0.4.3 (21 Nov 2026): PEm, energy commodity x activity buyers' prices (the carbon tax); None = PQ for every
+        buyer, as before. With 'fuels' (two levels): PEN = CES(the other energy commodities, PFU; sigma_e), PFU = CES(the fuels;
+        sigma_f); 'de' then holds the top-level shares of the other commodities and the shares of each fuel within the fuel
+        bundle, 'dfb' the fuel bundle's top-level share."""
         en = self.en
         d = shares or en
         E, s1, s2 = en["E"], en["s1"], en["s2"]
-        PE_ = _pos(PQ[E])[:, None]
-        PEN = np.where(en["has"], (d["de"] * PE_ ** (1 - s2)).sum(axis=0) ** (1 / (1 - s2)), 1.0)
+        PE_ = _pos(PQ[E])[:, None] if PEm is None else _pos(np.asarray(PEm, float))
+        fl = en.get("fl")
+        if fl is None:
+            PEN = np.where(en["has"], (d["de"] * PE_ ** (1 - s2)).sum(axis=0) ** (1 / (1 - s2)), 1.0)
+        else:                                   # 0.4.3: electricity (and any other non-fuel energy) vs the fuel bundle
+            s3, nf = en["s3"], ~fl
+            with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
+                PFU = np.where(en["hasf"], (d["de"][fl] * PE_[fl] ** (1 - s3)).sum(axis=0) ** (1 / (1 - s3)), 1.0)
+                PEN = np.where(en["has"], ((d["de"][nf] * PE_[nf] ** (1 - s2)).sum(axis=0) + d["dfb"] * PFU ** (1 - s2))
+                               ** (1 / (1 - s2)), 1.0)
         PVAE = (d["dva"] * _pos(PVA) ** (1 - s1) + d["den"] * PEN ** (1 - s1)) ** (1 / (1 - s1))
         QVAE = en["ive"] * QA
         QVA = QVAE * d["dva"] * (PVAE / _pos(PVA)) ** s1
         QEN = QVAE * d["den"] * (PVAE / PEN) ** s1
-        QEd = d["de"] * QEN[None, :] * (PEN[None, :] / PE_) ** s2
+        if fl is None:
+            QEd = d["de"] * QEN[None, :] * (PEN[None, :] / PE_) ** s2
+        else:
+            QEd = np.zeros(np.shape(d["de"]))
+            QEd[nf] = d["de"][nf] * QEN[None, :] * (PEN[None, :] / PE_[nf]) ** s2
+            QFU = d["dfb"] * QEN * (PEN / PFU) ** s2
+            QEd[fl] = d["de"][fl] * QFU[None, :] * (PFU[None, :] / PE_[fl]) ** s3
         return PEN, PVAE, QVA, QEd
 
     def energy_shares_at(self, PQ, PVA, QA, ref):
@@ -1353,9 +1492,21 @@ class CGE:
         QVAE = en["ive"] * QA
         safe = lambda x: np.where(x > 0, x, 1.0)
         on = QVAE > 0
-        return dict(dva=np.where(on, QVA / safe(QVAE) * (_pos(PVA) / PVAE) ** s1, en["dva"]),
-                    den=np.where(on, QEN / safe(QVAE) * (PEN / PVAE) ** s1, en["den"]),
-                    de=np.where(en["has"] & (QEN > 0), QEd / safe(QEN)[None, :] * (PE_ / PEN[None, :]) ** s2, en["de"]))
+        out = dict(dva=np.where(on, QVA / safe(QVAE) * (_pos(PVA) / PVAE) ** s1, en["dva"]),
+                   den=np.where(on, QEN / safe(QVAE) * (PEN / PVAE) ** s1, en["den"]),
+                   de=np.where(en["has"] & (QEN > 0), QEd / safe(QEN)[None, :] * (PE_ / PEN[None, :]) ** s2, en["de"]))
+        fl = en.get("fl")
+        if fl is not None:                      # 0.4.3: the two-level bundle; the fuel bundle's quantity index is the
+            s3, nf = en["s3"], ~fl              # sum of the fuels' quantities (benchmark units), its price their value over it
+            QFU = QEd[fl].sum(axis=0)
+            PFU = np.where(QFU > 0, (PE_[fl] * QEd[fl]).sum(axis=0) / safe(QFU), 1.0)
+            m_ = en["has"] & (QEN > 0)
+            de = np.array(en["de"], float).copy()
+            de[nf] = np.where(m_, QEd[nf] / safe(QEN)[None, :] * (PE_[nf] / PEN[None, :]) ** s2, en["de"][nf])
+            de[fl] = np.where(en["hasf"] & (QFU > 0), QEd[fl] / safe(QFU)[None, :] * (PE_[fl] / PFU[None, :]) ** s3, en["de"][fl])
+            out["de"] = de
+            out["dfb"] = np.where(m_, QFU / safe(QEN) * (PFU / PEN) ** s2, en["dfb"])
+        return out
 
     def _output_gap(self, Y, sh):
         """0.3.13 (P6, check MG1): the output gap the markup pass-through responds to, in percent: 100 x (Y / Y_ref - 1), Y real
@@ -1507,4 +1658,111 @@ class CGE:
         S.loc["s-i", "gov"] = v["GSAV"]
         S.loc["s-i", "row"] = self.fsav * EXR
         S.loc["dstk", "s-i"] = float(v["PQ"] @ self.qdst)
+        if "CTREV" in v:                             # 0.4.3: buyers pay the carbon tax; the stax row books it
+            S.loc[C, A] = (v["PQ"][:, None] + v["CTA"]) * v["QINTM"]
+            S.loc[C, H] = v["QH"] * v["PQH"][:, None]
+            S.loc["stax", C] = v["STAX"] + v["CTc"]
+            S.loc["gov", "stax"] = float(v["STAX"].sum()) + float(v["CTREV"])
         return S
+
+    # ================================================================== 0.4.3 (21 Nov 2026)
+    def _energy_split(self, spec) -> dict:
+        """The two-level energy bundle and elasticities by activity (energy_nest keys 'fuels', 'sigma_f', 'sigma_e_act',
+        'sigma_f_act'; see __init__). Returns the entries added to self.en: s2 (one number, or one per activity), and with
+        'fuels' the mask fl over the bundle's commodities, s3, the within-bundle shares in 'de', dfb and hasf."""
+        en, C, A = self.en, self.C, self.A
+        E = list(en["E"])
+        names = [C[i] for i in E]
+
+        def by_act(base, key):
+            if key not in spec:
+                return base
+            vals = dict(spec[key])
+            bad = [a for a in vals if a not in A]
+            if bad:
+                raise ValueError(f"energy_nest '{key}': not activities of this SAM: {bad}")
+            out = np.full(len(A), float(base))
+            for a, x in vals.items():
+                out[A.index(a)] = float(x)
+            return out
+
+        def ok(x):
+            x = np.atleast_1d(np.asarray(x, float))
+            return bool(np.all(np.isfinite(x)) and np.all(x > 0) and np.all(np.abs(x - 1) >= 1e-6))
+        s2 = by_act(en["s2"], "sigma_e_act")
+        out = {"s2": s2}
+        fuels = spec.get("fuels")
+        if fuels is None:
+            if "sigma_f" in spec or "sigma_f_act" in spec:
+                raise ValueError("energy_nest: 'sigma_f' and 'sigma_f_act' need 'fuels'")
+        else:
+            bad = [c for c in fuels if c not in names]
+            if bad:
+                raise ValueError(f"energy_nest 'fuels' must be energy commodities of the bundle ({names}), not {bad}")
+            fl = np.array([c in fuels for c in names])
+            if fl.all() or not fl.any():
+                raise ValueError("energy_nest 'fuels' must be a non-empty proper subset of 'energy' (electricity stays outside)")
+            if "sigma_f" not in spec:
+                raise ValueError("energy_nest 'fuels' needs 'sigma_f' (the elasticity between the fuels)")
+            s3 = by_act(float(spec["sigma_f"]), "sigma_f_act")
+            if not ok(s3):
+                raise ValueError("energy_nest: 'sigma_f' must be positive and not 1 (use 0.99 or 1.01)")
+            icaE = self.ica[E]
+            fu0, e0 = icaE[fl].sum(axis=0), icaE.sum(axis=0)
+            safe = lambda x: np.where(x > 0, x, 1.0)
+            de = np.array(en["de"], float).copy()
+            de[fl] = np.where(fu0 > 0, icaE[fl] / safe(fu0), 0.0)
+            out.update(fl=fl, s3=s3, de=de, dfb=np.where(e0 > 0, fu0 / safe(e0), 0.0), hasf=fu0 > 0)
+        if not ok(s2):
+            raise ValueError("energy_nest: 'sigma_e' (and 'sigma_e_act') must be positive and not 1 (use 0.99 or 1.01)")
+        return out
+
+    def _carbon_setup(self, spec) -> dict:
+        """The carbon= option (see __init__): intensities (Mt CO2 per PHP bn bought at benchmark prices) by commodity for every
+        activity, household and the government ('ef'), buyer-specific ones for activities ('ef_act'), and the buyers exempt
+        from the tax ('exempt': activity codes or 'households'; the government never pays it). Returns the arrays."""
+        if self.home == "separate":
+            raise NotImplementedError("carbon= is not combined with home='separate' yet")
+        sp = dict(spec)
+        unknown = set(sp) - {"ef", "ef_act", "exempt", "source"}
+        if unknown:
+            raise ValueError(f"carbon: unknown keys {sorted(unknown)} (use 'ef', 'ef_act', 'exempt', 'source')")
+        C, A = self.C, self.A
+
+        def num(x, what):
+            if isinstance(x, (bool, np.bool_)) or not np.isfinite(float(x)) or float(x) < 0:
+                raise ValueError(f"carbon: {what} must be a finite number >= 0 (Mt CO2 per PHP bn), not {x!r}")
+            return float(x)
+        efc = np.zeros(len(C))
+        for c, x in dict(sp.get("ef", {})).items():
+            if c not in C:
+                raise ValueError(f"carbon 'ef': {c!r} is not a commodity of this SAM")
+            efc[C.index(c)] = num(x, f"'ef' of {c}")
+        efa = np.repeat(efc[:, None], len(A), axis=1)
+        for c, d in dict(sp.get("ef_act", {})).items():
+            if c not in C:
+                raise ValueError(f"carbon 'ef_act': {c!r} is not a commodity of this SAM")
+            for a, x in dict(d).items():
+                if a not in A:
+                    raise ValueError(f"carbon 'ef_act' ({c}): {a!r} is not an activity of this SAM")
+                efa[C.index(c), A.index(a)] = num(x, f"'ef_act' of {c} bought by {a}")
+        ex = list(sp.get("exempt", []))
+        bad = [e for e in ex if e != "households" and e not in A]
+        if bad:
+            raise ValueError(f"carbon 'exempt': not activities of this SAM (or 'households'): {bad}")
+        cov = np.array([a not in ex for a in A], float)
+        return dict(efa=efa, efh=efc.copy(), efg=efc.copy(), taxa=efa * cov[None, :],
+                    taxh=efc * (0.0 if "households" in ex else 1.0), exempt=ex, source=str(sp.get("source", "")))
+
+    def emissions(self, sol: Solution) -> pd.DataFrame:
+        """CO2 (Mt) by fuel commodity and buyer (activities, households, government) at a solution of a model with carbon=:
+        the intensities x quantities bought. Exports, investment and stocks emit nothing here."""
+        if self.carbon is None:
+            raise ValueError("emissions() needs a model built with carbon=")
+        v, cb = sol.v, self.carbon
+        rows = {"activities": (cb["efa"] * v["QINTM"]).sum(axis=1), "households": cb["efh"] * v["QH"].sum(axis=1),
+                "government": cb["efg"] * v["QG"]}
+        df = pd.DataFrame(rows, index=self.C)
+        df = df[(cb["efa"].sum(axis=1) > 0) | (cb["efh"] > 0)]
+        df["total"] = df.sum(axis=1)
+        return df

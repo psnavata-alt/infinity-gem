@@ -25,3 +25,14 @@ The WUI for the Philippines from FRED (series WUIPHL) is not included either: FR
 
 - **IMF Investment and Capital Stock Dataset (ICSD)**, July 2025 release (data.imf.org, dataset IMF.FAD:ICSD): the IMF's terms do not allow redistribution. Two scenario scripts (`scenarios/infrastructure_full_dynamic.py`, `scenarios/infrastructure_public_capital.py`) read it as `IMF_ICSD_2025-07_all_countries_downloaded_2026-10-02.csv`; the two values the model uses (public capital as a share of GDP, 2019) are typed into `infinity_gem/settings.py` with their source.
 - **Caldara and Iacoviello's full GPR file** (`data_gpr_export.xls`, https://www.matteoiacoviello.com/gpr.htm): `preshock/geopolitics_panel_lp.py` reads it as `Caldara_Iacoviello_data_gpr_export_downloaded_2026-10-14.xls`. The Philippine columns are included as `Caldara_Iacoviello_GPR_Philippines_monthly.csv`.
+
+## Government debt and the balance of payments (0.4.3; download them yourself)
+
+The opt-in modules `infinity_gem/debt.py` (check DB1) and `infinity_gem/bop.py` (with `debt.py`, check GF2) read official workbooks whose terms of redistribution are not confirmed, so they are not included. Save them under these names:
+
+- **The Bureau of the Treasury's national government debt indicators, 1986-2025** (the Treasury's website, statistics on national government debt): `data/raw/fiscal/btr/Debt-Indicator-Annual-1986-2025.xlsx` (sheets `NG OS Debt 1986-2025` and `Debt Service 2004-2025`; the code finds the rows by their labels).
+- **The Treasury's cash-operations financing, 1986-2025**: `data/raw/fiscal/btr/COR-Financing_Annual_1986-2025-1.xlsx` (sheet `2004-2025`).
+- **The BSP's balance of payments, BPM6** (the BSP's website, statistics, external accounts): `Table1.xlsx`, `Table1.6.xlsx`, `Table1.7.xlsx`, `Table1.8.xlsx`, `Table1.9.xlsx` and `Table1.10.xlsx` in `data/raw/macro/bsp_bop/` (sheet `Annual`, US$ million).
+- The 193rd DBCC joint statement of 8 July 2026 (PDF), if you want `debt.dbcc_fiscal_program()` to read its fiscal program from the PDF: `data/raw/oil/forecasts/DBCC_193rd_8Jul2026_joint_statement.pdf` (the code checks its SHA-256; without the PDF it uses the transcription typed into `debt.py`).
+
+The checks DB1 and GF2 report NOT RUN until these files are present (GF2 also needs its standalone test, which is not in this release).

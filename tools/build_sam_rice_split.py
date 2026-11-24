@@ -27,6 +27,10 @@ its 'cocer' imports, ₱47.5 bn, match neither PSA's wheat, ₱111.1 bn, nor all
 New accounts: amric / cmric (milled rice and corn); afood / cfood keep the code but now exclude milling.
 Output: data/processed/IFPRI_SAM_PHL_2023_SAM_petroleum_rice_split.csv and outputs/sam_rice_split_<date>.md.
 Run:  py tools/build_sam_rice_split.py            (py tools/build_sam_rice_split.py io2018 for the 2018-share version)
+21 Nov 2026 (the rice-tariff fix; OPT-IN, the filed file is not touched): palay_duty="zero"
+(py tools/build_sam_rice_split.py palay0) writes IFPRI_SAM_PHL_2023_SAM_petroleum_rice_split_palay_duty0.csv: palay's ₱9.76 bn of
+IFPRI duty (239% of its ₱4.08 bn of imports; BOC's 2023 rice collections are all on milled rice) back to other food's duty, with
+check_rice_tariff (the guard: cmric's effective rate within 1 point of BOC / customs = 34.4%; palay duty zero) before it is written.
 """
 from __future__ import annotations
 
@@ -54,6 +58,13 @@ MAIZE = ("100590",)      # maize grain other than seed (1005.10, seed, left out)
 MILLED = ("100620", "100630", "100640", "110220", "110313", "110423")  # husked, milled, broken rice; maize flour, groats/meal, worked grains
 RICE_DUTY_2023 = 29.93   # ₱ bn: Bureau of Customs' certified 2023 rice tariff collections (Philippine Star, 29 May 2025;
                          # a reference copy (not distributed)); 34.5% of rice's CIF value (34.4% of milled rice and corn), i.e. the 35% tariff of 2023
+# 21 Nov 2026 (the rice-tariff fix): BOC's total is
+# accounted for by milled rice at about the statutory 35% (RICE_DUTY_2023 / the customs CIF of MILLED = 34.4%), so palay (rice in
+# the husk, HS 1006.10: seed for sowing, about US$3,600 a tonne in 2023) carries no rice duty. PALAY = its HS line in the same PSA
+# table; RICE_TM_TOL = the guard's tolerance on cmric's effective rate (1 point; a design note (not included)).
+PALAY = ("100610",)
+RICE_TM_TOL = 0.01
+OUT_PALAY0 = paths.DATA_PROCESSED / "IFPRI_SAM_PHL_2023_SAM_petroleum_rice_split_palay_duty0.csv"   # palay_duty="zero" (opt-in)
 
 
 def peso_per_usd_2023() -> float:
@@ -85,9 +96,50 @@ def psa_milled_imports_2023() -> dict:
     return {"usd": usd, "fx": fx, "php_bn": usd * fx / 1e9}
 
 
-def main(imports: str = "psa2023"):
+def psa_palay_imports_2023() -> dict:
+    """21 Nov 2026: PSA's 2023 imports of rice in the husk (HS 1006.10, palay; seed for sowing), CIF, in US$ and ₱ bn."""
+    import pandas as pd
+    d = pd.read_csv(PSA_IMPORTS, comment="#", dtype={"commodity_code": str}, na_values=[".."])
+    usd = float(d.loc[d["commodity_code"].str[:6].isin(PALAY), "cif_usd_2023"].sum())
+    fx = peso_per_usd_2023()
+    return {"usd": usd, "fx": fx, "php_bn": usd * fx / 1e9}
+
+
+def rice_tariff_2023() -> dict:
+    """21 Nov 2026: the customs-based effective 2023 rice tariff on milled rice and corn (cmric): BOC's certified collections
+    over PSA's 2023 customs CIF of the cmric HS lines (MILLED) = 34.4%; the CIF of palay (PALAY) for the SAM's palay imports."""
+    mil, pal = psa_milled_imports_2023(), psa_palay_imports_2023()
+    return {"duty (₱ bn, BOC 2023)": RICE_DUTY_2023, "cmric CIF (₱ bn, PSA customs 2023)": mil["php_bn"],
+            "crice CIF (₱ bn, PSA customs 2023, HS 1006.10)": pal["php_bn"], "fx (₱ per US$, BSP 2023 mean)": mil["fx"],
+            "cmric effective rate": RICE_DUTY_2023 / mil["php_bn"]}
+
+
+def check_rice_tariff(t, label: str = "SAM", target: float | None = None, tol: float = RICE_TM_TOL) -> dict:
+    """21 Nov 2026 (the guard that comes with the rice-tariff fix): REFUSE a SAM table whose milled-rice-and-corn (cmric) effective tariff
+    (mtax / imports) is more than `tol` from the customs-based 2023 rate (rice_tariff_2023, 34.4%), or whose palay (crice) carries
+    a rice duty. Returns the rates. Used by the builders before a SAM is written (build_own_sam_2023 v1.1, main(palay_duty='zero'))."""
+    tgt = rice_tariff_2023()["cmric effective rate"] if target is None else float(target)
+    tm = float(t.loc["mtax", "cmric"]) / float(t.loc["row", "cmric"])
+    duty_p = float(t.loc["mtax", "crice"])
+    if abs(tm - tgt) > tol:
+        raise ValueError(f"{label}: cmric's effective tariff is {tm:.4f}, more than {tol:.2f} from the customs-based 2023 rate "
+                         f"{tgt:.4f} (BOC {RICE_DUTY_2023} / PSA customs CIF): the 2026 15% tariff would be cut from the wrong level")
+    if abs(duty_p) > 1e-9:
+        raise ValueError(f"{label}: palay (crice) carries ₱{duty_p:.3f} bn of import duty; BOC's 2023 rice collections are all on milled rice")
+    return {"cmric tm": tm, "target": tgt, "crice duty": duty_p}
+
+
+def main(imports: str = "psa2023", palay_duty: str = "ifpri"):
+    """palay_duty (21 Nov 2026; OPT-IN): "ifpri" (default, as filed: palay keeps the petroleum-split SAM's ₱9.76 bn of duty) or
+    "zero": palay's duty is IFPRI's booking of part of the rice tariff that BOC's ₱29.93 bn (on cmric) already counts, so it is set to
+    zero and returned to other food's duty (cfood: the SAM's food duty row holds more than tariffs, module notes), and food processing
+    (afood) buys that much less palay and that much more processed food (palay's CIF imports stay IFPRI's, near PSA customs; every
+    other account's total and every activity's total unchanged). Written to OUT_PALAY0 (never over OUT); the guard check_rice_tariff
+    must pass."""
     if imports not in ("psa2023", "io2018"):
         raise ValueError("imports must be 'psa2023' or 'io2018'")
+    if palay_duty not in ("ifpri", "zero") or (palay_duty == "zero" and imports != "psa2023"):
+        raise ValueError("palay_duty must be 'ifpri' or 'zero' (with imports='psa2023')")
     import openpyxl
     ws = openpyxl.load_workbook(paths.DATA_RAW / "io" / "240-Industry20Table202018.xlsx", read_only=True, data_only=True)["240 TT"]
     rows = list(ws.iter_rows(values_only=True))
@@ -216,17 +268,32 @@ def main(imports: str = "psa2023"):
         rep.append((f"maize imports placed in cmaiz (PSA 2023, from cocer; duty at cocer's rate {rate:.4f})", mz, round(mz / float(orig.loc['row', 'cocer']), 4)))
         if min(float(t.loc["row", "cocer"]), float(t.loc["cocer", OLD_A])) < 0:
             raise ValueError("maize imports exceed other cereals' imports or food processing's purchases of them")
-    S = SAM(t, labels, f"{paths.SAM_2023_PETR.name} with milled rice and corn split (Infinity GEM 0.3.7; imports {imports})")
+    p0 = 0.0
+    if palay_duty == "zero":                       # 21 Nov 2026 (opt-in): palay's duty back to other food (main's notes)
+        p0 = float(t.loc["mtax", "crice"])
+        if float(t.loc["crice", OLD_A]) < p0:
+            raise ValueError("palay_duty='zero': food processing buys less palay than palay's duty")
+        t.loc["mtax", "crice"] = 0.0
+        t.loc["mtax", OLD_C] += p0
+        t.loc["crice", OLD_A] -= p0
+        t.loc[OLD_C, OLD_A] += p0
+        rep.append(("palay duty set to zero, returned to other food's duty; food processing's palay -> processed food (₱ bn)", p0, 0.0))
+    S = SAM(t, labels, f"{paths.SAM_2023_PETR.name} with milled rice and corn split (Infinity GEM 0.3.7; imports {imports}"
+                       + ("; palay duty zero, 21 Nov 2026" if p0 else "") + ")")
     chk = S.check(tol=1e-6, verbose=False)
-    keep = [c for c in orig.index if c not in (OLD_A, OLD_C) + (("cmaiz", "cocer") if moved else ())]
+    keep = [c for c in orig.index if c not in (OLD_A, OLD_C) + (("cmaiz", "cocer") if moved else ()) + (("crice",) if p0 else ())]
     d_rows = float(np.abs(t.loc[keep].sum(axis=1) - orig.loc[keep].sum(axis=1)).max())
     d_cells = float(np.abs(t.loc[keep, keep] - orig.loc[keep, keep]).to_numpy().max())
     if moved:                                      # maize and other cereals change by exactly the moved amount
         d_mz = abs(float(t.loc["cmaiz"].sum() - orig.loc["cmaiz"].sum()) - moved) + abs(float(t.loc["cocer"].sum() - orig.loc["cocer"].sum()) + moved)
         d_rows = max(d_rows, d_mz)
+    if p0:                                         # palay's account falls by exactly its duty (21 Nov 2026)
+        d_rows = max(d_rows, abs(float(t.loc["crice"].sum() - orig.loc["crice"].sum()) + p0))
     if not chk["balanced"] or d_rows > 1e-9 or d_cells > 1e-9:
         raise ValueError(f"Split SAM fails checks: balanced={chk['balanced']}, other totals {d_rows:.2e}, cells {d_cells:.2e}")
-    write_ifpri_csv(S, OUT if imports == "psa2023" else OUT.with_name(OUT.stem + "_io2018_imports.csv"))
+    if p0:
+        check_rice_tariff(t, "rice-split SAM, palay duty zero")   # the guard: refuse before writing
+    write_ifpri_csv(S, OUT_PALAY0 if p0 else (OUT if imports == "psa2023" else OUT.with_name(OUT.stem + "_io2018_imports.csv")))
     summary = {"output, milled rice and corn (₱ bn)": make[NEW_C], "output, other processed food (₱ bn)": make[OLD_C],
                "imports, milled rice and corn (₱ bn)": float(t.loc["row", NEW_C]), "imports, other food (₱ bn)": float(t.loc["row", OLD_C]),
                "import duty, milled rice and corn (₱ bn)": float(t.loc["mtax", NEW_C]), "import duty, other food (₱ bn)": float(t.loc["mtax", OLD_C]),
@@ -239,14 +306,19 @@ def main(imports: str = "psa2023"):
 
 if __name__ == "__main__":
     IMPORTS = sys.argv[1] if len(sys.argv) > 1 else "psa2023"
-    S, summary, rep = main(IMPORTS)
-    lines = [f"# SAM milled rice and corn split, {dt.date.today():%d %b %Y}; imports: {IMPORTS}", "",
-             f"File: `{OUT.relative_to(ROOT)}`. Builder: `tools/build_sam_rice_split.py` (rules: `tools/build_sam_petroleum_split.py`).", "",
+    PALAY0 = IMPORTS == "palay0"                   # 21 Nov 2026 (opt-in): py tools/build_sam_rice_split.py palay0
+    if PALAY0:
+        IMPORTS = "psa2023"
+    S, summary, rep = main(IMPORTS, palay_duty="zero" if PALAY0 else "ifpri")
+    FILE = OUT_PALAY0 if PALAY0 else OUT
+    lines = [f"# SAM milled rice and corn split, {dt.date.today():%d %b %Y}; imports: {IMPORTS}"
+             + ("; palay duty zero (opt-in, 21 Nov 2026)" if PALAY0 else ""), "",
+             f"File: `{FILE.relative_to(ROOT)}`. Builder: `tools/build_sam_rice_split.py` (rules: `tools/build_sam_petroleum_split.py`).", "",
              "## Summary", "", "| Item | Value |", "|---|---|"]
     lines += [f"| {k} | {v:,.4f} |" if isinstance(v, float) else f"| {k} | {v} |" for k, v in summary.items()]
     lines += ["", "## Cell splits (milled rice and corn share)", "", "| Cell | ₱ bn | Share |", "|---|---|---|"]
     lines += [f"| {a} | {b:,.2f} | {c} |" for a, b, c in rep]
-    rp = paths.OUTPUTS / f"sam_rice_split_{dt.date.today():%Y%m%d}{'' if IMPORTS == 'psa2023' else '_io2018'}.md"
+    rp = paths.OUTPUTS / f"sam_rice_split_{dt.date.today():%Y%m%d}{'' if IMPORTS == 'psa2023' else '_io2018'}{'_palay0' if PALAY0 else ''}.md"
     rp.write_text(chr(10).join(lines) + chr(10), encoding="utf-8")
     for k, v in summary.items():
         print(f"{k}: {v:,.4f}" if isinstance(v, float) else f"{k}: {v}")

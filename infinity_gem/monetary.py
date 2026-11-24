@@ -14,6 +14,16 @@ over a year). Nothing here is typed in: the coefficients are read from the saved
   micro price data, WPS 2020-02) or 0.85 (the middle case; milestone 21b), pooled chains of that specification.
 The chain files are outputs/dsge_ph_<model>_draws_<stamp><tag>.npy; the parameter names come from the matching estimation note
 outputs/dsge_ph_<model>_estimation_<stamp><tag>.md (its posterior table), so no research module is imported for them.
+- "pamph_annex3" (0.4.3, 21 Nov 2026; OPT-IN, no setting uses it): PAMPh's OWN calibrated rule, eq. (9)
+  p. 13 with Annex 3 p. 30 of BSP WPS 2020-12 (gamma1 inertia 0.70, gamma2 inflation deviation 1.50, gamma3 output gap 0.50),
+  in the same mapping as "pamph" (rho = g1, phi_pi = 1 + g2, phi_x = g3, phi_e = 0). The values are read, not typed: from the
+  defaults of the Params dataclass in research/qpm/qpm_ph.py, where they are transcribed with their page; read with
+  ast, so nothing is imported or run. "pamph" (above) fits PAMPh's impulse-response CHARTS (g1 0.721, g2 1.05, g3 0.10): its
+  output-gap response is a fifth of the table's (research/qpm/RESEARCH_NOTE_row146_QPM_21Nov2026.md, section 5c).
+- "pamph_estimated" (same date; OPT-IN, research): PAMPh's structure with g1, g2, g3 ESTIMATED on Philippine data 2002Q1-2026Q3
+  (posterior mode, variant E of research/qpm/run_qpm.py; g1 0.92, g2 1.69, g3 0.46), read from the run the research note
+  reports, QPM_ESTIMATE below. Same mapping. Not for citation (the note's section 7).
+Check MP2 (checks/test_monetary_annex3.py); design note a design note (not included).
 """
 from __future__ import annotations
 
@@ -28,6 +38,37 @@ OUT = ROOT / "outputs"
 SPECS = {"dsge": ("htmu", "_w1_ratio_long_stl_seed*", ("long", "stl")),
          "oil0.73": ("oilw", "_w1_ratio_long_stl_thfix0.73*", ("long", "stl", "thfix0.73")),
          "oil0.85": ("oilw", "_w1_ratio_long_stl_thfix0.85*", ("long", "stl", "thfix0.85"))}
+# 0.4.3 (21 Nov 2026; opt-in): PAMPh's own rule and its estimated variant (module notes; check MP2)
+QPM_RULES = ("pamph_annex3", "pamph_estimated")
+QPM_PH = ROOT / "research" / "qpm" / "qpm_ph.py"           # Params defaults = PAMPh Annex 3 (BSP WPS 2020-12, pp. 30-31)
+QPM_ESTIMATE = ROOT / "research" / "qpm" / "outputs" / "qpm_params_20261121_0109.json"   # a research run (not in this release), variant "E"
+
+
+def _qpm_rule_values(name: str) -> tuple:
+    """g1, g2, g3 of PAMPh's rule for "pamph_annex3" (the Params defaults of research/qpm/qpm_ph.py, read with ast: nothing is
+    imported or run) or "pamph_estimated" (variant "E" of QPM_ESTIMATE), and a source line."""
+    import ast
+    import json
+    if not (QPM_PH if name == "pamph_annex3" else QPM_ESTIMATE).exists():   # public version: research/qpm is not included
+        raise ValueError(f"rule({name!r}) reads research/qpm/ (PAMPh's Annex 3 values or a research estimate), which is not "
+                         "in this release; the default rule is rule('pamph')")
+    if name == "pamph_annex3":
+        tree = ast.parse(QPM_PH.read_text(encoding="utf-8"))
+        cls = [n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "Params"]
+        if not cls:
+            raise ValueError(f"{QPM_PH}: no Params class (PAMPh's Annex 3 values)")
+        vals = {s.target.id: ast.literal_eval(s.value) for s in cls[0].body
+                if isinstance(s, ast.AnnAssign) and isinstance(s.target, ast.Name) and s.value is not None}
+        g = {k: float(vals[k]) for k in ("g1", "g2", "g3")}
+        src = ("PAMPh's own calibration (BSP WPS 2020-12, eq. (9) p. 13, Annex 3 p. 30: gamma1, gamma2, gamma3), read from "
+               "research/qpm/qpm_ph.py Params")
+    else:
+        g = {k: float(json.loads(QPM_ESTIMATE.read_text(encoding="utf-8"))["E"][k]) for k in ("g1", "g2", "g3")}
+        src = (f"PAMPh's rule estimated on Philippine data 2002Q1-2026Q3 (posterior mode, variant E; research only, not for "
+               f"citation): research/qpm/outputs/{QPM_ESTIMATE.name}")
+    if not (0.0 <= g["g1"] < 1.0 and g["g2"] >= 0.0 and g["g3"] >= 0.0):
+        raise ValueError(f"{name}: coefficients out of range {g}")
+    return g, src
 
 
 def _names(md: Path) -> list:
@@ -58,7 +99,8 @@ def chains(name: str):
 
 def rule(name: str = "pamph", expected: str = "current") -> dict:
     """Coefficients for DynamicCGE.monetary_scenario(rule=...): {"rho", "phi_pi", "phi_x", "phi_e", "freq": "quarterly", "source"}.
-    expected (0.4.1, 13 Nov 2026; "pamph" only; opt-in): how the QPM's expected-inflation term E pi' enters the annual
+    expected (0.4.1, 13 Nov 2026; the QPM rules only: "pamph", and since 21 Nov 2026 "pamph_annex3" and
+    "pamph_estimated"; opt-in): how the QPM's expected-inflation term E pi' enters the annual
     target. "current" (default, as before): E pi' moves one-for-one with this year's inflation gap, phi_pi = 1 + g2. "lead": E pi' is
     the path's NEXT-year inflation gap (model-consistent, as in the QPM, where E pi' is the rational expectation): phi_pi = g2 on
     this year's gap and phi_pi_lead = 1 on next year's. "lag": E pi' = LAST year's gap (adaptive): phi_pi = g2, phi_pi_lag = 1."""
@@ -76,10 +118,21 @@ def rule(name: str = "pamph", expected: str = "current") -> dict:
             r["source"] = (f"QPM calibrated to PAMPh (research/dsge/qpm.py match_pamph): g2 on this year's inflation gap and 1 on "
                            f"{'next' if expected == 'lead' else 'last'} year's (E pi' {'model-consistent' if expected == 'lead' else 'adaptive'})")
         return r
+    if name in QPM_RULES:                    # 0.4.3 (21 Nov 2026; opt-in, check MP2): the same mapping as "pamph"
+        g, src = _qpm_rule_values(name)
+        r = {"rho": g["g1"], "phi_pi": 1.0 + g["g2"], "phi_x": g["g3"], "phi_e": 0.0, "freq": "quarterly",
+             "source": src + "; inflation coefficient 1 + g2"}
+        if expected != "current":
+            r["phi_pi"] = g["g2"]
+            r["phi_pi_" + expected] = 1.0
+            r["source"] = (src + f"; g2 on this year's inflation gap and 1 on {'next' if expected == 'lead' else 'last'} year's "
+                                 f"(E pi' {'model-consistent' if expected == 'lead' else 'adaptive'})")
+        return r
     if expected != "current":
-        raise ValueError("expected='lead'/'lag' applies to the QPM's rule ('pamph'); the DSGE rules have no expected-inflation term")
+        raise ValueError("expected='lead'/'lag' applies to the QPM's rules ('pamph', 'pamph_annex3', 'pamph_estimated'); the DSGE "
+                         "rules have no expected-inflation term")
     if name not in SPECS:
-        raise ValueError(f"rule must be one of pamph, {', '.join(SPECS)}")
+        raise ValueError(f"rule must be one of pamph, {', '.join(QPM_RULES)}, {', '.join(SPECS)}")
     files, names, D = chains(name)
     mean = dict(zip(names, D.mean(0)))
     return {"rho": float(mean["rho_i"]), "phi_pi": float(mean["phi_pi"]), "phi_x": 4.0 * float(mean["phi_x"]),
@@ -137,7 +190,7 @@ def quarter_weights(monthly, year: int) -> tuple:
 
 
 if __name__ == "__main__":
-    for n in ("pamph", "dsge", "oil0.73", "oil0.85"):
+    for n in ("pamph", *QPM_RULES, "dsge", "oil0.73", "oil0.85"):
         try:
             print(n, rule(n))
         except (FileNotFoundError, ValueError) as e:

@@ -144,6 +144,8 @@ def main():
         m = d.m
         ic = m.C.index("ccons")
         q0 = m.qinv[ic]
+        from infinity_gem.rice_tariff import guard as rice_guard   # 21 Nov 2026: the 2023 rice rate checked; legacy files pass
+        rice_guard(m, "combined_2025_2030")
         tariff = {"tm_scale": {"cmric": EN.TARIFF_2026 / float(m.tm[m.C.index("cmric")])}}
         fert = fertilizer_cost_shock(m, UREA, fertilizer_cost_shares())
         oil26 = cge_oil_shock(m, CRUDE)

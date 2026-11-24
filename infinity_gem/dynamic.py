@@ -165,6 +165,14 @@ omega}); check CET1)
   Long-run years are unchanged. Refused: omega not a finite number above 0; commodities not of the SAM; hybrid=False; a scenario's own
   'cet_sr'.
 
+A carbon tax in the dynamic model (0.4.3, 21 Nov 2026; cge.py has the static tax (check CT1); opt-in: DynamicCGE(carbon=infinity_gem.carbon.intensities_2023() or any cge.py carbon= dict); check CT2)
+  carbon is passed unchanged to every model the path builds (long run, savings-driven, short run, the short-run cache, the gfin models),
+  so a scenario's per-year shock key 'ctax' (PHP per tonne of CO2 in benchmark pesos, indexed to the pre-tax CPI by cge.py: a real
+  tax, so it is NOT grown with the baseline as ₱ amounts are) works in every year. The baseline carries no tax (ctax 0). The path's
+  table gains co2_mt (Mt CO2 bought as fuel, CGE.emissions) and carbon_revenue (CTREV, the year's model pesos). None (default) = the
+  models are built exactly as before (the keyword is not passed), results unchanged to the bit. Static design and limits:
+  a design note (not included); the dynamic wiring: a design note (not included).
+
 Public capital (0.3, opt-in: DynamicCGE(public_capital={...}))
   Lost roads and bridges lower the productivity of every industry, not only the capital stock. In a scenario,
   the change in construction investment relative to the baseline is treated as public investment (true for the
@@ -296,6 +304,7 @@ from __future__ import annotations
 
 import copy
 import numbers
+from contextlib import contextmanager          # 0.4.3 (21 Nov 2026): DynamicCGE._gfin_swap
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -435,8 +444,22 @@ DEFAULT_ASSUMPTIONS = dict(
                                   # ('trg_h_add', 'sav_add', 'grow_out_add', ₱ bn at the 2023 SAM's scale) are multiplied by the
                                   # year's baseline index Y_index, as the SAM's own transfers are (trg_scale). "legacy" = as before
                                   # 11 Nov 2026: the amounts at the 2023 scale in every year (module notes; check TS1)
+    gfin=None,                    # 0.4.3 (21 Nov 2026; opt-in, check GF2): cge.py's
+                                  # government financing option in every year of a SCENARIO path, {"close": "deficit" | "tax" |
+                                  # "spend", "foreign": phi}, with each year's reference and target government saving = that year's
+                                  # BASELINE real government saving (GSAV / CPI of the baseline solution), so a zero shock is the
+                                  # baseline and the borrowing measured is the change against the baseline. The baseline itself is
+                                  # solved without it (identical to the bit). In short-run years with the fixed peso (Keynesian,
+                                  # foreign saving free) the foreign share is an accounting split, not a constraint (cge.py refuses it
+                                  # there). Table columns gov_*; debt.scenario_debt() turns them into debt. None = off (default,
+                                  # results unchanged). a design note (not included)
+    carbon=None,                  # 0.4.3 (21 Nov 2026; opt-in, check CT2): cge.py's carbon=
+                                  # (CO2 per peso of each fuel bought; infinity_gem.carbon.intensities_2023()) for every model of the path,
+                                  # so a scenario's 'ctax' (PHP per tCO2, real) works in every year; table columns co2_mt and
+                                  # carbon_revenue. None = not passed (default, results unchanged)
 )
 TRANSFER_SCALING = ("baseline", "legacy")
+GFIN_CLOSES = ("deficit", "tax", "spend")   # 0.4.3 (21 Nov 2026): cge.py's gfin closures
 # 0.3.13 (sr_erpt): commodities whose import prices take the peso's move in full (priced in US$ on world markets: refined
 # petroleum at Singapore benchmark prices, crude oil inside mining at Dubai), as in the design note's P2(b). ccoal: Infinity GEM SAM v0.7 only (coal split
 # from mining, 24 Oct 2026): coal is priced in US$ on world markets too, and inside mining it took the peso in full
@@ -742,6 +765,8 @@ class DynamicCGE:
         a = dict(DEFAULT_ASSUMPTIONS)
         a.update(assumptions)
         _check_transfer_scaling(a)                   # 11 Nov 2026: before any model is built
+        if a.get("gfin") is not None:                # 0.4.3 (21 Nov 2026, check GF2): checked before any model is built
+            self._check_gfin(a)
         self.a = a
         self.growth = dict(DEFAULT_GROWTH if growth is None else growth)
         self.putty = a["capital_allocation"] == "putty-clay"
@@ -766,9 +791,12 @@ class DynamicCGE:
             kw["energy_nest"] = a["energy_nest"]
         if a["interest"] is not None:             # 0.3.11; not passed when None
             kw["interest"] = a["interest"]
+        if a.get("carbon") is not None:           # 0.4.3 (21 Nov 2026, check CT2); not passed when None (the call as before)
+            kw["carbon"] = a["carbon"]
         if self.vintage:
             kw["vintage"] = {"e": float(a["vintage_e"])}
         self.m = CGE(sam, **kw) if sam is not None else CGE.from_sam(**kw)
+        self._sam, self._kw_lr = sam, kw             # 0.4.3 (21 Nov 2026): kept to build the gfin models of a scenario
         if a["public_capital"] is not None:
             pc = dict(PUBLIC_CAPITAL_DEFAULTS, **a["public_capital"])
             missing = [k for k in ("phi", "kg_gdp") if k not in pc]
@@ -813,6 +841,8 @@ class DynamicCGE:
             en_sr = a["sr_energy_nest"] if a["sr_energy_nest"] is not None else a["energy_nest"]
             if en_sr is not None:                 # 0.3.11
                 kw_sr["energy_nest"] = en_sr
+            if a.get("carbon") is not None:       # 0.4.3 (21 Nov 2026, check CT2): the short-run models too
+                kw_sr["carbon"] = a["carbon"]
             if self.vintage and float(a["vintage_e_sr"]) > 0:   # e_sr = 0: the short-run model is plain fixed capital at the
                 kw_sr["vintage"] = {"e": float(a["vintage_e_sr"])}   # anchored old capital (same economics, no spare unknowns)
             self.ms = CGE(sam, **kw_sr) if sam is not None else CGE.from_sam(**kw_sr)
@@ -913,7 +943,95 @@ class DynamicCGE:
             spec["kscale"] = {a: float(K[i] / self.K0a[i]) for i, a in enumerate(m.A) if self.K0a[i] > 0}
         if self.vintage:                               # 0.3.12: the year's pool of new capital, share of the benchmark stock
             spec["knew"] = float(self._knew / self.K0)
+        if getattr(self, "_gfin_active", False):       # 0.4.3 (21 Nov 2026, check GF2): the year's baseline real government
+            ref = self._gfin_ref(t)                    # saving is the reference of the borrowing and, under 'tax' / 'spend', the
+            spec.setdefault("gsav_ref", ref)           # target; a scenario's own 'gsav_ref' / 'gsav_tgt' (₱ bn at the year's scale,
+            if self.a["gfin"].get("close", "deficit") != "deficit":   # benchmark prices) is kept
+                spec.setdefault("gsav_tgt", ref)
         return spec
+
+    # ------------------------------------------------------------------ 0.4.3 (21 Nov 2026): gfin
+    @staticmethod
+    def _check_gfin(a) -> dict:
+        """The assumption gfin = {"close": "deficit" | "tax" | "spend", "foreign": phi in [0, 1]} (cge.py's keys only); returns it
+        complete. Checked at construction and before each scenario path (it may be set afterwards, as the tests do)."""
+        gf = a.get("gfin")
+        if not isinstance(gf, dict) or set(gf) - {"close", "foreign"}:
+            raise ValueError("gfin takes {'close': 'deficit' | 'tax' | 'spend', 'foreign': share in [0, 1]} (cge.py gfin=)")
+        close_, phi_ = gf.get("close", "deficit"), gf.get("foreign", 0.0)
+        if close_ not in GFIN_CLOSES or not isinstance(phi_, (int, float)) or not 0.0 <= float(phi_) <= 1.0:
+            raise ValueError("gfin: 'close' must be 'deficit', 'tax' or 'spend'; 'foreign' a share in [0, 1]")
+        return {"close": close_, "foreign": float(phi_)}
+
+    def _gfin_ref(self, t) -> float:
+        """The baseline's real government saving of year t (₱ bn at benchmark prices, the year's scale): GSAV / CPI of its solution."""
+        b = self.base.solutions[t]
+        return float(b["GSAV"]) / float(b["CPI"])
+
+    def _gfin_models(self) -> dict:
+        """The scenario models with cge.py's gfin (built once per gfin value and kept): the long-run model, the savings-driven one
+        (investment_closure='savings') and the short-run model with its cache (hybrid). In a short-run model with the Keynesian
+        closure and the fixed peso, cge.py refuses a foreign share (foreign saving is free there), so that model gets foreign 0 and
+        the share is applied to the borrowing as an accounting split in the table (gov_borrowing_abroad)."""
+        gf = self._check_gfin(self.a)
+        key = (gf["close"], gf["foreign"])
+        c = getattr(self, "_gfin_built", None)
+        if c is not None and c["key"] == key:
+            return c
+        mk = lambda kw: CGE(self._sam, **kw) if self._sam is not None else CGE.from_sam(**kw)
+        c = {"key": key, "m": mk(dict(self._kw_lr, gfin=gf)),
+             "mL": mk(dict(self._kw_lr, closure="savings", gfin=gf)) if self.mL is not None else None}
+        if self.a["hybrid"]:
+            free_fsav = self._kw_sr.get("closure") == "keynesian" and self._kw_sr.get("fx", "fixed") == "fixed"
+            kw_sr = dict(self._kw_sr, gfin=dict(gf, foreign=0.0) if free_fsav else dict(gf))
+            ms = mk(kw_sr)
+            c.update(ms=ms, kw_sr=kw_sr, cache={tuple(ms.unemployed): ms})
+        self._gfin_built = c
+        return c
+
+    @contextmanager
+    def _gfin_swap(self):
+        """A scenario path solved on the gfin models: self.m, self.mL, self.ms and the short-run cache are swapped in for the path
+        and put back afterwards (the baseline and every path without gfin use the models built in __init__, unchanged)."""
+        c = self._gfin_models()
+        names = ("m", "mL", "ms", "_kw_sr", "_ms_cache")
+        saved = {k: getattr(self, k) for k in names if hasattr(self, k)}
+        self.m, self.mL = c["m"], c["mL"]
+        if self.a["hybrid"]:
+            self.ms, self._kw_sr, self._ms_cache = c["ms"], c["kw_sr"], c["cache"]
+        self._gfin_active = True
+        try:
+            yield c
+        finally:
+            for k, v in saved.items():
+                setattr(self, k, v)
+            self._gfin_active = False
+
+    def _gfin_row(self, sol, t, model) -> dict:
+        """The year's government financing columns (₱ bn, the year's model units, current prices of the solution): government
+        saving, its reference (the baseline's real saving x this CPI), the extra borrowing (reference less saving; + = more than in
+        the baseline), its parts abroad (foreign share x borrowing: inside the model in long-run years, an accounting split in
+        short-run fixed-peso years, gov_foreign_in_model 0) and at home, the closure's adjustment GFADJ (direct tax rates or real
+        government consumption, a share), and foreign saving in total (foreign currency units: the current account deficit the
+        model solves, the government's borrowing abroad included)."""
+        phi = float(self.a["gfin"].get("foreign", 0.0))
+        gsav, cpi, exr = float(sol["GSAV"]), float(sol["CPI"]), float(sol["EXR"])
+        bor = float(sol["GBOR_D"]) + float(sol["GFOR"]) * exr
+        return {"gov_saving": gsav, "gov_saving_ref": self._gfin_ref(t) * cpi, "gov_borrowing": bor,
+                "gov_borrowing_abroad": phi * bor, "gov_borrowing_home": (1 - phi) * bor,
+                "gov_foreign_in_model": float(phi == 0.0 or model.gfin["foreign"] > 0.0),
+                "gfin_adjust": float(sol["GFADJ"]), "foreign_saving_fcu": float(sol["FSAV"]) + float(sol["GFOR"])}
+
+    def _base_x(self, t, model):
+        """0.4.3: the baseline solution of year t as a starting point in `model`'s layout: the vector itself when the
+        layouts agree (every run without gfin: unchanged), else with the gfin slot (cge.py 'GFIN', 'tax' / 'spend') set to 0."""
+        x = self.base.solutions[t].x
+        if len(x) == model.n:
+            return x
+        sl = model.slices["GFIN"]
+        if model.n - len(x) != sl.stop - sl.start:
+            raise ValueError(f"Year {t}: the baseline's solution does not fit the scenario model's layout")
+        return np.insert(np.asarray(x, float), sl.start, np.zeros(sl.stop - sl.start))
 
     def _calibrate_industries(self, t, K, L_index, Y_index, extra, x, va_prev, tf_prev, dem_prev):
         """Industry baseline: productivity by industry and the two demand levels so each PSA industry's real value added grows
@@ -963,6 +1081,8 @@ class DynamicCGE:
                 kw["labour_cap"] = True
             if kw.get("fx") == "flexible" and not key:   # 0.3.8: every labour type at full employment leaves no peso
                 kw["fx"] = "fixed"                       # wage to anchor prices: the peso goes back to its baseline (numeraire)
+                if kw.get("gfin") is not None:           # 0.4.3: foreign saving is then free, so the foreign share is
+                    kw["gfin"] = dict(kw["gfin"], foreign=0.0)   # an accounting split there (as _gfin_models)
             self._ms_cache[ckey] = CGE(self._sam_sr, **kw) if self._sam_sr is not None else CGE.from_sam(**kw)
         return self._ms_cache[ckey]
 
@@ -1607,11 +1727,15 @@ class DynamicCGE:
         """0.3.8: the baseline solution of year t as a starting point for the savings-driven long-run model (the closure
         slot holds the investment level instead of the saving-rate adjustment)."""
         b = self.base.solutions[t]
-        x = b.x.copy()
+        x = self._base_x(t, self.mL).copy()         # 0.4.3: = b.x.copy() unless the gfin slot is added
         x[self.mL.slices["CLOS"]] = float(b["IADJ"])
         return x
 
     def _run(self, shocks=None, tfp_path=None, calibrate=False):
+        if (self.a.get("gfin") is not None and shocks is not None and not calibrate
+                and not getattr(self, "_gfin_active", False)):   # 0.4.3 (21 Nov 2026, check GF2): a scenario path on the gfin
+            with self._gfin_swap():                              # models, the baseline's real government saving the year's reference
+                return self._run(shocks=shocks, tfp_path=tfp_path, calibrate=calibrate)
         m = self.m
         sav_lr = self.mL is not None and shocks is not None and not calibrate   # 0.3.8 (D1): savings-driven long run
         hybrid = bool(self.a["hybrid"]) and shocks is not None and not calibrate
@@ -1735,12 +1859,12 @@ class DynamicCGE:
                 if not sol.ok and calibrate and t in self.ind_targets:     # 0.3: restart from the calibration's point
                     sol = m.solve(spec, x_start=self._calib_x)
                 if not sol.ok and not calibrate and not sav_lr and getattr(self, "base", None) is not None:
-                    sol = m.solve(spec, x_start=self.base.solutions[t].x)  # 0.3: restart from the baseline's solution
+                    sol = m.solve(spec, x_start=self._base_x(t, m))  # 0.3: restart from the baseline's solution (0.4.3: its layout)
             if not sol.ok and not calibrate and extra and getattr(self, "base", None) is not None:
                 # 0.3.7: very large shocks, solved in steps (25%, 50%, 75%, 100% of the year's shock),
                 # each step starting from the last solution (continuation). The final step is the full shock, solved to
                 # the usual tolerance, so the result is the same equilibrium, only reached more safely.
-                xs = self._short_run_start(t, model) if short else (self._lr_start(t) if sav_lr else self.base.solutions[t].x)
+                xs = self._short_run_start(t, model) if short else (self._lr_start(t) if sav_lr else self._base_x(t, m))
                 for lam in (0.25, 0.5, 0.75, 1.0):
                     sp = self._spec(t, K, L_index, Y_index, tf_used, _scale_shock(extra, lam), dem)
                     if short:
@@ -1833,7 +1957,10 @@ class DynamicCGE:
                                 if hybrid else {}),
                              **({"employment_cap_fallback": "smooth"} if t in fallback_years else {}),   # 0.4.0 (EF1)
                              **({"public_capital_gap_pct": dKG_start / (self.pc["kg_gdp"] * float(self.base.table.loc[t, "real_gdp"])) * 100}
-                                if pubcap else {})))
+                                if pubcap else {}),
+                             **(self._gfin_row(sol, t, model) if getattr(self, "_gfin_active", False) else {}),   # 0.4.3 (GF2)
+                             **({"co2_mt": float(model.emissions(sol)["total"].sum()), "carbon_revenue": float(sol["CTREV"])}
+                                if self.a.get("carbon") is not None else {})))   # 0.4.3 (21 Nov 2026, CT2): carbon= only
             # capital for next year from this year's real investment
             inv_k = float(sol["QINV"].sum()) - waste_adj     # 0.3.6: less any wasted public spending (waste_lost)
             if self.putty:

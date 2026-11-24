@@ -372,8 +372,48 @@ def main(argv):
                    **reference_values(new), PESO_KEY: float(new[PESO_KEY])}
             REF_FILE_042C.write_text(json.dumps(ref, indent=1), encoding="utf-8")
             log(f"saved {REF_FILE_042C}")
+    elif mode == "ref043":                       # 0.4.3 (21 Nov 2026; check R43): the new
+        #                                          default "0.4.3 recommended" (the candidate's values on Infinity GEM SAM v1.1 with the Q3 2026
+        #                                          public-works shock) beside "0.4.1 recommended" (v1.0, the 14 Oct shock); on the FIES base
+        #                                          of this process: fies2023 writes checks/reference_043_central.json, fies2025 (unset)
+        #                                          checks/reference_043F_central.json. Refused with INFINITY_GEM_SAM_VERSION or INFINITY_GEM_PW_VINTAGE set.
+        if os.environ.get("INFINITY_GEM_SAM_VERSION") or os.environ.get("INFINITY_GEM_PW_VINTAGE"):
+            raise SystemExit("ref043: run with INFINITY_GEM_SAM_VERSION and INFINITY_GEM_PW_VINTAGE unset (each setting's own SAM and shock vintage)")
+        new_s, old_s = settings.DEFAULT, "0.4.1 recommended"
+        if new_s != "0.4.3 recommended" or settings.sam_version(new_s) != "1.1" or settings.pw_vintage(new_s) != "q3":
+            raise SystemExit(f"ref043: the default is {new_s!r} on v{settings.sam_version(new_s)}, {settings.pw_vintage(new_s)}")
+        head[0] = head[0].replace("Infinity GEM 0.4.0", f"Infinity GEM {__import__('infinity_gem').__version__}").replace(
+            "Infinity GEM's own SAM v1.0", "\"0.4.3 recommended\" on Infinity GEM's own SAM v1.1 with the Q3 2026 public-works shock; \"0.4.1 recommended\" "
+            "on Infinity GEM's own SAM v1.0 with the 14 Oct 2026 shock")
+        log(f"--- \"{new_s}\" (the default since 21 Nov 2026; SAM v{settings.sam_version(new_s)}, public works {settings.pw_vintage(new_s)})")
+        new = run_case(new_s, log=log, peso=True)
+        pd.DataFrame({new_s: new}).to_csv(path.with_name(path.stem + "_partial.csv"))
+        if flags.get("old") == "1":              # optional: 0.4.1 beside it (check R41 holds its numbers on FIES 2023)
+            log(f"--- \"{old_s}\" (SAM v{settings.sam_version(old_s)}, public works {settings.pw_vintage(old_s)})")
+            old = run_case(old_s, log=log, peso=True)
+            t = pd.DataFrame({f"{old_s} (default to 21 Nov 2026)": old, f"{new_s} (new default)": new})
+            t["change (new less old)"] = [
+                (float(n) - float(o)) if isinstance(n, (int, float, np.floating)) and isinstance(o, (int, float, np.floating)) else ""
+                for o, n in zip(t.iloc[:, 0], t.iloc[:, 1])]
+        else:
+            t = pd.DataFrame({f"{new_s} (new default)": new})
+        if flags.get("save_reference") == "1":
+            target = {"fies2023": ROOT / "checks" / "reference_043_central.json",
+                      "fies2025": ROOT / "checks" / "reference_043F_central.json"}[_common.FIES_BASE]
+            ref = {"_meta": {"what": "check R43: the 0.4.3 central case's main results (scenarios/central_case_04.headline) and the "
+                                     "peso diagnostic (peso_alone), on the FIES base named below",
+                             "computed": time.strftime("%Y-%m-%d %H:%M"), "by": "scenarios/central_case_04.py ref043 save_reference=1",
+                             "run file": path.name, "infinity_gem": __import__("infinity_gem").__version__,
+                             "SAM": paths.sam_own(settings.sam_version(new_s)).name, "public-works vintage": settings.pw_vintage(new_s),
+                             "setting": new_s, "FIES base": new["FIES base"],
+                             "decision": "the 0.4.3 default since 21 Nov 2026 (0.4.3 on SAM v1.1, the Q3 2026 "
+                                         "public-works shock, the current BSP rule)",
+                             "tolerance": "relative and absolute 1e-9 (as R0)"},
+                   **reference_values(new), PESO_KEY: float(new[PESO_KEY])}
+            target.write_text(json.dumps(ref, indent=1), encoding="utf-8")
+            log(f"saved {target}")
     else:
-        raise SystemExit("mode must be 'compare', 'verify', 'ref041', 'ref041F', 'accelerator' or 'cand042'")
+        raise SystemExit("mode must be 'compare', 'verify', 'ref041', 'ref041F', 'accelerator', 'cand042' or 'ref043'")
     path.write_text("# " + head[0] + "\n" + t.to_csv(), encoding="utf-8")
     path.with_suffix(".md").write_text("\n".join([f"# Infinity GEM 0.4: the central 2026 case ({mode}, {time.strftime('%d %B %Y, %H:%M')})",
                                                   "", head[0], "", t.to_markdown(floatfmt=".4f")]) + "\n", encoding="utf-8")

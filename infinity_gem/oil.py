@@ -85,12 +85,16 @@ def io_refined_passthrough(io=None) -> dict:
 # to compare with PSA's 2018 share.
 CRUDE_SHARE_FROM_SAM = True
 OWN_SAM_V10 = "InfinityGEM_SAM_PHL_2023_own_v1.0.csv"
+# 21 Nov 2026 (opt-in): Infinity GEM SAM v1.1 (v1.0 with the rice tariff fix only; its fuel and coal accounts are v1.0's build) is treated
+# as v1.0 here, so an oil shock on it uses the file's own crude share and the PSA coal and LNG path, as on v1.0
+OWN_SAM_V10_FAMILY = (OWN_SAM_V10, "InfinityGEM_SAM_PHL_2023_own_v1.1.csv")
 CUSTOMS_V09 = paths.DATA_PROCESSED / "fuel_trade_customs_2023_v0.9_inputs.csv"
 
 
 def is_own_sam_v10(m) -> bool:
-    """True if model m was calibrated to Infinity GEM SAM v1.0 (the file named in its SAM's source)."""
-    return OWN_SAM_V10 in str(getattr(getattr(m, "sam", None), "source", ""))
+    """True if model m was calibrated to Infinity GEM SAM v1.0 (the file named in its SAM's source); 21 Nov 2026: or v1.1 (opt-in)."""
+    src = str(getattr(getattr(m, "sam", None), "source", ""))
+    return any(n in src for n in OWN_SAM_V10_FAMILY)
 
 
 def crude_share_own_sam(m) -> float:

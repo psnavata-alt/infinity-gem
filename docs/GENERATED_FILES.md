@@ -14,6 +14,7 @@ Validation results and test inputs outside `data/`. Each was written by the scri
 - `docs/verification/stata/data/solution.csv`
 - `docs/verification/stata/results/python_mirror_calibration_results.csv`
 - `docs/verification/stata/results/python_mirror_equation_results.csv`
+- `infinity_gem/calibration/refit_eval11_042c.json`
 - `requirements.txt`
 - `research/dsge/draws/dsge_ph_draws_20261019_0205.npy`
 - `scenarios/specs/five_shocks_2026_central.json`

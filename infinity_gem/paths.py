@@ -32,6 +32,23 @@ SAM_2023_RICE_PSA = DATA_PROCESSED / "InfinityGEM_SAM_PHL_2023_PSA_consistent_fr
 # 6 Nov 2026: v1.0 (v0.9 with the fuel tax row from 2023 collections and coal mining at
 # PSA's 2023 GVA) is the default for rice=True runs (settings.DEFAULT_SAM_VARIANT); v0.5, the default from 18 Oct 2026, stays as sam_own("0.5").
 SAM_2023_OWN = DATA_PROCESSED / "InfinityGEM_SAM_PHL_2023_own_v1.0.csv"
+# 21 Nov 2026 (OPT-IN at first, the default staying v1.0): Infinity GEM SAM v1.1 =
+# v1.0 with the rice tariff fix (tools/build_own_sam_2023.py build("1.1"); check S14). Environment variable INFINITY_GEM_SAM_VERSION="1.1"
+# points SAM_2023_OWN (the 'own' variant, the default of rice=True runs) at it for that process; unset or "1.0" = v1.0, as before.
+import os as _os
+SAM_OWN_VERSIONS = ("1.0", "1.1")
+# 0.4.3 (21 Nov 2026, after a like-for-like comparison: Infinity GEM 0.4.3 on Infinity GEM SAM v1.1 with the
+# Q3 2026 public-works shock and the current BSP rule): v1.1 is now the DEFAULT Infinity GEM SAM (SAM_2023_OWN when INFINITY_GEM_SAM_VERSION is
+# unset). INFINITY_GEM_SAM_VERSION="1.0" = v1.0 for every setting (the way back). Each named setting also carries the SAM its numbers were
+# computed on (infinity_gem/settings.py SETTING_SAM_VERSION: "0.4.3 recommended" v1.1; "0.4.1 recommended", "0.4 recommended", "0.4.2
+# candidate" and "0.3 recommended" v1.0), so they reproduce without the variable; the variable, when set, overrides every setting.
+SAM_OWN_DEFAULT_VERSION = "1.1"
+SAM_OWN_VERSION_ENV = _os.environ.get("INFINITY_GEM_SAM_VERSION", "").strip() or None   # None = not set (each setting's own SAM)
+_SAM_OWN_VERSION = SAM_OWN_VERSION_ENV or SAM_OWN_DEFAULT_VERSION
+if _SAM_OWN_VERSION not in SAM_OWN_VERSIONS:
+    raise ValueError(f"INFINITY_GEM_SAM_VERSION must be one of {SAM_OWN_VERSIONS}, not {_SAM_OWN_VERSION!r}")
+if _SAM_OWN_VERSION != "1.0":
+    SAM_2023_OWN = DATA_PROCESSED / f"InfinityGEM_SAM_PHL_2023_own_v{_SAM_OWN_VERSION}.csv"
 
 
 def sam_own(version: str) -> Path:

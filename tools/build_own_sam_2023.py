@@ -148,6 +148,7 @@ Run:  py tools/build_own_sam_2023.py [version]     NOT the default SAM: settings
       py tools/build_own_sam_2023.py 0.8       research: v0.7b with refined-oil's imported coal and crude back in coal and mining
       py tools/build_own_sam_2023.py 0.9       research: v0.7 with customs-anchored fuel imports and coal account; checks/test_own_sam_v09.py
       py tools/build_own_sam_2023.py 1.0       research: v0.9 with the fuel tax row from data and coal mining at PSA's 2023 GVA; checks/test_own_sam_v10.py
+      py tools/build_own_sam_2023.py 1.1       21 Nov 2026 (opt-in, INFINITY_GEM_SAM_VERSION=1.1): v1.0 with the rice tariff fix; checks/test_own_sam_v11.py
 """
 from __future__ import annotations
 
@@ -378,8 +379,11 @@ def besf_2023() -> dict:
             "inc_other": v("Others"), "property": v("Property Transfer Tax")}
 
 
-def tax_block(X: pd.DataFrame, t78: pd.DataFrame, A: list, C: list, H: list) -> pd.DataFrame:
-    """Taxes on products by commodity and direct taxes, 2023 (BESF), written into the prior X; returns the allocation table."""
+def tax_block(X: pd.DataFrame, t78: pd.DataFrame, A: list, C: list, H: list, palay_duty: bool = True) -> pd.DataFrame:
+    """Taxes on products by commodity and direct taxes, 2023 (BESF), written into the prior X; returns the allocation table.
+    palay_duty (21 Nov 2026; version '1.1' only, through build(rice_customs=...)): False sets palay's (crice) import duty
+    to zero before the rest of BESF's duties are spread, so rice duties = BOC's ₱29.93 bn, all on milled rice and corn (cmric); the
+    ₱9.76 bn IFPRI booked on palay then goes to the other dutiable commodities by IFPRI's pattern (the rule below)."""
     b = besf_2023()
     stax = pd.Series(0.0, index=C)
     base = (X.loc[C, H].sum(axis=1) + X.loc[C, "gov"] + X.loc[C, "s-i"]).clip(lower=0) * pd.Series(
@@ -402,6 +406,8 @@ def tax_block(X: pd.DataFrame, t78: pd.DataFrame, A: list, C: list, H: list) -> 
     mtax = pd.Series(0.0, index=C)
     rice = ["cmric", "crice"]                                          # BOC rice tariff collections (rice-split SAM, 0.3.7)
     mtax[rice] = t78.loc["mtax", rice].values
+    if not palay_duty:                                                 # '1.1' (21 Nov 2026): BOC's total is all on milled rice
+        mtax["crice"] = 0.0
     rest = [c for c in C if c not in rice]
     duties = b["duties"] + b["fees"]
     mtax[rest] = (duties - mtax[rice].sum()) * t78.loc["mtax", rest] / t78.loc["mtax", rest].sum()
@@ -1879,12 +1885,15 @@ def customs_base_v09() -> dict:
     return {"t5": t5, "te": te, "x7": x7, "d7": d7, "customs inputs": c, "cu": cu, "gas": gas, "vol": vol, "base": base}
 
 
-def build_v10(steps: bool = True, excise: float | None = None):
+def build_v10(steps: bool = True, excise: float | None = None, rice: dict | None = None):
     """Version '1.0': v0.9's build (customs_base_v09, fuel_targets_v09, the coal split with customs imports and exports and cement at p x its
     volume, p by the secant) with build("0.5e", fuel_targets=..., fuel_tax=T) and over["va_coal"] (the module notes). excise: the petroleum
     excise in T (None = FUEL_EXCISE_2023; a sensitivity, e.g. 170, is not a file). steps=False: v0.9 itself (build_v09). build()'s outputs,
-    with extra['coal split'], extra['customs v0.9'] (as build_v09's doc) and extra['v1.0'] (the fuel tax table, the coal anchor)."""
+    with extra['coal split'], extra['customs v0.9'] (as build_v09's doc) and extra['v1.0'] (the fuel tax table, the coal anchor).
+    rice (21 Nov 2026; '1.1' only, from build_v11): the rice customs controls, passed to build("0.5e", rice_customs=rice)."""
     if not steps:
+        if rice is not None:
+            raise ValueError("rice (v1.1) needs v1.0's steps")
         return build_v09()
     inp = inputs_v10()
     exc = FUEL_EXCISE_2023 if excise is None else float(excise)
@@ -1898,7 +1907,7 @@ def build_v10(steps: bool = True, excise: float | None = None):
 
     def run(p):
         tg = fuel_targets_v09(p, base)
-        out = build("0.5e", fuel_targets=tg, fuel_tax=tax_target)
+        out = build("0.5e", fuel_targets=tg, fuel_tax=tax_target, rice_customs=rice)
         ind = out[4]
         ratio = float(ind.loc["Mining and quarrying", "value added at basic prices"] / ind.loc["Mining and quarrying", "PSA GVA 2023"])
         va_coal = gva_coal * ratio
@@ -2063,11 +2072,117 @@ def main_v10():
     return S1
 
 
+# Version '1.1' (21 Nov 2026: a corrected SAM v1.1; OPT-IN at first, NOT the default: VERSION stays "1.0"; the default SAM
+# since 0.4.3, set in infinity_gem/paths.py): v1.0 with the RICE TARIFF FIX. (1) Palay's (crice) import duty is zero in tax_block: BOC's certified 2023 rice tariff
+# collections, ₱29.93 bn, are all on milled rice and corn (cmric) at about the statutory 35%, and palay's 2023 imports are seed (HS
+# 1006.10); v1.0 kept IFPRI's ₱9.76 bn on palay (136% of its imports), so rice duties summed to ₱39.69 bn. (2) Two cross-entropy
+# controls, as v0.9 did for fuel imports: imports of cmric = PSA's 2023 customs CIF of HS 1006.20-1006.40 and the corn-milling lines
+# (₱87.00 bn; v1.0 had ₱62.29 bn from the I-O prior, so its duty rate was 48.1%) and imports of crice = PSA customs HS 1006.10
+# (₱4.24 bn; v1.0 ₱7.16 bn). Then tm(cmric) = 29.93 / 87.00 = 34.4% and tm(crice) = 0 come out of the data, and the scenarios'
+# tm_scale = 0.15 / tm sets the 2026 tariff from the right level. Sources: tools/build_sam_rice_split.py rice_tariff_2023 (PSA OpenSTAT
+# 0032L4DMFD2, source BOC; BSP's 2023 mean peso-dollar rate; BOC via the Philippine Star, 29 May 2025, a reference copy (not distributed)).
+# The guard build_sam_rice_split.check_rice_tariff refuses the file if cmric's rate is more than 1 point from 34.4% or palay has a
+# duty. Everything else is build("1.0") (the same controls, the coal secant); the research rebuild R1B of 21 Nov 2026
+# (research/rice_tariff_base_21Nov2026/r1b_rebuild_v10_customs_rice.py) is the same build done by wrapping the builder in memory.
+# Design note and checks: a design note (not included); checks/test_own_sam_v11.py (S14).
+def rice_customs_v11() -> dict:
+    """Version '1.1': the rice customs controls and their inputs (tools/build_sam_rice_split.rice_tariff_2023)."""
+    import build_sam_rice_split as RS
+    r = RS.rice_tariff_2023()
+    return {"controls": {("row", "cmric"): float(r["cmric CIF (₱ bn, PSA customs 2023)"]),
+                         ("row", "crice"): float(r["crice CIF (₱ bn, PSA customs 2023, HS 1006.10)"])}, "inputs": r}
+
+
+def build_v11():
+    """Version '1.1': build_v10(rice=the customs controls) with palay's duty zero (tax_block), then the guard. build()'s outputs, with
+    extra['v1.1'] (the customs inputs, the guard's rates, the target gaps)."""
+    import build_sam_rice_split as RS
+    rc = rice_customs_v11()
+    S, s78, diag, ctl, ind, fg, psa, extra = build_v10(rice=rc["controls"])
+    t = S.table
+    C_ = [c for c in t.columns if c.startswith("c")]
+    gaps = {f"imports of {c_} less PSA customs (₱ bn)": float(t.loc[r_, c_]) - v_ for (r_, c_), v_ in rc["controls"].items()}
+    gaps["rice duties less BOC 2023 (₱ bn)"] = float(t.loc["mtax", ["cmric", "crice"]].sum()) - RS.RICE_DUTY_2023
+    gaps["imports less PSA 2023 (₱ bn)"] = float(t.loc["row", C_].sum()) - float(psa["imports"])
+    if max(abs(v) for v in gaps.values()) > 1e-6:
+        raise ValueError(f"v1.1: a target is missed: {gaps}")
+    guard = RS.check_rice_tariff(t, "Infinity GEM SAM v1.1")
+    S11 = SAM(t, dict(S.labels), S.source.replace("version 1.0 (", "version 1.1 (v1.0 with the RICE TARIFF FIX: palay duty zero, "
+                                                                   "milled-rice and palay imports at PSA customs 2023; ", 1))
+    diag = dict(diag)
+    diag.update({f"v1.1: {k}": v for k, v in gaps.items()})
+    diag.update({"v1.1: cmric effective tariff": guard["cmric tm"], "v1.1: customs-based target": guard["target"]})
+    return S11, s78, diag, ctl, ind, fg, psa, dict(extra, **{"v1.1": {"rice customs": rc["inputs"], "guard": guard, "gaps": gaps}})
+
+
+def main_v11():
+    """Version '1.1': writes the SAM file paths.sam_own('1.1') (never v1.0's) and outputs/own_sam_2023_v1.1_<stamp>_<table>.csv:
+    the rice accounts and every cell changed against v1.0, the targets and the guard."""
+    version = "1.1"
+    S, s0, diag, ctl, ind, fg, psa, extra = build(version)
+    path = paths.sam_own(version)
+    if path.resolve() == paths.SAM_2023_OWN.resolve() and "v1.0" in path.name:
+        raise RuntimeError("v1.1 must not overwrite v1.0")
+    write_ifpri_csv(S, path)
+    with open(path, encoding="utf-8-sig") as f:
+        txt = f.read()
+    title = ("Infinity GEM 2023 Social Accounting Matrix for the Philippines, version 1.1 (research, opt-in, not the default: v1.0 with the RICE "
+             "TARIFF FIX: palay import duty zero, BOC's 2023 rice duty on milled rice only, milled-rice and palay imports at PSA customs "
+             "2023; v1.0 = v0.9 with the fuel tax row from data and coal mining at PSA's 2023 GVA; Infinity GEM 0.4.3)")
+    txt = txt.replace("2023 Social Accounting Matrix for Philippines, petroleum split (Infinity GEM 0.3)", title, 1)
+    with open(path, "w", encoding="utf-8-sig", newline="") as f:
+        f.write(txt)
+    t = SAM.load(path).table
+    t10 = SAM.load(paths.sam_own("1.0")).table
+    stamp = dt.datetime.now()
+    files = []
+
+    def save(df, name: str):
+        f = paths.output_dir() / f"own_sam_2023_v{version}_{stamp:%Y%m%d_%H%M}_{name}.csv"
+        df.to_csv(f)
+        files.append(f)
+    d = (t - t10).stack()
+    d = d[d.abs() > 0.005]
+    ch = pd.DataFrame({"v1.0": [float(t10.loc[r, c]) for r, c in d.index], "v1.1": [float(t.loc[r, c]) for r, c in d.index],
+                       "v1.1 - v1.0": d.values}, index=pd.MultiIndex.from_tuples(d.index, names=["row", "column"]))
+    ch = ch.iloc[np.argsort(-np.abs(ch["v1.1 - v1.0"].to_numpy()), kind="stable")]
+    save(ch, "cells_changed_vs_v1.0")
+    rice = pd.DataFrame({v: {"cmric imports (CIF)": float(tb.loc["row", "cmric"]), "cmric duty": float(tb.loc["mtax", "cmric"]),
+                             "cmric duty rate": float(tb.loc["mtax", "cmric"] / tb.loc["row", "cmric"]),
+                             "crice imports (CIF)": float(tb.loc["row", "crice"]), "crice duty": float(tb.loc["mtax", "crice"]),
+                             "amric output": float(tb["amric"].sum()), "arice output": float(tb["arice"].sum()),
+                             "millers' palay (crice, amric)": float(tb.loc["crice", "amric"]),
+                             "households' milled rice": float(tb.loc["cmric", [h for h in tb.columns if h.startswith("hhd")]].sum()),
+                             "imports, all commodities": float(tb.loc["row", [c for c in tb.columns if c.startswith("c")]].sum()),
+                             "import duties, all commodities": float(tb.loc["mtax", [c for c in tb.columns if c.startswith("c")]].sum())}
+                         for v, tb in (("v1.0", t10), ("v1.1", t))})
+    save(rice, "rice_accounts")
+    save(pd.Series({**extra["v1.1"]["rice customs"], **extra["v1.1"]["gaps"], **{f"guard: {k}": v for k, v in extra["v1.1"]["guard"].items()}}
+                   ).to_frame("value"), "rice_customs_and_guard")
+    save(pd.Series(diag).to_frame("value"), "balancing")
+    save(ctl, "controls")
+    pd.set_option("display.width", 250)
+    print(rice.round(4).to_string())
+    print(ch.head(25).round(3).to_string())
+    print("saved", path)
+    for f in files:
+        print("saved", f)
+    return SAM.load(path)
+
+
 def build(version: str = VERSION, double_count: float | None = None, content: bool = True, customs: bool = True,
-          fuel_targets: dict | None = None, fuel_tax: float | None = None, steps: bool = True):
+          fuel_targets: dict | None = None, fuel_tax: float | None = None, steps: bool = True, rice_customs: dict | None = None):
     # steps: '1.0' only (build_v10): False leaves out v1.0's steps, giving v0.9
+    if version == "1.1":                                            # '1.1' (21 Nov 2026): v1.0 with the rice tariff fix (build_v11)
+        return build_v11()
     if version == "1.0":                                            # '1.0': v0.9 with the fuel tax row from data and coal mining at PSA's GVA
         return build_v10(steps)
+    # rice_customs: '1.1' only (build_v11 -> build_v10(rice=...) -> build("0.5e", fuel_targets=..., fuel_tax=..., rice_customs=...)):
+    # palay's duty zero in tax_block and the two customs controls {("row", "cmric"): ₱ bn, ("row", "crice"): ₱ bn}; also allowed on
+    # build("0.5") as RESEARCH (21 Nov 2026: v0.5 with the same fix, to size the correction of the 2026 scenarios run on v0.5; never a file
+    # in data/processed)
+    if rice_customs is not None and not (version == "0.5" or (version == "0.5e" and fuel_targets is not None and fuel_tax is not None)):
+        raise ValueError("rice_customs is the '1.1' change of v1.0's build (v0.5e's build with fuel_targets and fuel_tax), or research on '0.5'")
     # fuel_tax: '1.0' only (build_v10 calls build("0.5e", fuel_targets=..., fuel_tax=T)): taxes on fuel products = T (fuel_tax_v10)
     if fuel_tax is not None and (version != "0.5e" or fuel_targets is None):
         raise ValueError("fuel_tax is the '1.0' change of v0.5e's build with fuel_targets only")
@@ -2090,7 +2205,7 @@ def build(version: str = VERSION, double_count: float | None = None, content: bo
     s78 = SAM.load(paths.SAM_2023_RICE_PSA)                         #: IFPRI's institutional detail, double count removed
     t0 = io_prior(s78, version)
     A0, C0, H0 = s78.accounts("a"), s78.accounts("c"), s78.accounts("hhd")
-    taxes = tax_block(t0, s78.table, A0, C0, H0)
+    taxes = tax_block(t0, s78.table, A0, C0, H0, palay_duty=rice_customs is None)   # '1.1': palay's duty zero
     tax10 = fuel_tax_v10(t0, C0, H0, fuel_tax) if fuel_tax is not None else None   # '1.0' (build_v10) only: the fuel tax row from data
     el_fix = electricity_fuel_mix(t0) if version >= "0.6" and version.endswith("e") else None   # '0.6e' only
     el_base = "0.5" if version == "0.5e" else "0.6"                 # '0.5e': v0.5 with the same correction only
@@ -2241,6 +2356,9 @@ def build(version: str = VERSION, double_count: float | None = None, content: bo
             for a in a_:
                 if a not in (big, "apetr"):                         # apetr: v0.5's refining control already holds it
                     controls.append((f"value added: {a} = v0.5e's (v0.9)", mask(F_, [a]), float(te_.loc[F_, a].sum())))
+    if rice_customs is not None:   # '1.1' (21 Nov 2026): milled-rice and palay imports at PSA customs 2023, as v0.9 did for fuels
+        for (r_, c_), v_ in rice_customs.items():
+            controls.append((f"imports of {c_} = PSA customs 2023 CIF (v1.1)", mask([r_], [c_]), float(v_)))
     abroad = float(t0.loc[H, "row"].sum())
     for h in H:
         for x in P.LABOUR:
@@ -2303,6 +2421,8 @@ def main(version: str = VERSION):
         return main_v09()
     if version == "1.0":                                            # '1.0': the SAM file and CSV tables only (main_v10)
         return main_v10()
+    if version == "1.1":                                            # '1.1' (21 Nov 2026): the SAM file and CSV tables (main_v11)
+        return main_v11()
     S, s0, diag, ctl, ind, fg, psa, extra = build(version)
     path = paths.sam_own(version)
     write_ifpri_csv(S, path)

@@ -94,6 +94,8 @@ def calendar_year_losses(oni_s1=2.0) -> dict:
 def policy_2026(m) -> dict:
     """The 2026 rice tariff as a shock spec on the rice-split model (tariff rate from the SAM's 34.4% to 15%)."""
     i = m.C.index("cmric")
+    from infinity_gem.rice_tariff import guard        # 21 Nov 2026: refuses a new SAM with the wrong 2023 rice rate; legacy files pass
+    guard(m, "elnino_to_cge.policy_2026")
     return {"tm_scale": {"cmric": TARIFF_2026 / float(m.tm[i])}}
 
 
